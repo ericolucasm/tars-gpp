@@ -26,7 +26,7 @@ export function areasSobGestao(pessoaId: string, areas: AreaH[]): string[] {
 }
 
 /** Time direto: quem tem esta pessoa como gestor. */
-export function timeDireto(gestorId: string, pessoas: PessoaH[], areas: AreaH[]) {
+export function timeDireto<P extends PessoaH>(gestorId: string, pessoas: P[], areas: AreaH[]): P[] {
   return pessoas.filter((p) => p.id !== gestorId && !p.externo && gestorDe(p, areas) === gestorId);
 }
 

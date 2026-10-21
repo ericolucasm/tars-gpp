@@ -210,7 +210,8 @@ export function listaAvaliacao(d: DadosOrg) {
   }).map((i) => {
     const av = d.avaliacoes.find((a) => a.iniciativaId === i.id && a.cicloId === ciclo.id);
     const notas = av?.notas ?? [0, 0, 0, 0];
-    const decisao = (av?.decisao ?? (i.tipo === 'obr' ? 'pre' : null)) as 'pre' | 'bkl' | 'rec' | null;
+    // obrigatórias entram pré-aprovadas por padrão (só enquanto o PMO não mexeu na decisão)
+    const decisao = (av ? av.decisao : i.tipo === 'obr' ? 'pre' : null) as 'pre' | 'bkl' | 'rec' | null;
     return { ini: i, notas, decisao, motivoRecusa: av?.motivoRecusa ?? null, comunicado: !!av?.comunicado, nota: notaFinal(notas, d.org.config.pesos) };
   });
   return { ciclo, itens };

@@ -16,7 +16,7 @@ export function VerComo({ rotulo, perfis, ativo, personas, persona }: {
 }) {
   const [pend, start] = useTransition();
   return (
-    <div style={s('flex: 1 1 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 16px; background: #26213A; color: #E7E0FF; font-size: 12px')}>
+    <div style={s('flex: 0 0 auto; width: 100%; box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 16px; background: #26213A; color: #E7E0FF; font-size: 12px')}>
       <span style={s('font-weight: 600; margin-right: 4px')}>{rotulo}</span>
       {perfis.map((p) => (
         <button key={p.id} type="button" disabled={pend} aria-pressed={p.id === ativo} onClick={() => start(() => trocarVisao(p.id, ''))} style={p.id === ativo ? on : off}>{p.rotulo}</button>
