@@ -1,0 +1,9 @@
+* { box-sizing: border-box; }
+body { margin: 0; background: #FBFAF7; }
+a { color: #4B2FD1; text-decoration: none; }
+a:hover { color: #3A22A8; }
+button, input, select, textarea { font-family: inherit; }
+button { cursor: pointer; }
+button:disabled { cursor: default; opacity: .6; }
+nav a[href^="#"]:not([aria-current]) { color: #ABA4B7 !important; }
+nav a[href^="#"]:not([aria-current]) span { opacity: .6; }

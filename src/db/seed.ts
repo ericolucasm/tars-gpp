@@ -278,10 +278,13 @@ export async function seedDemo(db: DB, hoje: string) {
 
     // ---------- Planos dos projetos ----------
     type F = [string, number, number];
-    const plano = async (iniId: string, fases: F[]) => {
+    // Fases que terminaram antes da data do protótipo já nascem confirmadas pelo GP
+    const plano = async (iniId: string, fases: F[], inicio: string) => {
       const ids: Record<string, string> = {};
       for (const [i, [nome, s, dur]] of fases.entries()) {
-        const [row] = await tx.insert(t.projetoFases).values({ iniciativaId: iniId, nome, inicioSemana: s, duracao: dur, ordem: i, criterioConclusao: fase[nome]?.crit ?? '' }).returning();
+        const fim = addDias(inicio, (s + dur) * 7);
+        const confirmadaEm = fim < DATA_PROTOTIPO ? ts(fim) : null;
+        const [row] = await tx.insert(t.projetoFases).values({ iniciativaId: iniId, nome, inicioSemana: s, duracao: dur, ordem: i, criterioConclusao: fase[nome]?.crit ?? '', confirmadaEm }).returning();
         ids[nome] = row.id;
       }
       return ids;
@@ -297,7 +300,7 @@ export async function seedDemo(db: DB, hoje: string) {
     };
 
     // App de pedidos — exatamente o plano do protótipo
-    const fApp = await plano(app, [['Iniciação', 0, 2], ['Planejamento', 2, 3], ['Contratação de fornecedor', 3, 3], ['Desenvolvimento', 6, 10], ['Testes', 16, 3], ['Implantação', 19, 2], ['Encerramento', 21, 1]]);
+    const fApp = await plano(app, [['Iniciação', 0, 2], ['Planejamento', 2, 3], ['Contratação de fornecedor', 3, 3], ['Desenvolvimento', 6, 10], ['Testes', 16, 3], ['Implantação', 19, 2], ['Encerramento', 21, 1]], '2026-09-07');
     await aloc(fApp, [['Iniciação', 'Carlos Andrade', 50], ['Iniciação', 'Renata Souza', 30], ['Planejamento', 'Carlos Andrade', 50], ['Planejamento', 'Renata Souza', 40], ['Planejamento', 'Ana Costa', 30],
       ['Contratação de fornecedor', 'Carlos Andrade', 30], ['Desenvolvimento', 'Carlos Andrade', 30], ['Desenvolvimento', 'Pedro Lima', 80], ['Desenvolvimento', 'DevHouse', 100], ['Desenvolvimento', 'Ana Costa', 20],
       ['Testes', 'Renata Souza', 50], ['Testes', 'Pedro Lima', 40], ['Implantação', 'Pedro Lima', 60], ['Implantação', 'Carlos Andrade', 40], ['Encerramento', 'Carlos Andrade', 20]]);
@@ -324,7 +327,7 @@ export async function seedDemo(db: DB, hoje: string) {
     await tx.insert(t.pedidosAlocacao).values({ orgId, iniciativaId: app, pessoaId: pes['Pedro Lima'], deltaPct: 20, aPartirDe: 'outubro', solicitadoPor: pes['Carlos Andrade'], createdAt: ts('2026-10-12') });
 
     // Roteirização de entregas
-    const fRot = await plano(rot, [['Iniciação', 0, 2], ['Levantamento de requisitos', 2, 2], ['Planejamento', 4, 3], ['Implantação', 7, 12], ['Treinamento', 19, 2], ['Operação assistida', 21, 3], ['Encerramento', 24, 1]]);
+    const fRot = await plano(rot, [['Iniciação', 0, 2], ['Levantamento de requisitos', 2, 2], ['Planejamento', 4, 3], ['Implantação', 7, 12], ['Treinamento', 19, 2], ['Operação assistida', 21, 3], ['Encerramento', 24, 1]], '2026-08-03');
     await aloc(fRot, [['Implantação', 'Bruno Reis', 20], ['Implantação', 'João Silva', 10], ['Implantação', 'Fábio Oliveira', 40], ['Treinamento', 'Bruno Reis', 20]]);
     await tarefas(rot, fRot, [
       ['Iniciação', 'Termo de abertura aprovado', 'Fábio Oliveira', '2026-08-14', true], ['Levantamento de requisitos', 'Requisitos de rotas validados', 'Bruno Reis', '2026-08-28', true],
@@ -337,7 +340,7 @@ export async function seedDemo(db: DB, hoje: string) {
     await reports(rot, [['2026-10-16', 'ok', 'No prazo', 'Endereços dos clientes importados.', 'Mapear rotas da zona leste.', '—']]);
 
     // Inventário rotativo
-    const fInv = await plano(inv, [['Iniciação', 0, 2], ['Planejamento', 2, 3], ['Execução', 5, 8], ['Encerramento', 13, 1]]);
+    const fInv = await plano(inv, [['Iniciação', 0, 2], ['Planejamento', 2, 3], ['Execução', 5, 8], ['Encerramento', 13, 1]], '2026-08-24');
     await aloc(fInv, [['Execução', 'Clara Mendes', 30], ['Execução', 'Carlos Andrade', 20]]);
     await tarefas(inv, fInv, [
       ['Iniciação', 'Termo de abertura aprovado', 'Carlos Andrade', '2026-09-04', true], ['Planejamento', 'Calendário de contagens aprovado', 'Carlos Andrade', '2026-09-25', true],
@@ -349,7 +352,7 @@ export async function seedDemo(db: DB, hoje: string) {
     await reports(inv, [['2026-10-16', 'aten', 'Linha de base não congelada', 'Contagem do bloco A em andamento.', 'Contagem do bloco B.', 'Clara Mendes acima do cedido.']]);
 
     // CRM, ISO, embalagem e loja: planos simples
-    const fCrm = await plano(crm, [['Iniciação', 0, 2], ['Levantamento de requisitos', 2, 3], ['Planejamento', 5, 3], ['Implantação', 8, 12], ['Treinamento', 20, 3], ['Operação assistida', 23, 3], ['Encerramento', 26, 2]]);
+    const fCrm = await plano(crm, [['Iniciação', 0, 2], ['Levantamento de requisitos', 2, 3], ['Planejamento', 5, 3], ['Implantação', 8, 12], ['Treinamento', 20, 3], ['Operação assistida', 23, 3], ['Encerramento', 26, 2]], '2026-06-01');
     await aloc(fCrm, [['Implantação', 'Renata Souza', 20], ['Implantação', 'Marina Gomes', 40]]);
     await tarefas(crm, fCrm, [['Iniciação', 'Termo de abertura aprovado', 'Marina Gomes', '2026-06-12', true], ['Levantamento de requisitos', 'Requisitos validados', 'Renata Souza', '2026-07-03', true],
       ['Planejamento', 'Cronograma aprovado', 'Marina Gomes', '2026-07-24', true], ['Implantação', 'Migrar base de clientes', 'Marina Gomes', '2026-09-11', true],
@@ -358,7 +361,7 @@ export async function seedDemo(db: DB, hoje: string) {
       ['Implantação', 'Integrar CRM ao e-mail', 'Renata Souza', '2026-10-02', true], ['Implantação', 'Relatórios gerenciais', 'Marina Gomes', '2026-10-16', true]]);
     await reports(crm, [['2026-10-16', 'ok', 'No prazo', 'Funil de vendas configurado.', 'Treinamento dos vendedores.', '—']]);
 
-    const fIso = await plano(iso, [['Iniciação', 0, 2], ['Planejamento', 2, 3], ['Execução', 5, 26], ['Encerramento', 31, 1]]);
+    const fIso = await plano(iso, [['Iniciação', 0, 2], ['Planejamento', 2, 3], ['Execução', 5, 26], ['Encerramento', 31, 1]], '2026-07-20');
     await aloc(fIso, [['Execução', 'Júlia Tavares', 30]]);
     await tarefas(iso, fIso, [['Iniciação', 'Termo de abertura aprovado', 'Júlia Tavares', '2026-07-31', true], ['Planejamento', 'Plano de auditoria interna', 'Júlia Tavares', '2026-08-21', true],
       ['Execução', 'Mapear processos da produção', 'Júlia Tavares', '2026-10-30', false], ['Execução', 'Auditoria interna', 'Júlia Tavares', '2026-12-11', false],
@@ -366,7 +369,7 @@ export async function seedDemo(db: DB, hoje: string) {
     await tx.insert(t.riscos).values({ faseId: fIso['Execução'], nome: 'Processos sem dono definido', nivel: 'Alto' });
     await reports(iso, [['2026-10-06', 'aten', 'Linha de base não congelada', 'Plano de auditoria aprovado.', 'Mapear processos da produção.', 'Processos sem dono definido.']]);
 
-    const fEmb = await plano(emb, [['Iniciação', 0, 2], ['Planejamento', 2, 3], ['Contratação de fornecedor', 5, 4], ['Execução', 9, 12], ['Encerramento', 21, 1]]);
+    const fEmb = await plano(emb, [['Iniciação', 0, 2], ['Planejamento', 2, 3], ['Contratação de fornecedor', 5, 4], ['Execução', 9, 12], ['Encerramento', 21, 1]], '2026-06-15');
     await tx.insert(t.linhasBase).values({ iniciativaId: emb, fases: [
       { id: fEmb['Iniciação'], nome: 'Iniciação', inicioSemana: 0, duracao: 2 }, { id: fEmb['Planejamento'], nome: 'Planejamento', inicioSemana: 2, duracao: 3 },
       { id: fEmb['Contratação de fornecedor'], nome: 'Contratação de fornecedor', inicioSemana: 5, duracao: 3 }, { id: fEmb['Execução'], nome: 'Execução', inicioSemana: 8, duracao: 12 },
@@ -380,13 +383,13 @@ export async function seedDemo(db: DB, hoje: string) {
     await tx.insert(t.riscos).values({ faseId: fEmb['Execução'], nome: 'Fornecedor atrasar peças da esteira', nivel: 'Alto' });
     await reports(emb, [['2026-10-05', 'crit', '+1 semana(s)', 'Equipamento entregue com atraso.', 'Montagem da linha.', 'Fornecedor atrasou a entrega em 8 dias.']]);
 
-    const fLoja = await plano(loja, [['Iniciação', 0, 2], ['Planejamento', 2, 3], ['Contratação de fornecedor', 5, 3], ['Desenvolvimento', 8, 10], ['Testes', 18, 3], ['Implantação', 21, 2], ['Encerramento', 23, 1]]);
+    const fLoja = await plano(loja, [['Iniciação', 0, 2], ['Planejamento', 2, 3], ['Contratação de fornecedor', 5, 3], ['Desenvolvimento', 8, 10], ['Testes', 18, 3], ['Implantação', 21, 2], ['Encerramento', 23, 1]], '2026-07-06');
     await tarefas(loja, fLoja, [['Iniciação', 'Termo de abertura aprovado', 'Marina Gomes', '2026-07-17', true], ['Planejamento', 'Cronograma aprovado', 'Marina Gomes', '2026-08-07', false],
       ['Contratação de fornecedor', 'Contratar plataforma', 'Marina Gomes', '2026-08-28', false], ['Desenvolvimento', 'Catálogo B2B', 'Marina Gomes', '2026-10-30', false],
       ['Encerramento', 'Lições aprendidas registradas', 'Marina Gomes', '2027-01-15', false]]);
 
     for (const x of [col, cli]) {
-      const f = await plano(x, [['Iniciação', 0, 2], ['Planejamento', 2, 3], ['Execução', 5, 8], ['Encerramento', 13, 1]]);
+      const f = await plano(x, [['Iniciação', 0, 2], ['Planejamento', 2, 3], ['Execução', 5, 8], ['Encerramento', 13, 1]], x === col ? '2026-03-02' : '2026-05-18');
       await tarefas(x, f, [['Iniciação', 'Termo de abertura aprovado', 'Fábio Oliveira', '2026-03-13', true], ['Encerramento', 'Lições aprendidas registradas', 'Fábio Oliveira', '2026-08-14', true]]);
     }
 

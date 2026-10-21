@@ -78,3 +78,14 @@ export function acimaDoCedido(alocacao: number, cedeAte: number | null, externo 
   if (externo || cedeAte == null) return false;
   return alocacao > cedeAte;
 }
+
+/** A área e todas as que estão abaixo dela. */
+export function subarvore(areaId: string, areas: AreaH[]): string[] {
+  const res = new Set([areaId]);
+  let mudou = true;
+  while (mudou) {
+    mudou = false;
+    for (const a of areas) if (a.parentId && res.has(a.parentId) && !res.has(a.id)) { res.add(a.id); mudou = true; }
+  }
+  return [...res];
+}
