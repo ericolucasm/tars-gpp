@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>TARS GPP — Início do colaborador</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FBFAF7}
+a{color:#4B2FD1;text-decoration:none}a:hover{color:#3A22A8}
+nav a[href^="#"]:not([aria-current]){color:#ABA4B7 !important}
+nav a[href^="#"]:not([aria-current]) span{opacity:.6}
+</style>
+</helmet>
+<div style="font-family: 'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif; color: #26213A; background: #FBFAF7; min-height: 100vh; display: flex; flex-wrap: wrap; align-items: stretch">
+<div style="flex: 1 1 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 16px; background: #26213A; color: #E7E0FF; font-size: 12px">
+<span style="font-weight: 600; margin-right: 4px">Protótipo · ver como:</span>
+<a href="InicioColaborador.dc.html" aria-current="page" style="padding: 5px 12px; border-radius: 14px; color: #FFFFFF; background: #6D4AFF; border: 1px solid #6D4AFF; font-weight: 600">Colaborador</a>
+<a href="InicioGestor.dc.html" style="padding: 5px 12px; border-radius: 14px; color: #E7E0FF; border: 1px solid #5A5270">Gestor de área</a>
+<a href="InicioGP.dc.html" style="padding: 5px 12px; border-radius: 14px; color: #E7E0FF; border: 1px solid #5A5270">Gerente de projeto</a>
+<a href="InicioPMO.dc.html" style="padding: 5px 12px; border-radius: 14px; color: #E7E0FF; border: 1px solid #5A5270">PMO</a>
+</div>
+
+<nav aria-label="Menu principal" style="flex: 1 1 248px; max-width: 100%; background: #F3F0EA; border-right: 1px solid #E2DCD0; padding: 16px 12px; box-sizing: border-box; display: flex; flex-direction: column; gap: 2px; font-size: 14px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 4px 6px 14px">
+<div style="width: 32px; height: 32px; border-radius: 9px; background: #6D4AFF; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px">T</div>
+<div style="display: flex; flex-direction: column"><span style="font-weight: 700; font-size: 16px">TARS GPP</span><span style="font-size: 11px; color: #5E5770">Gestão de Portfólios e Projetos</span></div>
+</div>
+<a href="NovaIniciativa.dc.html" style="display: flex; align-items: center; justify-content: center; height: 40px; border-radius: 10px; background: #6D4AFF; color: #FFFFFF; font-weight: 600; margin-bottom: 12px">+ Nova iniciativa</a>
+<a href="InicioColaborador.dc.html" aria-current="page" style="display: flex; padding: 9px 10px; border-radius: 9px; background: #E7E0FF; color: #4B2FD1; font-weight: 600">Início</a>
+<div style="flex: 1"></div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 10px; border-top: 1px solid #E2DCD0; margin-top: 12px">
+<span style="width: 30px; height: 30px; border-radius: 50%; background: #E7E0FF; color: #4B2FD1; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600">JS</span>
+<span style="display: flex; flex-direction: column; font-size: 13px"><span style="font-weight: 600">João Silva</span><span style="font-size: 11px; color: #5E5770">Colaborador · Logística</span></span>
+</div>
+</nav>
+
+<main style="flex: 999 1 560px; min-width: 0; padding: 28px 32px 40px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<span style="font-size: 12px; color: #5E5770">Sábado, 17 de outubro</span>
+<h1 style="margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.3px">Bom dia, João</h1>
+<p style="margin: 0; font-size: 14px; color: #5E5770">Uma iniciativa sua voltou com pedido de ajuste e você tem 2 tarefas nesta semana.</p>
+</div>
+
+<a href="NovaIniciativa.dc.html" style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 16px 18px; border-radius: 14px; background: #EFEAFE; border: 1px solid #DCD2FF; color: #26213A">
+<span style="display: flex; flex-direction: column; flex: 1; min-width: 220px"><span style="font-size: 15px; font-weight: 700; color: #3A22A8">Ciclo Planejamento 2027 · inscrições abertas</span><span style="font-size: 13px; color: #4A4458">Tem uma ideia para melhorar a Logística? Envie até 31/10.</span></span>
+<span style="height: 40px; padding: 0 16px; border-radius: 10px; background: #6D4AFF; color: #FFFFFF; font-weight: 600; font-size: 13px; display: inline-flex; align-items: center">Nova iniciativa</span>
+</a>
+
+<section aria-label="Suas iniciativas" style="background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+<h2 style="margin: 0; font-size: 18px; font-weight: 700">Suas iniciativas</h2>
+<sc-for list="{{ items }}" as="it" hint-placeholder-count="3">
+<div style="{{ it.box }}">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; align-items: center">
+<span style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px; font-weight: 600">{{ it.title }}</span><span style="font-size: 12px; color: #5E5770">{{ it.sub }}</span></span>
+<sc-if value="{{ it.hasAction }}" hint-placeholder-val="{{ false }}"><a href="NovaIniciativa.dc.html" style="height: 36px; padding: 0 14px; border-radius: 9px; background: #6D4AFF; color: #FFFFFF; font-weight: 600; font-size: 13px; display: inline-flex; align-items: center">{{ it.action }}</a></sc-if>
+</div>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px">
+<sc-for list="{{ it.steps }}" as="s" hint-placeholder-count="4">
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="{{ s.bar }}"></div><span style="{{ s.label }}">{{ s.name }}</span></div>
+</sc-for>
+</div>
+<sc-if value="{{ it.hasNote }}" hint-placeholder-val="{{ false }}"><span style="font-size: 13px; color: #4A4458; padding: 10px 12px; border-radius: 10px; background: #F7F5F0">{{ it.note }}</span></sc-if>
+</div>
+</sc-for>
+</section>
+
+<section aria-label="Suas tarefas" style="background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 18px; font-weight: 700">Suas tarefas em projetos</h2>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px; border: 1px solid #EFEBE3"><span style="flex: 1 1 220px; font-size: 13px; font-weight: 600">Mapear rotas da zona leste</span><span style="font-size: 12px; color: #5E5770">Roteirização de entregas</span><span style="font-size: 12px; color: #5E5770">Prazo 21/10</span></div>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px; border: 1px solid #EFEBE3"><span style="flex: 1 1 220px; font-size: 13px; font-weight: 600">Testar app de roteirização com 3 motoristas</span><span style="font-size: 12px; color: #5E5770">Roteirização de entregas</span><span style="font-size: 12px; color: #5E5770">Prazo 23/10</span></div>
+</section>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1150}}'>
+var IC_STEPS = ['Enviada', 'Gestor', 'Avaliação do PMO', 'Decisão'];
+var IC_ITEMS = [
+  { title: 'Controle de devoluções no armazém', sub: 'Devolvida para ajuste por Fernanda Oliveira há 1 dia', at: 1, warn: true, action: 'Ajustar e reenviar', note: 'Fernanda: “Detalhe o custo estimado e quem mais é impactado.”' },
+  { title: 'Reduzir o tempo de separação de pedidos', sub: 'Com Fernanda Oliveira para aprovação desde hoje', at: 1, warn: false },
+  { title: 'Coletores de dados no armazém', sub: 'Aprovada no ciclo 2026 · virou projeto e foi entregue em 15/08', at: 4, warn: false }
+];
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      items: IC_ITEMS.map(function (it) {
+        return {
+          title: it.title, sub: it.sub, hasAction: !!it.action, action: it.action || '', hasNote: !!it.note, note: it.note || '',
+          box: 'display: flex; flex-direction: column; gap: 12px; padding: 14px; border-radius: 12px; border: 1px solid ' + (it.warn ? '#F0D9A8' : '#EFEBE3') + '; background: ' + (it.warn ? '#FFFCF5' : '#FFFFFF'),
+          steps: IC_STEPS.map(function (n, i) {
+            var done = i < it.at, now = i === it.at;
+            var c = done ? '#9C8CF0' : (now ? (it.warn ? '#C27A0A' : '#6D4AFF') : '#EFEBE3');
+            return { name: (now && it.warn) ? 'Ajuste pedido' : n, bar: 'height: 6px; border-radius: 3px; background: ' + c,
+              label: 'font-size: 12px; font-weight: ' + (now ? '700' : '500') + '; color: ' + (now ? (it.warn ? '#7A4A04' : '#3A22A8') : '#5E5770') };
+          })
+        };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>

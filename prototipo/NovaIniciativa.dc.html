@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>TARS GPP — Nova iniciativa</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FBFAF7}
+a{color:#4B2FD1;text-decoration:none}a:hover{color:#3A22A8}
+nav a[href^="#"]:not([aria-current]){color:#ABA4B7 !important}
+nav a[href^="#"]:not([aria-current]) span{opacity:.6}
+button{font-family:inherit;cursor:pointer}
+input,textarea,select{font-family:inherit}
+</style>
+</helmet>
+<div style="font-family: 'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif; color: #26213A; background: #FBFAF7; min-height: 100vh; display: flex; flex-wrap: wrap; align-items: stretch">
+<div style="flex: 1 1 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 16px; background: #26213A; color: #E7E0FF; font-size: 12px">
+<span style="font-weight: 600; margin-right: 4px">Protótipo · ver como:</span>
+<a href="InicioColaborador.dc.html" style="{{ rb.colab }}">Colaborador</a>
+<a href="InicioGestor.dc.html" style="{{ rb.gestor }}">Gestor de área</a>
+<a href="InicioGP.dc.html" style="{{ rb.gp }}">Gerente de projeto</a>
+<a href="InicioPMO.dc.html" style="{{ rb.pmo }}">PMO</a>
+</div>
+
+<sc-if value="{{ isColab }}" hint-placeholder-val="{{ true }}">
+<nav aria-label="Menu principal" style="flex: 1 1 248px; max-width: 100%; background: #F3F0EA; border-right: 1px solid #E2DCD0; padding: 16px 12px; box-sizing: border-box; display: flex; flex-direction: column; gap: 2px; font-size: 14px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 4px 6px 14px">
+<div style="width: 32px; height: 32px; border-radius: 9px; background: #6D4AFF; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px">T</div>
+<div style="display: flex; flex-direction: column"><span style="font-weight: 700; font-size: 16px">TARS GPP</span><span style="font-size: 11px; color: #5E5770">Gestão de Portfólios e Projetos</span></div>
+</div>
+<a href="NovaIniciativa.dc.html" aria-current="page" style="display: flex; align-items: center; justify-content: center; height: 40px; border-radius: 10px; background: #3A22A8; color: #FFFFFF; font-weight: 600; margin-bottom: 12px">+ Nova iniciativa</a>
+<a href="InicioColaborador.dc.html" style="display: flex; padding: 9px 10px; border-radius: 9px; color: #4A4458">Início</a>
+<div style="flex: 1"></div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 10px; border-top: 1px solid #E2DCD0; margin-top: 12px">
+<span style="width: 30px; height: 30px; border-radius: 50%; background: #E7E0FF; color: #4B2FD1; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600">JS</span>
+<span style="display: flex; flex-direction: column; font-size: 13px"><span style="font-weight: 600">João Silva</span><span style="font-size: 11px; color: #5E5770">Colaborador · Logística</span></span>
+</div>
+</nav>
+</sc-if>
+<sc-if value="{{ isGestor }}" hint-placeholder-val="{{ false }}">
+<nav aria-label="Menu principal" style="flex: 1 1 248px; max-width: 100%; background: #F3F0EA; border-right: 1px solid #E2DCD0; padding: 16px 12px; box-sizing: border-box; display: flex; flex-direction: column; gap: 2px; font-size: 14px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 4px 6px 14px">
+<div style="width: 32px; height: 32px; border-radius: 9px; background: #6D4AFF; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px">T</div>
+<div style="display: flex; flex-direction: column"><span style="font-weight: 700; font-size: 16px">TARS GPP</span><span style="font-size: 11px; color: #5E5770">Gestão de Portfólios e Projetos</span></div>
+</div>
+<a href="NovaIniciativaGestor.dc.html" aria-current="page" style="display: flex; align-items: center; justify-content: center; height: 40px; border-radius: 10px; background: #3A22A8; color: #FFFFFF; font-weight: 600; margin-bottom: 12px">+ Nova iniciativa</a>
+<a href="InicioGestor.dc.html" style="display: flex; padding: 9px 10px; border-radius: 9px; color: #4A4458">Início</a>
+<span style="font-size: 11px; color: #6E6780; margin: 14px 10px 4px; font-weight: 600; letter-spacing: 0.4px">MINHA ÁREA</span>
+<a href="GestorArea.dc.html" style="display: flex; padding: 9px 10px; border-radius: 9px; color: #4A4458">Visão da área</a>
+<div style="flex: 1"></div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 10px; border-top: 1px solid #E2DCD0; margin-top: 12px">
+<span style="width: 30px; height: 30px; border-radius: 50%; background: #E7E0FF; color: #4B2FD1; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600">FO</span>
+<span style="display: flex; flex-direction: column; font-size: 13px"><span style="font-weight: 600">Fernanda Oliveira</span><span style="font-size: 11px; color: #5E5770">Gestora · Logística</span></span>
+</div>
+</nav>
+</sc-if>
+<sc-if value="{{ isPmo }}" hint-placeholder-val="{{ false }}">
+<nav aria-label="Menu principal" style="flex: 1 1 248px; max-width: 100%; background: #F3F0EA; border-right: 1px solid #E2DCD0; padding: 16px 12px; box-sizing: border-box; display: flex; flex-direction: column; gap: 2px; font-size: 14px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 4px 6px 14px">
+<div style="width: 32px; height: 32px; border-radius: 9px; background: #6D4AFF; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px">T</div>
+<div style="display: flex; flex-direction: column"><span style="font-weight: 700; font-size: 16px">TARS GPP</span><span style="font-size: 11px; color: #5E5770">Gestão de Portfólios e Projetos</span></div>
+</div>
+<a href="NovaIniciativaPMO.dc.html" aria-current="page" style="display: flex; align-items: center; justify-content: center; height: 40px; border-radius: 10px; background: #3A22A8; color: #FFFFFF; font-weight: 600; margin-bottom: 12px">+ Nova iniciativa</a>
+<a href="InicioPMO.dc.html" style="display: flex; padding: 9px 10px; border-radius: 9px; color: #4A4458">Início</a>
+<span style="font-size: 11px; color: #6E6780; margin: 14px 10px 4px; font-weight: 600; letter-spacing: 0.4px">GESTÃO</span>
+<a href="Main.dc.html" style="display: flex; padding: 9px 10px; border-radius: 9px; color: #4A4458">Portfólio</a>
+<a href="Ciclos.dc.html" style="display: flex; padding: 9px 10px; border-radius: 9px; color: #4A4458">Ciclos de planejamento</a>
+<a href="Avaliacao.dc.html" style="display: flex; padding: 9px 10px; border-radius: 9px; color: #4A4458">Avaliação e priorização</a>
+<a href="ProjetoPMO.dc.html" style="display: flex; padding: 9px 10px; border-radius: 9px; color: #4A4458">Projetos</a>
+<span style="font-size: 11px; color: #6E6780; margin: 14px 10px 4px; font-weight: 600; letter-spacing: 0.4px">CONFIGURAÇÃO</span>
+<a href="Cadastros.dc.html" style="display: flex; padding: 9px 10px; border-radius: 9px; color: #4A4458">Cadastros</a>
+<a href="Configuracoes.dc.html" style="display: flex; padding: 9px 10px; border-radius: 9px; color: #4A4458">Configurações</a>
+<div style="flex: 1"></div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 10px; border-top: 1px solid #E2DCD0; margin-top: 12px">
+<span style="width: 30px; height: 30px; border-radius: 50%; background: #E7E0FF; color: #4B2FD1; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600">MG</span>
+<span style="display: flex; flex-direction: column; font-size: 13px"><span style="font-weight: 600">Mariana</span><span style="font-size: 11px; color: #5E5770">PMO · Administradora</span></span>
+</div>
+</nav>
+</sc-if>
+
+<main style="flex: 999 1 560px; min-width: 0; padding: 28px 32px 40px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 12px; color: #5E5770">Minhas iniciativas / Nova</span>
+<h1 style="margin: 0; font-size: 30px; font-weight: 700; letter-spacing: -0.3px">Nova iniciativa</h1>
+<p style="margin: 0; font-size: 14px; color: #5E5770">Conte o que precisa ser resolvido. Seu gestor aprova e o PMO avalia no fechamento do ciclo.</p>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 14px; background: #EFEAFE; border: 1px solid #DCD2FF">
+<span style="width: 36px; height: 36px; border-radius: 10px; background: #6D4AFF; color: #FFFFFF; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg></span>
+<div style="display: flex; flex-direction: column; flex: 1; min-width: 220px"><span style="font-size: 14px; font-weight: 700; color: #3A22A8">Ciclo Planejamento 2027 · inscrições abertas</span><span style="font-size: 13px; color: #4A4458">Recebendo iniciativas até 31/10/2026. Faltam 14 dias.</span></div>
+<span style="font-size: 12px; color: #4A4458">É urgente ou obrigatória por lei? Marque na urgência: ela entra fora do ciclo.</span>
+</div>
+
+<sc-if value="{{ submitted }}" hint-placeholder-val="{{ false }}">
+<div style="background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 32px; display: flex; flex-direction: column; gap: 14px; max-width: 640px">
+<span style="width: 44px; height: 44px; border-radius: 50%; background: #E3F5EA; color: #17723D; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg></span>
+<h2 style="margin: 0; font-size: 22px; font-weight: 700">Iniciativa enviada para aprovação</h2>
+<p style="margin: 0; font-size: 14px; color: #4A4458; line-height: 1.6">“{{ titleShown }}” foi para {{ req.approver }}, {{ req.approverShort }}. Você recebe uma notificação a cada passo e pode acompanhar tudo em Minhas iniciativas.</p>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<a href="{{ req.home }}" style="height: 40px; padding: 0 16px; border-radius: 10px; background: #6D4AFF; color: #FFFFFF; font-weight: 600; font-size: 13px; display: inline-flex; align-items: center">Voltar ao início</a>
+<button onClick="{{ reset }}" style="height: 40px; padding: 0 14px; border-radius: 10px; border: 1px solid #E2DCD0; background: #FFFFFF; color: #26213A; font-size: 13px">Cadastrar outra</button>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ editing }}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start">
+
+<div style="flex: 999 1 520px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+
+<section style="background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; align-items: center; gap: 10px"><span style="width: 24px; height: 24px; border-radius: 50%; background: #E7E0FF; color: #4B2FD1; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center">1</span><h2 style="margin: 0; font-size: 17px; font-weight: 700">O que você quer resolver</h2></div>
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600">Título da iniciativa *
+<input type="text" value="{{ title }}" onChange="{{ setTitle }}" placeholder="Reduzir o tempo de separação de pedidos" style="height: 44px; padding: 0 12px; border-radius: 10px; border: 1px solid {{ titleBorder }}; font-size: 14px; font-weight: 400; color: #26213A; background: #FFFFFF">
+<sc-if value="{{ titleError }}" hint-placeholder-val="{{ false }}"><span style="font-size: 12px; font-weight: 400; color: #B42318">Dê um título para a iniciativa</span></sc-if>
+</label>
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600">Qual problema ou oportunidade? *
+<span style="font-size: 12px; font-weight: 400; color: #5E5770">Descreva o problema, não a solução. Quem é afetado e com que frequência?</span>
+<textarea value="{{ problem }}" onChange="{{ setProblem }}" rows="4" placeholder="A separação de um pedido leva em média 40 minutos e gera atrasos nas entregas da tarde." style="padding: 10px 12px; border-radius: 10px; border: 1px solid {{ problemBorder }}; font-size: 14px; font-weight: 400; color: #26213A; resize: vertical; line-height: 1.5"></textarea>
+<sc-if value="{{ problemError }}" hint-placeholder-val="{{ false }}"><span style="font-size: 12px; font-weight: 400; color: #B42318">Conte qual é o problema ou a oportunidade</span></sc-if>
+</label>
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600">Que resultado você espera?
+<span style="font-size: 12px; font-weight: 400; color: #5E5770">Se possível, com um número: tempo, custo, volume, satisfação.</span>
+<textarea rows="2" placeholder="Separar um pedido em até 15 minutos." style="padding: 10px 12px; border-radius: 10px; border: 1px solid #E2DCD0; font-size: 14px; font-weight: 400; color: #26213A; resize: vertical; line-height: 1.5"></textarea>
+</label>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 13px; font-weight: 600">Tipo de iniciativa *</span>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px">
+<sc-for list="{{ types }}" as="t" hint-placeholder-count="4">
+<button onClick="{{ t.pick }}" aria-pressed="{{ t.pressed }}" style="{{ t.style }}"><span style="font-size: 13px; font-weight: 600">{{ t.label }}</span><span style="font-size: 12px; color: #5E5770; font-weight: 400">{{ t.desc }}</span></button>
+</sc-for>
+</div>
+<sc-if value="{{ typeError }}" hint-placeholder-val="{{ false }}"><span style="font-size: 12px; color: #B42318">Escolha o tipo</span></sc-if>
+</div>
+</section>
+
+<section style="background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; align-items: center; gap: 10px"><span style="width: 24px; height: 24px; border-radius: 50%; background: #E7E0FF; color: #4B2FD1; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center">2</span><h2 style="margin: 0; font-size: 17px; font-weight: 700">Quem está envolvido</h2></div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 6px; padding: 12px; border-radius: 10px; background: #F7F5F0"><span style="font-size: 12px; color: #5E5770">Área solicitante</span><span style="font-size: 14px; font-weight: 600">{{ req.area }}</span><span style="font-size: 12px; color: #5E5770">{{ req.dir }}</span></div>
+<div style="display: flex; flex-direction: column; gap: 6px; padding: 12px; border-radius: 10px; background: #F7F5F0"><span style="font-size: 12px; color: #5E5770">Quem aprova primeiro</span><span style="font-size: 14px; font-weight: 600">{{ req.approver }}</span><span style="font-size: 12px; color: #5E5770">{{ req.approverRole }}</span></div>
+</div>
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600">Patrocinador (opcional)
+<span style="font-size: 12px; font-weight: 400; color: #5E5770">Quem, acima da área, defende essa iniciativa?</span>
+<input type="text" placeholder="Nome do diretor ou executivo" style="height: 44px; padding: 0 12px; border-radius: 10px; border: 1px solid #E2DCD0; font-size: 14px; font-weight: 400; color: #26213A">
+</label>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 13px; font-weight: 600">Outras áreas impactadas</span>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{ areas }}" as="a" hint-placeholder-count="6">
+<button onClick="{{ a.pick }}" aria-pressed="{{ a.pressed }}" style="{{ a.style }}">{{ a.label }}</button>
+</sc-for>
+</div>
+</div>
+</section>
+
+<section style="background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; align-items: center; gap: 10px"><span style="width: 24px; height: 24px; border-radius: 50%; background: #E7E0FF; color: #4B2FD1; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center">3</span><h2 style="margin: 0; font-size: 17px; font-weight: 700">Prazo e tamanho</h2><span style="font-size: 12px; color: #5E5770">Estimativas. Ninguém espera precisão agora.</span></div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 13px; font-weight: 600">Urgência</span>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{ urgencies }}" as="u" hint-placeholder-count="3">
+<button onClick="{{ u.pick }}" aria-pressed="{{ u.pressed }}" style="{{ u.style }}">{{ u.label }}</button>
+</sc-for>
+</div>
+<sc-if value="{{ isUrgent }}" hint-placeholder-val="{{ false }}">
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; padding: 12px; border-radius: 10px; background: #FEF3DC">Por que não pode esperar o ciclo?
+<input type="text" placeholder="Prazo legal, risco de segurança, parada de operação…" style="height: 44px; padding: 0 12px; border-radius: 10px; border: 1px solid #F0D9A8; font-size: 14px; font-weight: 400; color: #26213A; background: #FFFFFF">
+<span style="font-size: 12px; font-weight: 400; color: #7A4A04">Essa iniciativa entra fora do ciclo e vai direto para o PMO após seu gestor.</span>
+</label>
+</sc-if>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px">
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600">Início desejado
+<input type="month" value="2027-03" style="height: 44px; padding: 0 12px; border-radius: 10px; border: 1px solid #E2DCD0; font-size: 14px; font-weight: 400; color: #26213A">
+</label>
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600">Entrega desejada
+<input type="month" value="2027-08" style="height: 44px; padding: 0 12px; border-radius: 10px; border: 1px solid #E2DCD0; font-size: 14px; font-weight: 400; color: #26213A">
+</label>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 13px; font-weight: 600">Custo estimado</span>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{ costs }}" as="c" hint-placeholder-count="5">
+<button onClick="{{ c.pick }}" aria-pressed="{{ c.pressed }}" style="{{ c.style }}">{{ c.label }}</button>
+</sc-for>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 13px; font-weight: 600">Vai precisar de fornecedor externo?</span>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{ suppliers }}" as="s" hint-placeholder-count="3">
+<button onClick="{{ s.pick }}" aria-pressed="{{ s.pressed }}" style="{{ s.style }}">{{ s.label }}</button>
+</sc-for>
+</div>
+</div>
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600">Anexos (opcional)
+<span style="display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 64px; border-radius: 10px; border: 1px dashed #CFC6B6; font-size: 13px; font-weight: 400; color: #5E5770">Arraste arquivos ou clique para escolher · PDF, planilha, imagem</span>
+</label>
+</section>
+
+<sc-if value="{{ hasErrors }}" hint-placeholder-val="{{ false }}">
+<span style="font-size: 13px; color: #B42318">Preencha os campos obrigatórios marcados acima.</span>
+</sc-if>
+<div style="display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px">
+<button style="height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid #E2DCD0; background: #FFFFFF; color: #26213A; font-size: 14px">Salvar rascunho</button>
+<button onClick="{{ submit }}" style="height: 44px; padding: 0 20px; border-radius: 10px; border: 0; background: #6D4AFF; color: #FFFFFF; font-weight: 600; font-size: 14px">Enviar para aprovação</button>
+</div>
+</div>
+
+<aside aria-label="Como funciona" style="flex: 1 1 280px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+<div style="background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+<h2 style="margin: 0; font-size: 15px; font-weight: 700">O caminho da sua iniciativa</h2>
+<sc-for list="{{ steps }}" as="s" hint-placeholder-count="4">
+<div style="display: flex; gap: 12px">
+<span style="{{ s.dotStyle }}">{{ s.n }}</span>
+<div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 13px; font-weight: 600">{{ s.title }}</span><span style="font-size: 12px; color: #5E5770; line-height: 1.45">{{ s.desc }}</span></div>
+</div>
+</sc-for>
+</div>
+<div style="background: #F3F0EA; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 12px; font-weight: 700; color: #4B2FD1; letter-spacing: 0.3px">BOA PRÁTICA</span>
+<span style="font-size: 14px; font-weight: 600">Um bom pedido responde três perguntas</span>
+<span style="font-size: 13px; color: #4A4458; line-height: 1.55">Qual é o problema? Quem ele afeta? Como saberemos que foi resolvido? Iniciativas com essas respostas costumam ser avaliadas mais rápido.</span>
+</div>
+</aside>
+</div>
+</sc-if>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"perfil":{"editor":null,"default":"colab"},"$preview":{"width":1440,"height":1500}}'>
+var NI_TYPES = [
+  { id: 'est', label: 'Estratégica', desc: 'Faz a empresa crescer ou mudar' },
+  { id: 'mel', label: 'Melhoria', desc: 'Deixa um processo melhor' },
+  { id: 'obr', label: 'Obrigatória', desc: 'Lei, norma ou auditoria' },
+  { id: 'man', label: 'Manutenção', desc: 'Mantém algo funcionando' }
+];
+var NI_AREAS = ['Comercial', 'Financeiro', 'RH', 'TI', 'Operações', 'Qualidade'];
+var NI_URG = [{ id: 'esp', label: 'Pode esperar o ciclo' }, { id: 'ano', label: 'Precisa ser neste ano' }, { id: 'urg', label: 'Urgente ou obrigatória' }];
+var NI_COST = ['Até R$ 10 mil', 'R$ 10–50 mil', 'R$ 50–200 mil', 'Acima de R$ 200 mil', 'Não sei'];
+var NI_SUP = ['Sim', 'Não', 'Não sei'];
+function rbStyles(p) {
+  var off = 'padding: 5px 12px; border-radius: 14px; color: #E7E0FF; border: 1px solid #5A5270';
+  var on = 'padding: 5px 12px; border-radius: 14px; color: #FFFFFF; background: #6D4AFF; border: 1px solid #6D4AFF; font-weight: 600';
+  return { colab: p === 'colab' ? on : off, gestor: p === 'gestor' ? on : off, gp: p === 'gp' ? on : off, pmo: p === 'pmo' ? on : off };
+}
+var NI_REQ = {
+  colab: { area: 'Logística', dir: 'Diretoria de Operações', approver: 'Fernanda Oliveira', approverRole: 'Gestora da Logística', approverShort: 'gestora da Logística', home: 'InicioColaborador.dc.html' },
+  gestor: { area: 'Logística', dir: 'Diretoria de Operações', approver: 'Ricardo Moura', approverRole: 'Diretor de Operações', approverShort: 'diretor de Operações', home: 'InicioGestor.dc.html' },
+  pmo: { area: 'PMO', dir: 'Diretoria Administrativa', approver: 'Helena Castro', approverRole: 'Diretora Administrativa', approverShort: 'diretora Administrativa', home: 'InicioPMO.dc.html' }
+};
+var NI_STEPS = [
+  { title: 'Você envia', desc: 'A iniciativa fica salva e você acompanha cada passo.' },
+  { title: 'Seu gestor aprova', desc: 'Quem aprova primeiro confirma que faz sentido ou devolve com comentários.' },
+  { title: 'O PMO avalia', desc: 'Após o fechamento do ciclo, as iniciativas são comparadas e priorizadas.' },
+  { title: 'Você recebe a decisão', desc: 'Aprovada, no backlog ou não aprovada, sempre com o motivo.' }
+];
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { title: '', problem: '', type: '', areas: [], urg: 'esp', cost: 'Não sei', sup: 'Não sei', tried: false, submitted: false };
+  }
+
+  pill(on) {
+    return 'min-height: 40px; padding: 0 14px; border-radius: 20px; font-size: 13px; border: 1px solid ' + (on ? '#6D4AFF' : '#E2DCD0') + '; background: ' + (on ? '#EFEAFE' : '#FFFFFF') + '; color: ' + (on ? '#3A22A8' : '#26213A') + '; font-weight: ' + (on ? '600' : '400');
+  }
+
+  renderVals() {
+    var self = this;
+    var s = this.state;
+    var titleError = s.tried && !s.title.trim();
+    var problemError = s.tried && !s.problem.trim();
+    var typeError = s.tried && !s.type;
+    var perfil = this.props.perfil || 'colab';
+    return {
+      isColab: perfil === 'colab', isGestor: perfil === 'gestor', isPmo: perfil === 'pmo', rb: rbStyles(perfil), req: NI_REQ[perfil] || NI_REQ.colab,
+      title: s.title,
+      problem: s.problem,
+      titleShown: s.title || 'Sua iniciativa',
+      submitted: s.submitted,
+      editing: !s.submitted,
+      titleError: titleError,
+      problemError: problemError,
+      typeError: typeError,
+      hasErrors: titleError || problemError || typeError,
+      titleBorder: titleError ? '#B42318' : '#E2DCD0',
+      problemBorder: problemError ? '#B42318' : '#E2DCD0',
+      isUrgent: s.urg === 'urg',
+      setTitle: function (e) { self.setState({ title: e.target.value }); },
+      setProblem: function (e) { self.setState({ problem: e.target.value }); },
+      types: NI_TYPES.map(function (t) {
+        var on = s.type === t.id;
+        return { label: t.label, desc: t.desc, pressed: on ? 'true' : 'false',
+          style: 'display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; min-height: 64px; padding: 10px 12px; border-radius: 12px; border: ' + (on ? '2px solid #6D4AFF' : '1px solid #E2DCD0') + '; background: ' + (on ? '#EFEAFE' : '#FFFFFF') + '; color: #26213A',
+          pick: function () { self.setState({ type: t.id }); } };
+      }),
+      areas: NI_AREAS.map(function (a) {
+        var on = s.areas.indexOf(a) >= 0;
+        return { label: a, pressed: on ? 'true' : 'false', style: self.pill(on),
+          pick: function () {
+            var cur = self.state.areas;
+            self.setState({ areas: on ? cur.filter(function (x) { return x !== a; }) : cur.concat([a]) });
+          } };
+      }),
+      urgencies: NI_URG.map(function (u) {
+        var on = s.urg === u.id;
+        return { label: u.label, pressed: on ? 'true' : 'false', style: self.pill(on), pick: function () { self.setState({ urg: u.id }); } };
+      }),
+      costs: NI_COST.map(function (c) {
+        var on = s.cost === c;
+        return { label: c, pressed: on ? 'true' : 'false', style: self.pill(on), pick: function () { self.setState({ cost: c }); } };
+      }),
+      suppliers: NI_SUP.map(function (c) {
+        var on = s.sup === c;
+        return { label: c, pressed: on ? 'true' : 'false', style: self.pill(on), pick: function () { self.setState({ sup: c }); } };
+      }),
+      steps: NI_STEPS.map(function (st, i) {
+        return { n: i + 1, title: st.title, desc: st.desc,
+          dotStyle: 'flex: 0 0 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; background: ' + (i === 0 ? '#6D4AFF' : '#EFEAFE') + '; color: ' + (i === 0 ? '#FFFFFF' : '#4B2FD1') };
+      }),
+      submit: function () {
+        var st = self.state;
+        if (!st.title.trim() || !st.problem.trim() || !st.type) { self.setState({ tried: true }); return; }
+        self.setState({ submitted: true });
+      },
+      reset: function () {
+        self.setState({ title: '', problem: '', type: '', areas: [], urg: 'esp', cost: 'Não sei', sup: 'Não sei', tried: false, submitted: false });
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>TARS GPP — Avaliação e priorização</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FBFAF7}
+a{color:#4B2FD1;text-decoration:none}a:hover{color:#3A22A8}
+nav a[href^="#"]:not([aria-current]){color:#ABA4B7 !important}
+nav a[href^="#"]:not([aria-current]) span{opacity:.6}
+button,select{font-family:inherit}
+button{cursor:pointer}
+</style>
+</helmet>
+<div style="font-family: 'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif; color: #26213A; background: #FBFAF7; min-height: 100vh; display: flex; flex-wrap: wrap; align-items: stretch">
+<div style="flex: 1 1 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 16px; background: #26213A; color: #E7E0FF; font-size: 12px">
+<span style="font-weight: 600; margin-right: 4px">Protótipo · ver como:</span>
+<a href="InicioColaborador.dc.html" style="padding: 5px 12px; border-radius: 14px; color: #E7E0FF; border: 1px solid #5A5270">Colaborador</a>
+<a href="InicioGestor.dc.html" style="padding: 5px 12px; border-radius: 14px; color: #E7E0FF; border: 1px solid #5A5270">Gestor de área</a>
+<a href="InicioGP.dc.html" style="padding: 5px 12px; border-radius: 14px; color: #E7E0FF; border: 1px solid #5A5270">Gerente de projeto</a>
+<a href="InicioPMO.dc.html" aria-current="page" style="padding: 5px 12px; border-radius: 14px; color: #FFFFFF; background: #6D4AFF; border: 1px solid #6D4AFF; font-weight: 600">PMO</a>
+</div>
+
+<nav aria-label="Menu principal" style="flex: 1 1 248px; max-width: 100%; background: #F3F0EA; border-right: 1px solid #E2DCD0; padding: 16px 12px; box-sizing: border-box; display: flex; flex-direction: column; gap: 2px; font-size: 14px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 4px 6px 14px">
+<div style="width: 32px; height: 32px; border-radius: 9px; background: #6D4AFF; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px">T</div>
+<div style="display: flex; flex-direction: column"><span style="font-weight: 700; font-size: 16px">TARS GPP</span><span style="font-size: 11px; color: #5E5770">Gestão de Portfólios e Projetos</span></div>
+</div>
+<a href="NovaIniciativaPMO.dc.html" style="display: flex; align-items: center; justify-content: center; height: 40px; border-radius: 10px; background: #6D4AFF; color: #FFFFFF; font-weight: 600; margin-bottom: 12px">+ Nova iniciativa</a>
+<a href="InicioPMO.dc.html" style="display: flex; padding: 9px 10px; border-radius: 9px; color: #4A4458">Início</a>
+<span style="font-size: 11px; color: #6E6780; margin: 14px 10px 4px; font-weight: 600; letter-spacing: 0.4px">GESTÃO</span>
+<a href="Main.dc.html" style="display: flex; padding: 9px 10px; border-radius: 9px; color: #4A4458">Portfólio</a>
+<a href="Ciclos.dc.html" style="display: flex; padding: 9px 10px; border-radius: 9px; color: #4A4458">Ciclos de planejamento</a>
+<a href="Avaliacao.dc.html" aria-current="page" style="display: flex; padding: 9px 10px; border-radius: 9px; background: #E7E0FF; color: #4B2FD1; font-weight: 600">Avaliação e priorização</a>
+<a href="ProjetoPMO.dc.html" style="display: flex; padding: 9px 10px; border-radius: 9px; color: #4A4458">Projetos</a>
+<span style="font-size: 11px; color: #6E6780; margin: 14px 10px 4px; font-weight: 600; letter-spacing: 0.4px">CONFIGURAÇÃO</span>
+<a href="Cadastros.dc.html" style="display: flex; padding: 9px 10px; border-radius: 9px; color: #4A4458">Cadastros</a>
+<a href="Configuracoes.dc.html" style="display: flex; padding: 9px 10px; border-radius: 9px; color: #4A4458">Configurações</a>
+<div style="flex: 1"></div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 10px; border-top: 1px solid #E2DCD0; margin-top: 12px">
+<span style="width: 30px; height: 30px; border-radius: 50%; background: #E7E0FF; color: #4B2FD1; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600">MG</span>
+<span style="display: flex; flex-direction: column; font-size: 13px"><span style="font-weight: 600">Mariana</span><span style="font-size: 11px; color: #5E5770">PMO · Administradora</span></span>
+</div>
+</nav>
+
+<main style="flex: 999 1 560px; min-width: 0; padding: 28px 32px 40px; box-sizing: border-box; display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; align-items: flex-end">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<span style="font-size: 12px; color: #5E5770">Gestão / Ciclo Planejamento 2027 / Avaliação</span>
+<h1 style="margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.3px">Avaliação e priorização</h1>
+<p style="margin: 0; font-size: 14px; color: #5E5770">Dê notas de 1 a 5 em cada critério. O TARS calcula a nota final com os pesos da empresa e ordena a lista.</p>
+</div>
+<button onClick="{{ communicate }}" style="height: 40px; padding: 0 16px; border-radius: 10px; border: 0; background: #6D4AFF; color: #FFFFFF; font-weight: 600; font-size: 13px">Comunicar decisões às áreas</button>
+</div>
+
+<sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+<div role="status" style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; padding: 12px 16px; border-radius: 12px; background: #EFEAFE; color: #3A22A8; font-size: 13px; font-weight: 600"><span>{{ toast }}</span><a href="Main.dc.html" style="font-size: 13px; font-weight: 700">Ver no portfólio</a></div>
+</sc-if>
+
+<div style="display: flex; flex-wrap: wrap; gap: 12px">
+<div style="flex: 2 1 360px; background: #FFFFFF; border: 1px solid #E8E3D9; border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap"><span style="font-size: 12px; color: #5E5770">Custo das pré-aprovadas vs. orçamento de referência</span><span style="{{ budgetTextStyle }}">{{ budgetText }}</span></div>
+<div style="height: 10px; border-radius: 5px; background: #EFEBE3; overflow: hidden"><div style="{{ budgetBar }}"></div></div>
+</div>
+<div style="flex: 1 1 140px; background: #FFFFFF; border: 1px solid #E8E3D9; border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px"><span style="font-size: 12px; color: #5E5770">Pré-aprovadas</span><span style="font-size: 24px; font-weight: 700">{{ preCount }}</span></div>
+<div style="flex: 1 1 140px; background: #FFFFFF; border: 1px solid #E8E3D9; border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px"><span style="font-size: 12px; color: #5E5770">Backlog</span><span style="font-size: 24px; font-weight: 700">{{ bklCount }}</span></div>
+<div style="flex: 1 1 140px; background: #FFFFFF; border: 1px solid #E8E3D9; border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px"><span style="font-size: 12px; color: #5E5770">Sem decisão</span><span style="font-size: 24px; font-weight: 700">{{ openCount }}</span></div>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center; font-size: 12px; color: #4A4458">
+<span style="font-weight: 600">Pesos:</span>
+<span style="padding: 4px 10px; border-radius: 10px; background: #EDEAE3">Impacto 35%</span>
+<span style="padding: 4px 10px; border-radius: 10px; background: #EDEAE3">Urgência 25%</span>
+<span style="padding: 4px 10px; border-radius: 10px; background: #EDEAE3">Alinhamento estratégico 25%</span>
+<span style="padding: 4px 10px; border-radius: 10px; background: #EDEAE3">Facilidade 15%</span>
+<a href="Cadastros.dc.html" style="font-size: 12px; font-weight: 600">Ajustar em Cadastros</a>
+</div>
+
+<div style="padding: 12px 14px; border-radius: 12px; background: #FEF3DC; color: #6B3F03; font-size: 13px; line-height: 1.5"><strong>Concorrência de recursos:</strong> Migração do ERP precisaria do time de TI, que já tem Pedro Lima acima do cedido no App de pedidos. Avalie a capacidade antes de pré-aprovar.</div>
+
+<div style="overflow-x: auto; background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px">
+<div style="min-width: 1060px">
+<div style="display: grid; grid-template-columns: 2.6fr repeat(4, 1.15fr) 0.7fr 2fr; gap: 10px; padding: 12px 16px; font-size: 12px; color: #5E5770; font-weight: 600; border-bottom: 1px solid #EFEBE3; background: #FAF8F4">
+<span>Iniciativa</span><span>Impacto</span><span>Urgência</span><span>Alinhamento</span><span>Facilidade</span><span>Nota</span><span>Decisão</span>
+</div>
+<sc-for list="{{ rows }}" as="r" hint-placeholder-count="6">
+<div style="border-bottom: 1px solid #F3F0EA; padding: 12px 16px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: grid; grid-template-columns: 2.6fr repeat(4, 1.15fr) 0.7fr 2fr; gap: 10px; align-items: center">
+<div style="display: flex; flex-direction: column; gap: 3px; min-width: 0">
+<span style="font-size: 14px; font-weight: 600">{{ r.title }}</span>
+<span style="font-size: 12px; color: #5E5770">{{ r.area }} · {{ r.type }} · {{ r.costLabel }}</span>
+<sc-if value="{{ r.mandatory }}" hint-placeholder-val="{{ false }}"><span style="font-size: 11px; font-weight: 600; color: #7A4A04">Obrigatória: entra independente da nota</span></sc-if>
+</div>
+<sc-for list="{{ r.crit }}" as="c" hint-placeholder-count="4">
+<div style="display: flex; gap: 3px">
+<sc-for list="{{ c.dots }}" as="d" hint-placeholder-count="5">
+<button onClick="{{ d.pick }}" aria-label="{{ d.aria }}" style="{{ d.style }}">{{ d.n }}</button>
+</sc-for>
+</div>
+</sc-for>
+<span style="{{ r.scoreStyle }}">{{ r.score }}</span>
+<div style="display: flex; gap: 4px; flex-wrap: wrap">
+<sc-for list="{{ r.decisions }}" as="x" hint-placeholder-count="3">
+<button onClick="{{ x.pick }}" aria-pressed="{{ x.pressed }}" style="{{ x.style }}">{{ x.label }}</button>
+</sc-for>
+</div>
+</div>
+<sc-if value="{{ r.refused }}" hint-placeholder-val="{{ false }}">
+<label style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; padding-left: 4px">Motivo da recusa
+<select style="height: 38px; padding: 0 10px; border-radius: 9px; border: 1px solid #E2DCD0; font-size: 13px; color: #26213A; background: #FFFFFF"><option>Sem orçamento no ciclo</option><option>Sobreposição com outra iniciativa</option><option>Benefício não demonstrado</option><option>Fora da estratégia atual</option></select>
+</label>
+</sc-if>
+</div>
+</sc-for>
+</div>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1400}}'>
+var AV_W = [35, 25, 25, 15];
+var AV_CRIT = ['Impacto', 'Urgência', 'Alinhamento', 'Facilidade'];
+var AV_BUDGET = 1200000;
+var AV_ROWS = [
+  { id: 'r1', title: 'Adequação das empilhadeiras à norma de segurança', area: 'Logística', type: 'Obrigatória', cost: 6000, s: [3, 5, 3, 5], dec: 'pre', mandatory: true },
+  { id: 'r2', title: 'Adequação à nova norma de segurança', area: 'Operações', type: 'Obrigatória', cost: 8000, s: [3, 5, 3, 4], dec: 'pre', mandatory: true },
+  { id: 'r3', title: 'Reduzir o tempo de separação de pedidos', area: 'Logística', type: 'Melhoria', cost: 30000, s: [4, 3, 4, 4], dec: '' },
+  { id: 'r4', title: 'Migração do ERP', area: 'Financeiro', type: 'Estratégica', cost: 450000, s: [5, 3, 5, 1], dec: '' },
+  { id: 'r5', title: 'Etiquetagem automática na expedição', area: 'Logística', type: 'Melhoria', cost: 120000, s: [3, 3, 3, 3], dec: '' },
+  { id: 'r6', title: 'Novo site institucional', area: 'Marketing', type: 'Estratégica', cost: 40000, s: [3, 2, 4, 4], dec: '' },
+  { id: 'r7', title: 'Automatizar controle de ponto', area: 'RH', type: 'Melhoria', cost: 35000, s: [3, 2, 2, 4], dec: '' },
+  { id: 'r8', title: 'Programa de liderança', area: 'RH', type: 'Estratégica', cost: 45000, s: [3, 2, 4, 3], dec: '' },
+  { id: 'r9', title: 'Novo layout do armazém', area: 'Logística', type: 'Melhoria', cost: 150000, s: [3, 2, 3, 2], dec: '' }
+];
+function avMoney(v) { return 'R$ ' + Math.round(v).toLocaleString('pt-BR'); }
+function avScore(s) { var t = 0; for (var i = 0; i < 4; i++) t += s[i] * AV_W[i]; return Math.round(t / 5); }
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { rows: AV_ROWS.map(function (r) { return Object.assign({}, r, { s: r.s.slice() }); }), toast: '' };
+  }
+  renderVals() {
+    var self = this, st = this.state;
+    var setRow = function (id, fn) { self.setState({ rows: self.state.rows.map(function (r) { return r.id === id ? fn(Object.assign({}, r, { s: r.s.slice() })) : r; }), toast: '' }); };
+    var sorted = st.rows.slice().sort(function (a, b) { return avScore(b.s) - avScore(a.s); });
+    var rows = sorted.map(function (r) {
+      var score = avScore(r.s);
+      return {
+        title: r.title, area: r.area, type: r.type, costLabel: avMoney(r.cost), mandatory: !!r.mandatory, refused: r.dec === 'rec', score: score,
+        scoreStyle: 'font-size: 18px; font-weight: 700; color: ' + (score >= 70 ? '#3A22A8' : (score >= 55 ? '#26213A' : '#6E6780')),
+        crit: AV_CRIT.map(function (name, ci) {
+          return { dots: [1, 2, 3, 4, 5].map(function (n) {
+            var on = n <= r.s[ci];
+            return { n: n, aria: name + ' ' + n + ' de 5 para ' + r.title,
+              style: 'width: 24px; height: 28px; border-radius: 6px; font-size: 11px; font-weight: 600; padding: 0; border: 1px solid ' + (on ? '#6D4AFF' : '#E2DCD0') + '; background: ' + (on ? '#6D4AFF' : '#FFFFFF') + '; color: ' + (on ? '#FFFFFF' : '#8A8296'),
+              pick: function () { setRow(r.id, function (x) { x.s[ci] = n; return x; }); } };
+          }) };
+        }),
+        decisions: [['pre', 'Pré-aprovar'], ['bkl', 'Backlog'], ['rec', 'Recusar']].map(function (d) {
+          var on = r.dec === d[0];
+          var bg = on ? (d[0] === 'pre' ? '#6D4AFF' : (d[0] === 'bkl' ? '#4A4458' : '#26213A')) : '#FFFFFF';
+          return { label: d[1], pressed: on ? 'true' : 'false',
+            style: 'height: 32px; padding: 0 10px; border-radius: 8px; font-size: 12px; font-weight: 600; border: 1px solid ' + (on ? bg : '#E2DCD0') + '; background: ' + bg + '; color: ' + (on ? '#FFFFFF' : '#4A4458'),
+            pick: function () { setRow(r.id, function (x) { x.dec = x.dec === d[0] ? '' : d[0]; return x; }); } };
+        })
+      };
+    });
+    var pre = st.rows.filter(function (r) { return r.dec === 'pre'; });
+    var total = pre.reduce(function (t, r) { return t + r.cost; }, 0);
+    var pct = Math.round(total / AV_BUDGET * 100);
+    var over = total > AV_BUDGET;
+    return {
+      rows: rows,
+      preCount: pre.length,
+      bklCount: st.rows.filter(function (r) { return r.dec === 'bkl'; }).length,
+      openCount: st.rows.filter(function (r) { return !r.dec; }).length,
+      budgetText: avMoney(total) + ' de ' + avMoney(AV_BUDGET) + ' (' + pct + '%)',
+      budgetTextStyle: 'font-size: 13px; font-weight: 700; color: ' + (over ? '#B42318' : '#26213A'),
+      budgetBar: 'height: 10px; border-radius: 5px; width: ' + Math.min(pct, 100) + '%; background: ' + (over ? '#B42318' : '#6D4AFF'),
+      hasToast: !!st.toast, toast: st.toast,
+      communicate: function () {
+        var rs = self.state.rows;
+        var open = rs.filter(function (r) { return !r.dec; }).length;
+        if (open > 0) { self.setState({ toast: 'Ainda há ' + open + ' iniciativa(s) sem decisão. Decida todas antes de comunicar.' }); return; }
+        var p = rs.filter(function (r) { return r.dec === 'pre'; }).length, b = rs.filter(function (r) { return r.dec === 'bkl'; }).length, x = rs.filter(function (r) { return r.dec === 'rec'; }).length;
+        self.setState({ toast: 'Decisões enviadas: ' + p + ' pré-aprovadas, ' + b + ' no backlog, ' + x + ' recusadas. Cada solicitante e gestor recebeu o resultado com o motivo.' });
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>TARS GPP — Configurações</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FBFAF7}
+a{color:#4B2FD1;text-decoration:none}a:hover{color:#3A22A8}
+button,input,select{font-family:inherit}
+button{cursor:pointer}
+nav a[href^="#"]:not([aria-current]){color:#ABA4B7 !important}
+nav a[href^="#"]:not([aria-current]) span{opacity:.6}
+</style>
+</helmet>
+<div style="font-family: 'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif; color: #26213A; background: #FBFAF7; min-height: 100vh; display: flex; flex-wrap: wrap; align-items: stretch">
+<div style="flex: 1 1 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 16px; background: #26213A; color: #E7E0FF; font-size: 12px">
+<span style="font-weight: 600; margin-right: 4px">Protótipo · ver como:</span>
+<a href="InicioColaborador.dc.html" style="padding: 5px 12px; border-radius: 14px; color: #E7E0FF; border: 1px solid #5A5270">Colaborador</a>
+<a href="InicioGestor.dc.html" style="padding: 5px 12px; border-radius: 14px; color: #E7E0FF; border: 1px solid #5A5270">Gestor de área</a>
+<a href="InicioGP.dc.html" style="padding: 5px 12px; border-radius: 14px; color: #E7E0FF; border: 1px solid #5A5270">Gerente de projeto</a>
+<a href="InicioPMO.dc.html" aria-current="page" style="padding: 5px 12px; border-radius: 14px; color: #FFFFFF; background: #6D4AFF; border: 1px solid #6D4AFF; font-weight: 600">PMO</a>
+</div>
+
+<nav aria-label="Menu principal" style="flex: 1 1 248px; max-width: 100%; background: #F3F0EA; border-right: 1px solid #E2DCD0; padding: 16px 12px; box-sizing: border-box; display: flex; flex-direction: column; gap: 2px; font-size: 14px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 4px 6px 14px">
+<div style="width: 32px; height: 32px; border-radius: 9px; background: #6D4AFF; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px">T</div>
+<div style="display: flex; flex-direction: column"><span style="font-weight: 700; font-size: 16px">TARS GPP</span><span style="font-size: 11px; color: #5E5770">Gestão de Portfólios e Projetos</span></div>
+</div>
+<a href="NovaIniciativaPMO.dc.html" style="display: flex; align-items: center; justify-content: center; height: 40px; border-radius: 10px; background: #6D4AFF; color: #FFFFFF; font-weight: 600; margin-bottom: 12px">+ Nova iniciativa</a>
+<a href="InicioPMO.dc.html" style="display: flex; padding: 9px 10px; border-radius: 9px; color: #4A4458">Início</a>
+<span style="font-size: 11px; color: #6E6780; margin: 14px 10px 4px; font-weight: 600; letter-spacing: 0.4px">GESTÃO</span>
+<a href="Main.dc.html" style="display: flex; padding: 9px 10px; border-radius: 9px; color: #4A4458">Portfólio</a>
+<a href="Ciclos.dc.html" style="display: flex; padding: 9px 10px; border-radius: 9px; color: #4A4458">Ciclos de planejamento</a>
+<a href="Avaliacao.dc.html" style="display: flex; padding: 9px 10px; border-radius: 9px; color: #4A4458">Avaliação e priorização</a>
+<a href="ProjetoPMO.dc.html" style="display: flex; padding: 9px 10px; border-radius: 9px; color: #4A4458">Projetos</a>
+<span style="font-size: 11px; color: #6E6780; margin: 14px 10px 4px; font-weight: 600; letter-spacing: 0.4px">CONFIGURAÇÃO</span>
+<a href="Cadastros.dc.html" style="display: flex; padding: 9px 10px; border-radius: 9px; color: #4A4458">Cadastros</a>
+<a href="Configuracoes.dc.html" aria-current="page" style="display: flex; padding: 9px 10px; border-radius: 9px; background: #E7E0FF; color: #4B2FD1; font-weight: 600">Configurações</a>
+<div style="flex: 1"></div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 10px; border-top: 1px solid #E2DCD0; margin-top: 12px">
+<span style="width: 30px; height: 30px; border-radius: 50%; background: #E7E0FF; color: #4B2FD1; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600">MG</span>
+<span style="display: flex; flex-direction: column; font-size: 13px"><span style="font-weight: 600">Mariana</span><span style="font-size: 11px; color: #5E5770">PMO · Administradora</span></span>
+</div>
+</nav>
+
+<main style="flex: 999 1 560px; min-width: 0; padding: 28px 32px 40px; box-sizing: border-box; display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<span style="font-size: 12px; color: #5E5770">Configuração / Configurações</span>
+<h1 style="margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.3px">Configurações</h1>
+<p style="margin: 0; font-size: 14px; color: #5E5770">Ajuste o TARS ao jeito da sua empresa. Tudo já vem pronto com as boas práticas de PMO.</p>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 6px; border-bottom: 1px solid #E2DCD0; padding-bottom: 8px">
+<span aria-current="page" style="height: 38px; padding: 0 14px; border-radius: 10px; font-size: 13px; font-weight: 700; background: #E7E0FF; color: #3A22A8; display: inline-flex; align-items: center">Raias do portfólio</span>
+<span style="height: 38px; padding: 0 14px; font-size: 13px; color: #ABA4B7; display: inline-flex; align-items: center">Empresa</span>
+<span style="height: 38px; padding: 0 14px; font-size: 13px; color: #ABA4B7; display: inline-flex; align-items: center">Modo de captação</span>
+<span style="height: 38px; padding: 0 14px; font-size: 13px; color: #ABA4B7; display: inline-flex; align-items: center">Notificações</span>
+<span style="height: 38px; padding: 0 14px; font-size: 13px; color: #ABA4B7; display: inline-flex; align-items: center">Plano e cobrança</span>
+</div>
+
+<div style="background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px">
+<span style="font-size: 12px; font-weight: 700; color: #5E5770; letter-spacing: 0.3px">FLUXO ATUAL</span>
+<div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center">
+<sc-for list="{{ flow }}" as="f" hint-placeholder-count="6"><span style="{{ f.style }}">{{ f.name }}</span><span style="{{ f.arrow }}">→</span></sc-for>
+<span style="font-size: 12px; color: #5E5770; margin-left: 6px">· saída a qualquer momento: <strong>{{ exitName }}</strong></span>
+</div>
+</div>
+
+<sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+<div role="status" style="padding: 12px 16px; border-radius: 12px; background: #EFEAFE; color: #3A22A8; font-size: 13px; font-weight: 600">{{ toast }}</div>
+</sc-if>
+
+<div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start">
+<section aria-label="Raias" style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 8px">
+<sc-for list="{{ lanes }}" as="l" hint-placeholder-count="7">
+<div style="{{ l.box }}">
+<span style="width: 26px; height: 26px; border-radius: 8px; background: #EFEAFE; color: #4B2FD1; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center">{{ l.pos }}</span>
+<button onClick="{{ l.pick }}" aria-pressed="{{ l.pressed }}" style="flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; border: 0; background: transparent; text-align: left; padding: 0; color: #26213A"><span style="font-size: 14px; font-weight: 600">{{ l.name }}</span><span style="font-size: 12px; color: #5E5770">{{ l.info }}</span></button>
+<sc-if value="{{ l.movable }}" hint-placeholder-val="{{ true }}">
+<button onClick="{{ l.up }}" aria-label="Subir {{ l.name }}" style="width: 32px; height: 32px; border-radius: 8px; border: 1px solid #E2DCD0; background: #FFFFFF; color: #4A4458">↑</button>
+<button onClick="{{ l.down }}" aria-label="Descer {{ l.name }}" style="width: 32px; height: 32px; border-radius: 8px; border: 1px solid #E2DCD0; background: #FFFFFF; color: #4A4458">↓</button>
+</sc-if>
+<sc-if value="{{ l.locked }}" hint-placeholder-val="{{ false }}"><span style="font-size: 11px; color: #5E5770">fixa</span></sc-if>
+</div>
+</sc-for>
+<button onClick="{{ addLane }}" style="height: 44px; border-radius: 12px; border: 1px dashed #BDB2F5; background: #FBFAFF; color: #3A22A8; font-size: 13px; font-weight: 600">+ Nova raia</button>
+<span style="font-size: 12px; color: #5E5770; line-height: 1.5">Use as setas para reordenar. A raia de saída fica sempre disponível em qualquer etapa.</span>
+</section>
+
+<section aria-label="Editar raia" style="flex: 999 1 480px; min-width: 0; background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; justify-content: space-between; gap: 8px; align-items: center; flex-wrap: wrap"><h2 style="margin: 0; font-size: 18px; font-weight: 700">Editar raia</h2><span style="font-size: 12px; color: #5E5770">{{ cur.countLabel }}</span></div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px">
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600">Nome da raia<input type="text" value="{{ cur.name }}" onChange="{{ setName }}" style="height: 42px; padding: 0 12px; border-radius: 10px; border: 1px solid #E2DCD0; font-size: 14px; color: #26213A"></label>
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600">Descrição curta<input type="text" value="{{ cur.desc }}" onChange="{{ setDesc }}" style="height: 42px; padding: 0 12px; border-radius: 10px; border: 1px solid #E2DCD0; font-size: 14px; color: #26213A"></label>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px">
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600">Quem aprova a entrada nesta raia
+<select value="{{ cur.approver }}" onChange="{{ setApprover }}" style="height: 42px; padding: 0 10px; border-radius: 10px; border: 1px solid #E2DCD0; background: #FFFFFF; font-size: 14px; color: #26213A">
+<option>Solicitante</option><option>Gestor da área solicitante</option><option>PMO</option><option>Gerente de projeto</option><option>Patrocinador</option>
+</select></label>
+<div style="display: flex; flex-direction: column; gap: 6px"><span style="font-size: 13px; font-weight: 600">O card aparece como</span>
+<div style="display: flex; gap: 8px">
+<sc-for list="{{ kinds }}" as="k" hint-placeholder-count="2"><button onClick="{{ k.pick }}" aria-pressed="{{ k.pressed }}" style="{{ k.style }}">{{ k.label }}</button></sc-for>
+</div></div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 10px; border-top: 1px solid #EFEBE3; padding-top: 14px">
+<div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px; font-weight: 700">Critérios de passagem</span><span style="font-size: 12px; color: #5E5770">O que precisa estar pronto para um card entrar em “{{ cur.name }}”.</span></div>
+<sc-for list="{{ crit }}" as="c" hint-placeholder-count="3">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px; border-radius: 10px; border: 1px solid #EFEBE3">
+<input type="text" value="{{ c.text }}" onChange="{{ c.setText }}" aria-label="Critério {{ c.pos }}" style="flex: 1 1 240px; height: 38px; padding: 0 10px; border-radius: 8px; border: 1px solid #E2DCD0; font-size: 13px; color: #26213A">
+<label style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: #4A4458"><input type="checkbox" checked="{{ c.req }}" onChange="{{ c.toggle }}" style="width: 18px; height: 18px; accent-color: #6D4AFF">Obrigatório</label>
+<button onClick="{{ c.remove }}" aria-label="Remover critério {{ c.pos }}" style="width: 32px; height: 32px; border-radius: 8px; border: 0; background: transparent; color: #8A8296; font-size: 16px">×</button>
+</div>
+</sc-for>
+<sc-if value="{{ noCrit }}" hint-placeholder-val="{{ false }}"><span style="font-size: 13px; color: #5E5770; padding: 10px; border: 1px dashed #D6CFC2; border-radius: 10px; text-align: center">Sem critérios: o card entra direto, sem confirmação.</span></sc-if>
+<button onClick="{{ addCrit }}" style="align-self: flex-start; height: 38px; padding: 0 14px; border-radius: 10px; border: 1px dashed #BDB2F5; background: #FBFAFF; color: #3A22A8; font-size: 13px; font-weight: 600">+ Adicionar critério</button>
+</div>
+
+<div style="background: #F7F5F0; border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 12px; font-weight: 700; color: #4B2FD1; letter-spacing: 0.3px">PRÉVIA</span>
+<span style="font-size: 13px">Ao mover um card para <strong>{{ cur.name }}</strong>, {{ cur.approver }} confirma:</span>
+<sc-for list="{{ crit }}" as="c" hint-placeholder-count="3"><span style="font-size: 13px; color: #4A4458">☐ {{ c.text }}{{ c.optLabel }}</span></sc-for>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; align-items: center">
+<span style="font-size: 12px; color: #5E5770; max-width: 420px; line-height: 1.5">Mudanças valem para os próximos movimentos. O histórico guarda os critérios que valiam em cada passagem.</span>
+<div style="display: flex; gap: 8px">
+<sc-if value="{{ cur.deletable }}" hint-placeholder-val="{{ false }}"><button onClick="{{ removeLane }}" style="height: 40px; padding: 0 14px; border-radius: 10px; border: 1px solid #F5D2D2; background: #FFFFFF; color: #B42318; font-size: 13px">Excluir raia</button></sc-if>
+<button onClick="{{ save }}" style="height: 40px; padding: 0 16px; border-radius: 10px; border: 0; background: #6D4AFF; color: #FFFFFF; font-weight: 600; font-size: 13px">Salvar alterações</button>
+</div>
+</div>
+</section>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1300}}'>
+function cfLanes() {
+  return [
+    { id: 'sol', name: 'Solicitações', desc: 'Em aprovação pelo gestor e PMO', approver: 'Gestor da área solicitante', kind: 'Iniciativa', count: 5, crit: [['Alinhada às prioridades da área', true], ['Informações suficientes para avaliação', true]] },
+    { id: 'bkl', name: 'Backlog', desc: 'Classificadas, aguardando prioridade', approver: 'PMO', kind: 'Iniciativa', count: 3, crit: [['Tipo de iniciativa definido', true], ['Prioridade definida', true], ['Esforço estimado', true], ['Patrocinador indicado', true]] },
+    { id: 'pre', name: 'Pré-projeto', desc: 'Aprovadas, preparando o play', approver: 'PMO', kind: 'Iniciativa', count: 2, crit: [['Aprovação do gestor do portfólio', true], ['Área solicitante comunicada', true]] },
+    { id: 'exe', name: 'Em execução', desc: 'Cronograma rodando', approver: 'PMO', kind: 'Projeto', count: 6, crit: [['Informações complementadas pela área', true], ['Gerente de projeto atribuído', true], ['Time engajado e alocado', true], ['Contratos com terceiros resolvidos (se houver)', true], ['Datas de início e fim definidas', true]] },
+    { id: 'pau', name: 'Pausado', desc: 'Parado por decisão', approver: 'PMO', kind: 'Projeto', count: 1, crit: [['Motivo da pausa registrado', true], ['Data prevista de retomada definida', true]] },
+    { id: 'con', name: 'Concluído', desc: 'Entregue e aceito', approver: 'Gerente de projeto', kind: 'Projeto', count: 3, crit: [['Aceite da entrega pelo solicitante', true], ['Lições aprendidas registradas', false]] },
+    { id: 'can', name: 'Cancelado / recusado', desc: 'Saiu da esteira', approver: 'PMO', kind: 'Iniciativa', count: 1, exit: true, crit: [['Motivo registrado', true], ['Solicitante comunicado', true]] }
+  ].map(function (l) { return Object.assign({}, l, { crit: l.crit.map(function (c) { return { text: c[0], req: c[1] }; }) }); });
+}
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { lanes: cfLanes(), sel: 'exe', n: 1, toast: '' }; }
+  upd(fn) {
+    var sel = this.state.sel;
+    this.setState({ lanes: this.state.lanes.map(function (l) { return l.id === sel ? fn(Object.assign({}, l, { crit: l.crit.slice() })) : l; }), toast: '' });
+  }
+  move(id, d) {
+    var flow = this.state.lanes.filter(function (l) { return !l.exit; });
+    var exit = this.state.lanes.filter(function (l) { return l.exit; });
+    var i = flow.findIndex(function (l) { return l.id === id; }), j = i + d;
+    if (j < 0 || j >= flow.length) return;
+    var t = flow[i]; flow[i] = flow[j]; flow[j] = t;
+    this.setState({ lanes: flow.concat(exit), toast: '' });
+  }
+  renderVals() {
+    var self = this, st = this.state;
+    var flowLanes = st.lanes.filter(function (l) { return !l.exit; });
+    var exitLane = st.lanes.filter(function (l) { return l.exit; })[0];
+    var cur = st.lanes.filter(function (l) { return l.id === st.sel; })[0] || st.lanes[0];
+    var lanes = st.lanes.map(function (l) {
+      var on = l.id === cur.id;
+      var idx = flowLanes.indexOf(l);
+      return { name: l.name || 'Sem nome', pos: l.exit ? '×' : idx + 1, pressed: on ? 'true' : 'false',
+        info: l.crit.length + (l.crit.length === 1 ? ' critério' : ' critérios') + ' · aprova: ' + l.approver,
+        movable: !l.exit, locked: !!l.exit,
+        box: 'display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; background: #FFFFFF; border: ' + (on ? '2px solid #6D4AFF' : '1px solid #E2DCD0') + (l.exit ? '; border-style: ' + (on ? 'solid' : 'dashed') : ''),
+        pick: function () { self.setState({ sel: l.id, toast: '' }); },
+        up: function () { self.move(l.id, -1); }, down: function () { self.move(l.id, 1); } };
+    });
+    var flow = flowLanes.map(function (l, i) {
+      return { name: l.name || 'Sem nome',
+        style: 'font-size: 12px; font-weight: 600; padding: 5px 10px; border-radius: 10px; background: ' + (l.kind === 'Projeto' ? '#E7E0FF' : '#EDEAE3') + '; color: ' + (l.kind === 'Projeto' ? '#3A22A8' : '#4A4458'),
+        arrow: i === flowLanes.length - 1 ? 'display: none' : 'font-size: 12px; color: #8A8296' };
+    });
+    var crit = cur.crit.map(function (c, i) {
+      return { text: c.text, req: c.req, pos: i + 1, optLabel: c.req ? '' : ' (opcional)',
+        setText: function (e) { var v = e.target.value; self.upd(function (l) { l.crit[i] = Object.assign({}, l.crit[i], { text: v }); return l; }); },
+        toggle: function () { self.upd(function (l) { l.crit[i] = Object.assign({}, l.crit[i], { req: !l.crit[i].req }); return l; }); },
+        remove: function () { self.upd(function (l) { l.crit.splice(i, 1); return l; }); } };
+    });
+    var kinds = ['Iniciativa', 'Projeto'].map(function (k) {
+      var on = cur.kind === k;
+      return { label: k, pressed: on ? 'true' : 'false', pick: function () { self.upd(function (l) { l.kind = k; return l; }); },
+        style: 'height: 42px; padding: 0 16px; border-radius: 10px; font-size: 13px; font-weight: ' + (on ? '700' : '500') + '; border: 1px solid ' + (on ? '#6D4AFF' : '#E2DCD0') + '; background: ' + (on ? '#EFEAFE' : '#FFFFFF') + '; color: ' + (on ? '#3A22A8' : '#26213A') };
+    });
+    return {
+      lanes: lanes, flow: flow, exitName: exitLane ? exitLane.name : '', crit: crit, kinds: kinds, noCrit: crit.length === 0,
+      cur: { name: cur.name, desc: cur.desc, approver: cur.approver, deletable: !cur.exit && cur.count === 0,
+        countLabel: cur.count > 0 ? cur.count + ' card(s) nesta raia hoje · não pode ser excluída' : 'Raia vazia' },
+      hasToast: !!st.toast, toast: st.toast,
+      setName: function (e) { var v = e.target.value; self.upd(function (l) { l.name = v; return l; }); },
+      setDesc: function (e) { var v = e.target.value; self.upd(function (l) { l.desc = v; return l; }); },
+      setApprover: function (e) { var v = e.target.value; self.upd(function (l) { l.approver = v; return l; }); },
+      addCrit: function () { self.upd(function (l) { l.crit.push({ text: 'Novo critério', req: true }); return l; }); },
+      addLane: function () {
+        var id = 'n' + st.n;
+        var flow2 = self.state.lanes.filter(function (l) { return !l.exit; });
+        var exit2 = self.state.lanes.filter(function (l) { return l.exit; });
+        flow2.push({ id: id, name: 'Nova raia', desc: '', approver: 'PMO', kind: 'Projeto', count: 0, crit: [] });
+        self.setState({ lanes: flow2.concat(exit2), sel: id, n: st.n + 1, toast: '' });
+      },
+      removeLane: function () {
+        var rest = self.state.lanes.filter(function (l) { return l.id !== cur.id; });
+        self.setState({ lanes: rest, sel: rest[0].id, toast: 'Raia excluída.' });
+      },
+      save: function () { self.setState({ toast: 'Raias salvas. O portfólio já segue o novo fluxo nos próximos movimentos.' }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

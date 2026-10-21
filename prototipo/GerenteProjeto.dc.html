@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>TARS GPP — Projeto (gerente de projeto)</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FBFAF7}
+a{color:#4B2FD1;text-decoration:none}a:hover{color:#3A22A8}
+button,input,select,textarea{font-family:inherit}
+button{cursor:pointer}
+nav a[href^="#"]:not([aria-current]){color:#ABA4B7 !important}
+nav a[href^="#"]:not([aria-current]) span{opacity:.6}
+</style>
+</helmet>
+<div style="font-family: 'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif; color: #26213A; background: #FBFAF7; min-height: 100vh; display: flex; flex-wrap: wrap; align-items: stretch">
+<div style="flex: 1 1 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 16px; background: #26213A; color: #E7E0FF; font-size: 12px">
+<span style="font-weight: 600; margin-right: 4px">Protótipo · ver como:</span>
+<a href="InicioColaborador.dc.html" style="{{ rb.colab }}">Colaborador</a>
+<a href="InicioGestor.dc.html" style="{{ rb.gestor }}">Gestor de área</a>
+<a href="InicioGP.dc.html" style="{{ rb.gp }}">Gerente de projeto</a>
+<a href="InicioPMO.dc.html" style="{{ rb.pmo }}">PMO</a>
+</div>
+
+<sc-if value="{{ isGp }}" hint-placeholder-val="{{ true }}">
+<nav aria-label="Menu principal" style="flex: 1 1 248px; max-width: 100%; background: #F3F0EA; border-right: 1px solid #E2DCD0; padding: 16px 12px; box-sizing: border-box; display: flex; flex-direction: column; gap: 2px; font-size: 14px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 4px 6px 14px">
+<div style="width: 32px; height: 32px; border-radius: 9px; background: #6D4AFF; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px">T</div>
+<div style="display: flex; flex-direction: column"><span style="font-weight: 700; font-size: 16px">TARS GPP</span><span style="font-size: 11px; color: #5E5770">Gestão de Portfólios e Projetos</span></div>
+</div>
+<a href="InicioGP.dc.html" style="display: flex; padding: 9px 10px; border-radius: 9px; color: #4A4458">Início</a>
+<span style="font-size: 11px; color: #6E6780; margin: 14px 10px 4px; font-weight: 600; letter-spacing: 0.4px">MEUS PROJETOS</span>
+<a href="GerenteProjeto.dc.html" aria-current="page" style="display: flex; padding: 9px 10px; border-radius: 9px; background: #E7E0FF; color: #4B2FD1; font-weight: 600">App de pedidos</a>
+<div style="flex: 1"></div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 10px; border-top: 1px solid #E2DCD0; margin-top: 12px">
+<span style="width: 30px; height: 30px; border-radius: 50%; background: #E7E0FF; color: #4B2FD1; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600">CA</span>
+<span style="display: flex; flex-direction: column; font-size: 13px"><span style="font-weight: 600">Carlos Andrade</span><span style="font-size: 11px; color: #5E5770">Gerente de projeto</span></span>
+</div>
+</nav>
+</sc-if>
+<sc-if value="{{ isPmo }}" hint-placeholder-val="{{ false }}">
+<nav aria-label="Menu principal" style="flex: 1 1 248px; max-width: 100%; background: #F3F0EA; border-right: 1px solid #E2DCD0; padding: 16px 12px; box-sizing: border-box; display: flex; flex-direction: column; gap: 2px; font-size: 14px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 4px 6px 14px">
+<div style="width: 32px; height: 32px; border-radius: 9px; background: #6D4AFF; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px">T</div>
+<div style="display: flex; flex-direction: column"><span style="font-weight: 700; font-size: 16px">TARS GPP</span><span style="font-size: 11px; color: #5E5770">Gestão de Portfólios e Projetos</span></div>
+</div>
+<a href="NovaIniciativaPMO.dc.html" style="display: flex; align-items: center; justify-content: center; height: 40px; border-radius: 10px; background: #6D4AFF; color: #FFFFFF; font-weight: 600; margin-bottom: 12px">+ Nova iniciativa</a>
+<a href="InicioPMO.dc.html" style="display: flex; padding: 9px 10px; border-radius: 9px; color: #4A4458">Início</a>
+<span style="font-size: 11px; color: #6E6780; margin: 14px 10px 4px; font-weight: 600; letter-spacing: 0.4px">GESTÃO</span>
+<a href="Main.dc.html" style="display: flex; padding: 9px 10px; border-radius: 9px; color: #4A4458">Portfólio</a>
+<a href="Ciclos.dc.html" style="display: flex; padding: 9px 10px; border-radius: 9px; color: #4A4458">Ciclos de planejamento</a>
+<a href="Avaliacao.dc.html" style="display: flex; padding: 9px 10px; border-radius: 9px; color: #4A4458">Avaliação e priorização</a>
+<a href="ProjetoPMO.dc.html" aria-current="page" style="display: flex; padding: 9px 10px; border-radius: 9px; background: #E7E0FF; color: #4B2FD1; font-weight: 600">Projetos</a>
+<span style="font-size: 11px; color: #6E6780; margin: 14px 10px 4px; font-weight: 600; letter-spacing: 0.4px">CONFIGURAÇÃO</span>
+<a href="Cadastros.dc.html" style="display: flex; padding: 9px 10px; border-radius: 9px; color: #4A4458">Cadastros</a>
+<a href="Configuracoes.dc.html" style="display: flex; padding: 9px 10px; border-radius: 9px; color: #4A4458">Configurações</a>
+<div style="flex: 1"></div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 10px; border-top: 1px solid #E2DCD0; margin-top: 12px">
+<span style="width: 30px; height: 30px; border-radius: 50%; background: #E7E0FF; color: #4B2FD1; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600">MG</span>
+<span style="display: flex; flex-direction: column; font-size: 13px"><span style="font-weight: 600">Mariana</span><span style="font-size: 11px; color: #5E5770">PMO · Administradora</span></span>
+</div>
+</nav>
+</sc-if>
+
+<main style="flex: 999 1 560px; min-width: 0; padding: 28px 32px 40px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px">
+
+<div style="display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; align-items: flex-start">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 12px; color: #5E5770; font-weight: 600; letter-spacing: 0.3px">PROJETO · COMERCIAL · CICLO 2026</span>
+<h1 style="margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.3px">App de pedidos para representantes</h1>
+<span style="font-size: 13px; color: #5E5770">Patrocinador: Paula Ribeiro (Dir. Comercial) · Modelo: Software com fornecedor</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-end">
+<span style="font-size: 12px; color: #5E5770">Farol do projeto</span>
+<div style="display: flex; gap: 6px">
+<sc-for list="{{ farolOptions }}" as="f" hint-placeholder-count="3">
+<button onClick="{{ f.pick }}" aria-pressed="{{ f.pressed }}" style="{{ f.style }}"><span style="{{ f.dot }}"></span>{{ f.label }}</button>
+</sc-for>
+</div>
+<span style="font-size: 12px; color: #4A4458">Sugerido pelo TARS: <strong>{{ suggested }}</strong> · {{ suggestedWhy }}</span>
+</div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px">
+<div style="background: #FFFFFF; border: 1px solid #E8E3D9; border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px"><span style="font-size: 12px; color: #5E5770">Início</span><span style="font-size: 20px; font-weight: 700">07/09/2026</span></div>
+<div style="background: #FFFFFF; border: 1px solid #E8E3D9; border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px"><span style="font-size: 12px; color: #5E5770">Fim previsto</span><span style="font-size: 20px; font-weight: 700">{{ endLabel }}</span></div>
+<div style="background: #FFFFFF; border: 1px solid #E8E3D9; border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px"><span style="font-size: 12px; color: #5E5770">Desvio da linha de base</span><span style="{{ deviationStyle }}">{{ deviationLabel }}</span></div>
+<div style="background: #FFFFFF; border: 1px solid #E8E3D9; border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px"><span style="font-size: 12px; color: #5E5770">Tarefas concluídas</span><span style="font-size: 20px; font-weight: 700">{{ tasksDoneLabel }}</span></div>
+<div style="background: #FFFFFF; border: 1px solid #E8E3D9; border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px"><span style="font-size: 12px; color: #5E5770">Acima do cedido</span><span style="{{ overStyle }}">{{ overLabel }}</span></div>
+</div>
+
+<section aria-label="Linha do tempo" style="background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center">
+<div style="display: flex; flex-direction: column; gap: 2px"><h2 style="margin: 0; font-size: 18px; font-weight: 700">Linha do tempo</h2><span style="font-size: 12px; color: #5E5770">{{ timelineHint }}</span></div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<button onClick="{{ resetPlan }}" style="height: 38px; padding: 0 14px; border-radius: 10px; border: 1px solid #E2DCD0; background: #FFFFFF; color: #26213A; font-size: 13px">Recriar a partir do modelo</button>
+<button onClick="{{ freeze }}" style="height: 38px; padding: 0 14px; border-radius: 10px; border: 0; background: #6D4AFF; color: #FFFFFF; font-weight: 600; font-size: 13px">{{ freezeLabel }}</button>
+</div>
+</div>
+<div style="overflow-x: auto; border: 1px solid #EFEBE3; border-radius: 12px">
+<div onPointerMove="{{ onMove }}" onPointerUp="{{ onUp }}" onPointerLeave="{{ onUp }}" style="min-width: 1040px; user-select: none">
+<div style="display: flex; border-bottom: 1px solid #EFEBE3; background: #FAF8F4">
+<div style="flex: 0 0 240px; padding: 8px 12px; font-size: 12px; color: #5E5770; font-weight: 600">Fase · clique para detalhar</div>
+<div style="display: flex; flex: 0 0 780px"><sc-for list="{{ months }}" as="m" hint-placeholder-count="6"><div style="{{ m.style }}">{{ m.label }}</div></sc-for></div>
+</div>
+<sc-for list="{{ phases }}" as="ph" hint-placeholder-count="7">
+<div style="{{ ph.rowStyle }}">
+<div style="flex: 0 0 240px; padding: 6px 8px 6px 12px; display: flex; align-items: center; gap: 6px; box-sizing: border-box">
+<button onClick="{{ ph.select }}" aria-pressed="{{ ph.pressed }}" style="flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; border: 0; background: transparent; padding: 4px 0; text-align: left; color: #26213A"><span style="font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px">{{ ph.name }}</span><span style="{{ ph.statusStyle }}">{{ ph.status }}</span></button>
+<button onClick="{{ ph.remove }}" aria-label="Remover fase {{ ph.name }}" style="width: 32px; height: 32px; border-radius: 8px; border: 0; background: transparent; color: #8A8296; font-size: 16px">×</button>
+</div>
+<div style="position: relative; flex: 0 0 780px; height: 52px; background-image: linear-gradient(to right, #F3F0EA 1px, transparent 1px); background-size: 30px 52px">
+<div style="{{ todayStyle }}"></div>
+<sc-if value="{{ ph.hasBase }}" hint-placeholder-val="{{ false }}"><div style="{{ ph.baseStyle }}"></div></sc-if>
+<div onPointerDown="{{ ph.down }}" style="{{ ph.barStyle }}">
+<span style="font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1">{{ ph.durLabel }}</span>
+<span onPointerDown="{{ ph.resize }}" aria-hidden="true" style="width: 10px; align-self: stretch; cursor: ew-resize; display: flex; align-items: center; justify-content: center"><span style="width: 2px; height: 14px; border-radius: 1px; background: rgba(255,255,255,0.7)"></span></span>
+</div>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center">
+<span style="font-size: 12px; color: #5E5770; font-weight: 600">Biblioteca de fases · clique para adicionar:</span>
+<sc-for list="{{ library }}" as="l" hint-placeholder-count="5"><button onClick="{{ l.add }}" style="min-height: 36px; padding: 0 12px; border-radius: 18px; border: 1px dashed #BDB2F5; background: #FBFAFF; color: #3A22A8; font-size: 12px; font-weight: 600">+ {{ l.name }}</button></sc-for>
+</div>
+</section>
+
+<section aria-label="Tarefas e pessoas por fase" style="background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; flex-direction: column; gap: 2px"><h2 style="margin: 0; font-size: 18px; font-weight: 700">Planejamento por fase</h2><span style="font-size: 12px; color: #5E5770">Escolha uma fase para cadastrar tarefas, alocar pessoas e registrar marcos e riscos. Sem fase escolhida, tudo aparece agrupado.</span></div>
+<div role="tablist" aria-label="Fase" style="display: flex; flex-wrap: wrap; gap: 6px">
+<sc-for list="{{ phaseTabs }}" as="t" hint-placeholder-count="8"><button role="tab" aria-selected="{{ t.selected }}" onClick="{{ t.pick }}" style="{{ t.style }}">{{ t.label }}</button></sc-for>
+</div>
+
+<sc-if value="{{ showAll }}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-direction: column; gap: 10px">
+<sc-for list="{{ groups }}" as="g" hint-placeholder-count="4">
+<div style="border: 1px solid #EFEBE3; border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; align-items: center">
+<button onClick="{{ g.select }}" style="display: flex; flex-direction: column; align-items: flex-start; border: 0; background: transparent; padding: 0; text-align: left; color: #26213A"><span style="font-size: 15px; font-weight: 700">{{ g.name }}</span><span style="font-size: 12px; color: #5E5770">{{ g.dates }} · {{ g.status }}</span></button>
+<div style="display: flex; flex-wrap: wrap; gap: 6px">
+<sc-for list="{{ g.people }}" as="p" hint-placeholder-count="2"><span style="{{ p.chip }}">{{ p.label }}</span></sc-for>
+<sc-if value="{{ g.noPeople }}" hint-placeholder-val="{{ false }}"><span style="font-size: 12px; color: #9A5B05; font-weight: 600">Sem pessoas alocadas</span></sc-if>
+</div>
+</div>
+<sc-for list="{{ g.tasks }}" as="t" hint-placeholder-count="2">
+<label style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; background: #FAF8F4; cursor: pointer">
+<input type="checkbox" checked="{{ t.done }}" onChange="{{ t.toggle }}" style="width: 18px; height: 18px; accent-color: #6D4AFF">
+<span style="{{ t.titleStyle }}">{{ t.title }}</span><span style="font-size: 12px; color: #5E5770">{{ t.who }}</span><span style="{{ t.dueStyle }}">{{ t.dueLabel }}</span>
+</label>
+</sc-for>
+<sc-if value="{{ g.noTasks }}" hint-placeholder-val="{{ false }}"><span style="font-size: 12px; color: #5E5770">Nenhuma tarefa cadastrada.</span></sc-if>
+<sc-if value="{{ g.hasExtras }}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-wrap: wrap; gap: 6px">
+<sc-for list="{{ g.marcos }}" as="m" hint-placeholder-count="1"><span style="{{ m.chip }}"><span style="{{ m.diamondSm }}"></span>Marco: {{ m.name }} · {{ m.date }} · {{ m.status }}</span></sc-for>
+<sc-for list="{{ g.riscos }}" as="r" hint-placeholder-count="1"><span style="{{ r.chip }}">Risco {{ r.level }}: {{ r.name }}</span></sc-for>
+</div>
+</sc-if>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ showOne }}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start">
+<div style="flex: 999 1 440px; min-width: 0; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px; font-weight: 700">Tarefas · {{ one.name }}</span><span style="font-size: 12px; color: #5E5770">{{ one.dates }} · {{ one.status }}</span></div>
+<sc-for list="{{ one.tasks }}" as="t" hint-placeholder-count="3">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; border: 1px solid #EFEBE3">
+<input type="checkbox" checked="{{ t.done }}" onChange="{{ t.toggle }}" aria-label="Concluir {{ t.title }}" style="width: 18px; height: 18px; accent-color: #6D4AFF">
+<span style="{{ t.titleStyle }}">{{ t.title }}</span><span style="font-size: 12px; color: #5E5770">{{ t.who }}</span><span style="{{ t.dueStyle }}">{{ t.dueLabel }}</span>
+<button onClick="{{ t.remove }}" aria-label="Remover tarefa {{ t.title }}" style="width: 32px; height: 32px; border-radius: 8px; border: 0; background: transparent; color: #8A8296; font-size: 16px">×</button>
+</div>
+</sc-for>
+<div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; padding: 12px; border-radius: 12px; background: #F7F5F0">
+<label style="flex: 2 1 200px; display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 600">Nova tarefa<input type="text" value="{{ newTitle }}" onChange="{{ setNewTitle }}" placeholder="Descreva a entrega" style="height: 40px; padding: 0 10px; border-radius: 9px; border: 1px solid #E2DCD0; font-size: 13px; color: #26213A; background: #FFFFFF"></label>
+<label style="flex: 1 1 150px; display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 600">Responsável<select value="{{ newWho }}" onChange="{{ setNewWho }}" style="height: 40px; padding: 0 8px; border-radius: 9px; border: 1px solid #E2DCD0; font-size: 13px; color: #26213A; background: #FFFFFF"><sc-for list="{{ teamOptions }}" as="o" hint-placeholder-count="5"><option value="{{ o.id }}">{{ o.name }}</option></sc-for></select></label>
+<label style="flex: 1 1 140px; display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 600">Prazo<input type="date" value="{{ newDue }}" onChange="{{ setNewDue }}" style="height: 40px; padding: 0 8px; border-radius: 9px; border: 1px solid #E2DCD0; font-size: 13px; color: #26213A; background: #FFFFFF"></label>
+<button onClick="{{ addTask }}" style="height: 40px; padding: 0 14px; border-radius: 9px; border: 0; background: #6D4AFF; color: #FFFFFF; font-weight: 600; font-size: 13px">Adicionar</button>
+</div>
+</div>
+<div style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 10px">
+<span style="font-size: 15px; font-weight: 700">Pessoas nesta fase</span>
+<sc-for list="{{ one.people }}" as="p" hint-placeholder-count="3">
+<div style="display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border-radius: 10px; border: 1px solid #EFEBE3">
+<div style="display: flex; align-items: center; gap: 8px">
+<span style="width: 28px; height: 28px; border-radius: 50%; background: #E7E0FF; color: #4B2FD1; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600">{{ p.ini }}</span>
+<span style="display: flex; flex-direction: column; flex: 1; min-width: 0"><span style="font-size: 13px; font-weight: 600">{{ p.name }}</span><span style="font-size: 11px; color: #5E5770">{{ p.role }}</span></span>
+<button onClick="{{ p.minus }}" aria-label="Diminuir {{ p.name }}" style="width: 30px; height: 30px; border-radius: 8px; border: 1px solid #E2DCD0; background: #FFFFFF; color: #26213A">−</button>
+<span style="min-width: 42px; text-align: center; font-size: 13px; font-weight: 700">{{ p.pct }}</span>
+<button onClick="{{ p.plus }}" aria-label="Aumentar {{ p.name }}" style="width: 30px; height: 30px; border-radius: 8px; border: 1px solid #E2DCD0; background: #FFFFFF; color: #26213A">+</button>
+<button onClick="{{ p.remove }}" aria-label="Remover {{ p.name }} da fase" style="width: 30px; height: 30px; border-radius: 8px; border: 0; background: transparent; color: #8A8296; font-size: 16px">×</button>
+</div>
+<span style="{{ p.noteStyle }}">{{ p.note }}</span>
+</div>
+</sc-for>
+<div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; padding: 12px; border-radius: 12px; background: #F7F5F0">
+<label style="flex: 1 1 160px; display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 600">Alocar pessoa<select value="{{ addWho }}" onChange="{{ setAddWho }}" style="height: 40px; padding: 0 8px; border-radius: 9px; border: 1px solid #E2DCD0; font-size: 13px; color: #26213A; background: #FFFFFF"><sc-for list="{{ freeOptions }}" as="o" hint-placeholder-count="3"><option value="{{ o.id }}">{{ o.name }}</option></sc-for></select></label>
+<button onClick="{{ addPerson }}" style="height: 40px; padding: 0 14px; border-radius: 9px; border: 0; background: #6D4AFF; color: #FFFFFF; font-weight: 600; font-size: 13px">Alocar 20%</button>
+</div>
+<span style="font-size: 15px; font-weight: 700; margin-top: 6px">Marcos da fase</span>
+<sc-for list="{{ one.marcos }}" as="m" hint-placeholder-count="1">
+<div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px; border: 1px solid #EFEBE3"><span style="{{ m.diamond }}"></span><span style="display: flex; flex-direction: column; flex: 1"><span style="font-size: 13px; font-weight: 600">{{ m.name }}</span><span style="font-size: 12px; color: #5E5770">{{ m.date }}</span></span><span style="{{ m.pill }}">{{ m.status }}</span><button onClick="{{ m.remove }}" aria-label="Remover marco {{ m.name }}" style="width: 30px; height: 30px; border-radius: 8px; border: 0; background: transparent; color: #8A8296; font-size: 16px">×</button></div>
+</sc-for>
+<sc-if value="{{ one.noMarcos }}" hint-placeholder-val="{{ false }}"><span style="font-size: 12px; color: #5E5770">Nenhum marco nesta fase.</span></sc-if>
+<div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; padding: 12px; border-radius: 12px; background: #F7F5F0">
+<label style="flex: 2 1 140px; display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 600">Novo marco<input type="text" value="{{ msName }}" onChange="{{ setMsName }}" placeholder="Entrega-chave" style="height: 40px; padding: 0 10px; border-radius: 9px; border: 1px solid #E2DCD0; font-size: 13px; color: #26213A; background: #FFFFFF"></label>
+<label style="flex: 1 1 120px; display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 600">Data<input type="date" value="{{ msDate }}" onChange="{{ setMsDate }}" style="height: 40px; padding: 0 8px; border-radius: 9px; border: 1px solid #E2DCD0; font-size: 13px; color: #26213A; background: #FFFFFF"></label>
+<button onClick="{{ addMs }}" style="height: 40px; padding: 0 14px; border-radius: 9px; border: 0; background: #6D4AFF; color: #FFFFFF; font-weight: 600; font-size: 13px">Adicionar</button>
+</div>
+<span style="font-size: 15px; font-weight: 700; margin-top: 6px">Riscos da fase</span>
+<sc-for list="{{ one.riscos }}" as="r" hint-placeholder-count="1">
+<div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px; border: 1px solid #EFEBE3"><span style="{{ r.pill }}">{{ r.level }}</span><span style="flex: 1; font-size: 13px; font-weight: 600">{{ r.name }}</span><button onClick="{{ r.remove }}" aria-label="Remover risco {{ r.name }}" style="width: 30px; height: 30px; border-radius: 8px; border: 0; background: transparent; color: #8A8296; font-size: 16px">×</button></div>
+</sc-for>
+<sc-if value="{{ one.noRiscos }}" hint-placeholder-val="{{ false }}"><span style="font-size: 12px; color: #5E5770">Nenhum risco nesta fase.</span></sc-if>
+<div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; padding: 12px; border-radius: 12px; background: #F7F5F0">
+<label style="flex: 2 1 140px; display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 600">Novo risco<input type="text" value="{{ rkName }}" onChange="{{ setRkName }}" placeholder="O que pode dar errado?" style="height: 40px; padding: 0 10px; border-radius: 9px; border: 1px solid #E2DCD0; font-size: 13px; color: #26213A; background: #FFFFFF"></label>
+<label style="flex: 1 1 100px; display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 600">Nível<select value="{{ rkLevel }}" onChange="{{ setRkLevel }}" style="height: 40px; padding: 0 8px; border-radius: 9px; border: 1px solid #E2DCD0; font-size: 13px; color: #26213A; background: #FFFFFF"><option>Alto</option><option>Médio</option><option>Baixo</option></select></label>
+<button onClick="{{ addRk }}" style="height: 40px; padding: 0 14px; border-radius: 9px; border: 0; background: #6D4AFF; color: #FFFFFF; font-weight: 600; font-size: 13px">Adicionar</button>
+</div>
+</div>
+</div>
+</sc-if>
+</section>
+
+<div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start">
+<section aria-label="Status da semana" style="flex: 1 1 100%; min-width: 0; background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; align-items: center">
+<div style="display: flex; flex-direction: column; gap: 2px"><h2 style="margin: 0; font-size: 18px; font-weight: 700">Status do projeto</h2><span style="font-size: 12px; color: #5E5770">Visão geral do projeto, não de uma fase. O TARS junta com farol e desvio e envia ao patrocinador e ao PMO.</span></div>
+<label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600">Data<input type="date" value="{{ draftDate }}" onChange="{{ setDate }}" style="height: 40px; padding: 0 8px; border-radius: 9px; border: 1px solid #E2DCD0; font-size: 13px; color: #26213A"></label>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px">
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600">O que avançou?<textarea rows="3" value="{{ draftA }}" onChange="{{ setA }}" placeholder="Catálogo entregue para testes internos." style="padding: 10px 12px; border-radius: 10px; border: 1px solid #E2DCD0; font-size: 13px; font-weight: 400; color: #26213A; resize: vertical"></textarea></label>
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600">O que vem a seguir?<textarea rows="3" value="{{ draftB }}" onChange="{{ setB }}" placeholder="Integração com o ERP." style="padding: 10px 12px; border-radius: 10px; border: 1px solid #E2DCD0; font-size: 13px; font-weight: 400; color: #26213A; resize: vertical"></textarea></label>
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600">Pontos de atenção<textarea rows="3" value="{{ draftC }}" onChange="{{ setC }}" placeholder="API depende do time de TI." style="padding: 10px 12px; border-radius: 10px; border: 1px solid #E2DCD0; font-size: 13px; font-weight: 400; color: #26213A; resize: vertical"></textarea></label>
+</div>
+<sc-if value="{{ reportError }}" hint-placeholder-val="{{ false }}"><span style="font-size: 13px; color: #B42318">Preencha a data e ao menos “O que avançou?” para publicar.</span></sc-if>
+<div style="display: flex; justify-content: flex-end"><button onClick="{{ publishReport }}" style="height: 40px; padding: 0 16px; border-radius: 10px; border: 0; background: #6D4AFF; color: #FFFFFF; font-weight: 600; font-size: 13px">Publicar status</button></div>
+<div style="border-top: 1px solid #EFEBE3; padding-top: 12px; display: flex; flex-direction: column; gap: 10px">
+<span style="font-size: 12px; font-weight: 700; color: #5E5770; letter-spacing: 0.3px">STATUS ANTERIORES</span>
+<sc-for list="{{ reports }}" as="r" hint-placeholder-count="2">
+<div style="padding: 12px 14px; border-radius: 12px; background: #F7F5F0; display: flex; flex-direction: column; gap: 4px">
+<span style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center"><span style="font-size: 13px; font-weight: 700">{{ r.dateLabel }}</span><span style="{{ r.pill }}">{{ r.farol }}</span><span style="font-size: 12px; color: #5E5770">{{ r.dev }}</span></span>
+<span style="font-size: 13px"><strong>Avançou:</strong> {{ r.a }}</span>
+<span style="font-size: 13px"><strong>A seguir:</strong> {{ r.b }}</span>
+<span style="font-size: 13px"><strong>Atenção:</strong> {{ r.c }}</span>
+</div>
+</sc-for>
+</div>
+</section>
+
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"perfil":{"editor":null,"default":"gp"},"$preview":{"width":1440,"height":2600}}'>
+var GP_W = 30, GP_WEEKS = 26, GP_TODAY = 6;
+var GP_MONTHS = [['Set 2026', 4], ['Out', 4], ['Nov', 5], ['Dez', 4], ['Jan 2027', 4], ['Fev', 5]];
+var GP_LIB = [{ name: 'Levantamento de requisitos', dur: 2 }, { name: 'Piloto', dur: 2 }, { name: 'Treinamento', dur: 2 }, { name: 'Operação assistida', dur: 3 }];
+var GP_FAROL = { ok: ['OK', '#E3F5EA', '#17723D'], aten: ['Atenção', '#FEF3DC', '#9A5B05'], crit: ['Crítico', '#FDE8E8', '#B42318'] };
+var GP_TEAM = [
+  { id: 'p1', name: 'Carlos Andrade', ini: 'CA', role: 'Gerente de projeto · Vendas', cap: 50 },
+  { id: 'p2', name: 'Renata Souza', ini: 'RS', role: 'Analista de negócios · Vendas', cap: 50 },
+  { id: 'p3', name: 'Pedro Lima', ini: 'PL', role: 'Desenvolvedor · TI', cap: 60 },
+  { id: 'p4', name: 'Ana Costa', ini: 'AC', role: 'Designer · Marketing', cap: 30 },
+  { id: 'p5', name: 'DevHouse', ini: 'DH', role: 'Fornecedor externo', cap: null }
+];
+function gpPlan() {
+  return [
+    { id: 'f1', name: 'Iniciação', s: 0, d: 2 }, { id: 'f2', name: 'Planejamento', s: 2, d: 3 }, { id: 'f3', name: 'Contratação de fornecedor', s: 3, d: 3 },
+    { id: 'f4', name: 'Desenvolvimento', s: 6, d: 10 }, { id: 'f5', name: 'Testes', s: 16, d: 3 }, { id: 'f6', name: 'Implantação', s: 19, d: 2 }, { id: 'f7', name: 'Encerramento', s: 21, d: 1 }
+  ];
+}
+function gpAlloc() {
+  return [['f1', 'p1', 50], ['f1', 'p2', 30], ['f2', 'p1', 50], ['f2', 'p2', 40], ['f2', 'p4', 30], ['f3', 'p1', 30], ['f4', 'p1', 30], ['f4', 'p3', 80], ['f4', 'p5', 100], ['f4', 'p4', 20], ['f5', 'p2', 50], ['f5', 'p3', 40], ['f6', 'p3', 60], ['f6', 'p1', 40], ['f7', 'p1', 20]]
+    .map(function (a) { return { phase: a[0], person: a[1], pct: a[2] }; });
+}
+function gpTasks() {
+  return [
+    ['t1', 'f1', 'Termo de abertura aprovado', 'p1', '2026-09-18', true], ['t2', 'f2', 'Cronograma e riscos aprovados', 'p1', '2026-10-02', true], ['t3', 'f2', 'Protótipo aprovado pelos representantes', 'p4', '2026-10-11', true],
+    ['t4', 'f3', 'Contrato com a DevHouse assinado', 'p1', '2026-10-16', true], ['t5', 'f4', 'Configurar ambiente do fornecedor', 'p5', '2026-10-14', true], ['t6', 'f4', 'Validar regras de preço com o Comercial', 'p2', '2026-10-15', false],
+    ['t7', 'f4', 'API de estoque integrada ao ERP', 'p3', '2026-10-30', false], ['t8', 'f4', 'Tela de catálogo de produtos', 'p5', '2026-11-08', false], ['t9', 'f4', 'Fluxo de pedido e aprovação de desconto', 'p5', '2026-11-22', false],
+    ['t10', 'f5', 'Roteiro de testes com o Comercial', 'p2', '2026-12-18', false], ['t11', 'f6', 'Treinar representantes', 'p1', '2027-01-15', false], ['t12', 'f7', 'Lições aprendidas registradas', 'p1', '2027-02-05', false]
+  ].map(function (t) { return { id: t[0], phase: t[1], title: t[2], who: t[3], due: t[4], done: t[5] }; });
+}
+function br(iso) { if (!iso) return ''; var p = iso.split('-'); return p[2] + '/' + p[1] + '/' + p[0]; }
+var GP_TODAY_ISO = '2026-10-17';
+function rbStyles(p) {
+  var off = 'padding: 5px 12px; border-radius: 14px; color: #E7E0FF; border: 1px solid #5A5270';
+  var on = 'padding: 5px 12px; border-radius: 14px; color: #FFFFFF; background: #6D4AFF; border: 1px solid #6D4AFF; font-weight: 600';
+  return { colab: p === 'colab' ? on : off, gestor: p === 'gestor' ? on : off, gp: p === 'gp' ? on : off, pmo: p === 'pmo' ? on : off };
+}
+function gpMs() {
+  return [['m1', 'f3', 'Contrato assinado', '2026-10-16', 'Atingido'], ['m2', 'f4', 'API de estoque pronta', '2026-10-30', 'Em risco'], ['m3', 'f5', 'Primeira versão para testes', '2026-12-18', 'Previsto'], ['m4', 'f6', 'Go-live com representantes', '2027-02-01', 'Previsto']]
+    .map(function (m) { return { id: m[0], phase: m[1], name: m[2], date: m[3], status: m[4] }; });
+}
+function gpRisks() {
+  return [['r1', 'f4', 'Fornecedor atrasar a entrega da API', 'Alto'], ['r2', 'f4', 'Desenvolvedor dividido com a Implantação do CRM', 'Alto'], ['r3', 'f5', 'Representantes sem tempo para testar', 'Médio'], ['r4', 'f6', 'Resistência dos representantes ao app', 'Médio']]
+    .map(function (r) { return { id: r[0], phase: r[1], name: r[2], level: r[3] }; });
+}
+function msStyles(status) {
+  var c = status === 'Atingido' ? ['#E3F5EA', '#17723D'] : (status === 'Em risco' ? ['#FEF3DC', '#9A5B05'] : ['#EDEAE3', '#4A4458']);
+  var hollow = status === 'Previsto';
+  return { pill: 'font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 10px; background: ' + c[0] + '; color: ' + c[1],
+    chip: 'display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 10px; background: ' + c[0] + '; color: ' + c[1],
+    diamond: 'width: 12px; height: 12px; transform: rotate(45deg); border-radius: 2px; flex: 0 0 12px; background: ' + (hollow ? '#FFFFFF' : '#6D4AFF') + '; border: 2px solid #6D4AFF',
+    diamondSm: 'width: 7px; height: 7px; transform: rotate(45deg); background: currentColor' };
+}
+function rkStyles(level) {
+  var c = level === 'Alto' ? ['#FDE8E8', '#B42318'] : (level === 'Médio' ? ['#FEF3DC', '#9A5B05'] : ['#EDEAE3', '#4A4458']);
+  return { pill: 'font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 10px; flex: 0 0 auto; background: ' + c[0] + '; color: ' + c[1],
+    chip: 'font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 10px; background: ' + c[0] + '; color: ' + c[1] };
+}
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      phases: gpPlan(), baseline: null, drag: null, farol: 'aten', n: 1, sel: '',
+      alloc: gpAlloc(), tasks: gpTasks(), ms: gpMs(), risks: gpRisks(), msName: '', msDate: '', rkName: '', rkLevel: 'Alto',
+      newTitle: '', newWho: 'p1', newDue: '', addWho: '',
+      draftDate: GP_TODAY_ISO, draftA: '', draftB: '', draftC: '', reportError: false,
+      reports: [
+        { date: '2026-10-10', farol: 'aten', dev: 'Linha de base não congelada', a: 'Contrato com a DevHouse assinado e protótipo aprovado pelos representantes.', b: 'Início do desenvolvimento do catálogo e da integração com o ERP.', c: 'Pedro Lima está alocado acima do cedido pelo gestor de TI.' },
+        { date: '2026-10-03', farol: 'ok', dev: 'Linha de base não congelada', a: 'Cronograma e riscos aprovados pelo patrocinador.', b: 'Fechar contrato com o fornecedor.', c: '—' }
+      ]
+    };
+  }
+  endOf(list) { return list.reduce(function (m, p) { return Math.max(m, p.s + p.d); }, 0); }
+  dateLabel(week) { var d = new Date(2026, 8, 7 + week * 7); return ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2) + '/' + d.getFullYear(); }
+  person(id) { return GP_TEAM.filter(function (p) { return p.id === id; })[0]; }
+  phaseStatus(p) { var e = p.s + p.d; return e <= GP_TODAY ? 'Concluída' : (p.s <= GP_TODAY ? 'Em andamento' : 'Planejada'); }
+  taskVal(t, withRemove) {
+    var self = this, late = !t.done && t.due && t.due < GP_TODAY_ISO, who = this.person(t.who);
+    return { title: t.title, who: who ? who.name : '', done: t.done, dueLabel: late ? 'Atrasada · ' + br(t.due) : 'Prazo ' + br(t.due),
+      titleStyle: 'flex: 1 1 200px; font-size: 13px; font-weight: 600; color: ' + (t.done ? '#8A8296' : '#26213A') + '; text-decoration: ' + (t.done ? 'line-through' : 'none'),
+      dueStyle: 'font-size: 12px; font-weight: ' + (late ? '700' : '400') + '; color: ' + (late ? '#B42318' : '#5E5770'),
+      toggle: function () { self.setState({ tasks: self.state.tasks.map(function (x) { return x.id === t.id ? Object.assign({}, x, { done: !x.done }) : x; }) }); },
+      remove: function () { self.setState({ tasks: self.state.tasks.filter(function (x) { return x.id !== t.id; }) }); } };
+  }
+  renderVals() {
+    var self = this, st = this.state, W = GP_W;
+    var endNow = this.endOf(st.phases), endBase = st.baseline ? this.endOf(st.baseline) : null, dev = st.baseline ? endNow - endBase : null;
+    var overList = st.alloc.filter(function (a) { var p = self.person(a.person); return p && p.cap !== null && a.pct > p.cap; });
+    var overPeople = overList.map(function (a) { return a.person; }).filter(function (v, i, arr) { return arr.indexOf(v) === i; });
+    var suggested = 'OK', why = 'dentro do planejado';
+    if (dev !== null && dev > 2) { suggested = 'Crítico'; why = 'fim ' + dev + ' semanas após a linha de base'; }
+    else if (dev !== null && dev > 0) { suggested = 'Atenção'; why = 'fim ' + dev + ' semana(s) após a linha de base'; }
+    else if (dev === null) { suggested = 'Atenção'; why = 'linha de base ainda não congelada'; }
+    else if (overPeople.length) { suggested = 'Atenção'; why = overPeople.length + ' pessoa(s) acima do cedido'; }
+    var devLabel = function (dv) { return dv === null ? 'Linha de base não congelada' : (dv === 0 ? 'No prazo' : (dv > 0 ? '+' + dv + ' semana(s)' : dv + ' semana(s)')); };
+
+    var phases = st.phases.map(function (p) {
+      var status = self.phaseStatus(p), color = status === 'Concluída' ? '#9C8CF0' : '#6D4AFF';
+      var base = st.baseline ? st.baseline.filter(function (b) { return b.id === p.id; })[0] : null;
+      var dragging = st.drag && st.drag.id === p.id, on = st.sel === p.id;
+      return { name: p.name, status: status, pressed: on ? 'true' : 'false',
+        rowStyle: 'display: flex; border-bottom: 1px solid #F3F0EA; background: ' + (on ? '#F6F3FF' : '#FFFFFF'),
+        statusStyle: 'font-size: 11px; color: ' + (status === 'Em andamento' ? '#4B2FD1' : '#6E6780'),
+        durLabel: p.d + (p.d === 1 ? ' semana' : ' semanas') + ' · ' + self.dateLabel(p.s).slice(0, 5),
+        barStyle: 'position: absolute; top: 9px; height: 26px; left: ' + (p.s * W + 2) + 'px; width: ' + (p.d * W - 4) + 'px; border-radius: 7px; background: ' + color + '; color: #FFFFFF; display: flex; align-items: center; padding-left: 8px; box-sizing: border-box; cursor: ' + (dragging ? 'grabbing' : 'grab') + '; touch-action: none; box-shadow: ' + (dragging || on ? '0 0 0 3px #CFC4FF' : 'none'),
+        hasBase: !!base, baseStyle: base ? 'position: absolute; top: 40px; height: 4px; border-radius: 2px; background: #B8AFA0; left: ' + (base.s * W + 2) + 'px; width: ' + (base.d * W - 4) + 'px' : '',
+        select: function () { self.setState({ sel: self.state.sel === p.id ? '' : p.id, addWho: '' }); },
+        down: function (e) { e.preventDefault(); self.setState({ drag: { id: p.id, mode: 'move', x0: e.clientX, s0: p.s, d0: p.d } }); },
+        resize: function (e) { e.preventDefault(); e.stopPropagation(); self.setState({ drag: { id: p.id, mode: 'resize', x0: e.clientX, s0: p.s, d0: p.d } }); },
+        remove: function () { self.setState({ phases: self.state.phases.filter(function (x) { return x.id !== p.id; }), sel: self.state.sel === p.id ? '' : self.state.sel }); } };
+    });
+    var used = st.phases.map(function (p) { return p.name; });
+    var library = GP_LIB.filter(function (l) { return used.indexOf(l.name) < 0; }).map(function (l) {
+      return { name: l.name, add: function () { var cur = self.state.phases, s = Math.min(self.endOf(cur), GP_WEEKS - l.dur); self.setState({ phases: cur.concat([{ id: 'n' + self.state.n, name: l.name, s: Math.max(0, s), d: l.dur }]), n: self.state.n + 1 }); } };
+    });
+    var months = GP_MONTHS.map(function (m) { return { label: m[0], style: 'flex: 0 0 ' + (m[1] * W) + 'px; padding: 8px; box-sizing: border-box; font-size: 12px; font-weight: 600; color: #4A4458; border-left: 1px solid #EFEBE3' }; });
+
+    var tabStyle = function (on) { return 'height: 36px; padding: 0 12px; border-radius: 18px; font-size: 12px; font-weight: ' + (on ? '700' : '500') + '; border: 1px solid ' + (on ? '#6D4AFF' : '#E2DCD0') + '; background: ' + (on ? '#EFEAFE' : '#FFFFFF') + '; color: ' + (on ? '#3A22A8' : '#4A4458'); };
+    var phaseTabs = [{ label: 'Todas as fases', selected: st.sel === '' ? 'true' : 'false', style: tabStyle(st.sel === ''), pick: function () { self.setState({ sel: '' }); } }].concat(st.phases.map(function (p) {
+      return { label: p.name, selected: st.sel === p.id ? 'true' : 'false', style: tabStyle(st.sel === p.id), pick: function () { self.setState({ sel: p.id, addWho: '' }); } };
+    }));
+    var datesOf = function (p) { return self.dateLabel(p.s).slice(0, 5) + ' a ' + self.dateLabel(p.s + p.d).slice(0, 5); };
+    var groups = st.phases.map(function (p) {
+      var ppl = st.alloc.filter(function (a) { return a.phase === p.id; }).map(function (a) {
+        var per = self.person(a.person), over = per.cap !== null && a.pct > per.cap;
+        return { label: per.name.split(' ')[0] + ' ' + a.pct + '%', chip: 'font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 10px; background: ' + (over ? '#FEF3DC' : '#EFEAFE') + '; color: ' + (over ? '#7A4A04' : '#3A22A8') };
+      });
+      var tks = st.tasks.filter(function (t) { return t.phase === p.id; }).map(function (t) { return self.taskVal(t); });
+      var gm = st.ms.filter(function (m) { return m.phase === p.id; }).map(function (m) { var x = msStyles(m.status); return { name: m.name, date: br(m.date), status: m.status, chip: x.chip, diamondSm: x.diamondSm }; });
+      var gr = st.risks.filter(function (r) { return r.phase === p.id; }).map(function (r) { return { name: r.name, level: r.level.toLowerCase(), chip: rkStyles(r.level).chip }; });
+      return { name: p.name, dates: datesOf(p), status: self.phaseStatus(p), people: ppl, noPeople: ppl.length === 0, tasks: tks, noTasks: tks.length === 0, marcos: gm, riscos: gr, hasExtras: gm.length + gr.length > 0,
+        select: function () { self.setState({ sel: p.id, addWho: '' }); } };
+    });
+    var curPhase = st.phases.filter(function (p) { return p.id === st.sel; })[0];
+    var one = { name: '', dates: '', status: '', tasks: [], people: [], marcos: [], riscos: [], noMarcos: true, noRiscos: true }, freeOptions = [];
+    if (curPhase) {
+      var inPhase = st.alloc.filter(function (a) { return a.phase === curPhase.id; });
+      one = { name: curPhase.name, dates: datesOf(curPhase), status: self.phaseStatus(curPhase),
+        tasks: st.tasks.filter(function (t) { return t.phase === curPhase.id; }).map(function (t) { return self.taskVal(t); }),
+        people: inPhase.map(function (a) {
+          var per = self.person(a.person), ext = per.cap === null, over = !ext && a.pct > per.cap;
+          var setPct = function (v) { self.setState({ alloc: self.state.alloc.map(function (x) { return (x.phase === a.phase && x.person === a.person) ? Object.assign({}, x, { pct: v }) : x; }) }); };
+          return { name: per.name, ini: per.ini, role: per.role, pct: a.pct + '%',
+            note: ext ? 'Externo: sem limite de cedência' : (over ? 'Acima do cedido (' + per.cap + '%): vai pedir aprovação ao gestor da área' : 'Dentro do cedido pelo gestor (' + per.cap + '%)'),
+            noteStyle: 'font-size: 12px; color: ' + (over ? '#9A5B05' : '#5E5770') + '; font-weight: ' + (over ? '600' : '400'),
+            minus: function () { setPct(Math.max(10, a.pct - 10)); }, plus: function () { setPct(Math.min(100, a.pct + 10)); },
+            remove: function () { self.setState({ alloc: self.state.alloc.filter(function (x) { return !(x.phase === a.phase && x.person === a.person); }) }); } };
+        }) };
+      one.marcos = st.ms.filter(function (m) { return m.phase === curPhase.id; }).map(function (m) { var x = msStyles(m.status); return { name: m.name, date: br(m.date), status: m.status, pill: x.pill, diamond: x.diamond,
+        remove: function () { self.setState({ ms: self.state.ms.filter(function (y) { return y.id !== m.id; }) }); } }; });
+      one.riscos = st.risks.filter(function (r) { return r.phase === curPhase.id; }).map(function (r) { return { name: r.name, level: r.level, pill: rkStyles(r.level).pill,
+        remove: function () { self.setState({ risks: self.state.risks.filter(function (y) { return y.id !== r.id; }) }); } }; });
+      one.noMarcos = one.marcos.length === 0; one.noRiscos = one.riscos.length === 0;
+      var ids = inPhase.map(function (a) { return a.person; });
+      freeOptions = GP_TEAM.filter(function (p) { return ids.indexOf(p.id) < 0; }).map(function (p) { return { id: p.id, name: p.name }; });
+    }
+    var addWho = st.addWho || (freeOptions[0] ? freeOptions[0].id : '');
+
+    var reports = st.reports.slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; }).map(function (r) {
+      var f = GP_FAROL[r.farol];
+      return { dateLabel: br(r.date), farol: f[0], dev: r.dev, a: r.a, b: r.b, c: r.c, pill: 'font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; background: ' + f[1] + '; color: ' + f[2] };
+    });
+    var f0 = GP_FAROL[st.farol];
+    var doneT = st.tasks.filter(function (t) { return t.done; }).length;
+
+    var perfil = this.props.perfil || 'gp';
+    return {
+      isGp: perfil !== 'pmo', isPmo: perfil === 'pmo', rb: rbStyles(perfil === 'pmo' ? 'pmo' : 'gp'),
+      msName: st.msName, msDate: st.msDate, rkName: st.rkName, rkLevel: st.rkLevel,
+      setMsName: function (e) { self.setState({ msName: e.target.value }); },
+      setMsDate: function (e) { self.setState({ msDate: e.target.value }); },
+      setRkName: function (e) { self.setState({ rkName: e.target.value }); },
+      setRkLevel: function (e) { self.setState({ rkLevel: e.target.value }); },
+      addMs: function () { var s2 = self.state; if (!s2.msName.trim() || !s2.sel) return; self.setState({ ms: s2.ms.concat([{ id: 'nm' + s2.n, phase: s2.sel, name: s2.msName.trim(), date: s2.msDate, status: 'Previsto' }]), msName: '', msDate: '', n: s2.n + 1 }); },
+      addRk: function () { var s2 = self.state; if (!s2.rkName.trim() || !s2.sel) return; self.setState({ risks: s2.risks.concat([{ id: 'nr' + s2.n, phase: s2.sel, name: s2.rkName.trim(), level: s2.rkLevel }]), rkName: '', n: s2.n + 1 }); },
+      phases: phases, library: library, months: months, phaseTabs: phaseTabs, groups: groups,
+      showAll: !curPhase, showOne: !!curPhase, one: one,
+      teamOptions: GP_TEAM.map(function (p) { return { id: p.id, name: p.name }; }), freeOptions: freeOptions, addWho: addWho,
+      newTitle: st.newTitle, newWho: st.newWho, newDue: st.newDue,
+      setNewTitle: function (e) { self.setState({ newTitle: e.target.value }); },
+      setNewWho: function (e) { self.setState({ newWho: e.target.value }); },
+      setNewDue: function (e) { self.setState({ newDue: e.target.value }); },
+      setAddWho: function (e) { self.setState({ addWho: e.target.value }); },
+      addTask: function () {
+        var s = self.state; if (!s.newTitle.trim() || !s.sel) return;
+        self.setState({ tasks: s.tasks.concat([{ id: 'nt' + s.n, phase: s.sel, title: s.newTitle.trim(), who: s.newWho, due: s.newDue, done: false }]), newTitle: '', newDue: '', n: s.n + 1 });
+      },
+      addPerson: function () { if (!addWho || !self.state.sel) return; self.setState({ alloc: self.state.alloc.concat([{ phase: self.state.sel, person: addWho, pct: 20 }]), addWho: '' }); },
+      todayStyle: 'position: absolute; top: 0; bottom: 0; left: ' + (GP_TODAY * W) + 'px; width: 2px; background: #B42318; opacity: 0.6',
+      endLabel: this.dateLabel(endNow),
+      deviationLabel: dev === null ? 'Não congelada' : (dev === 0 ? 'No prazo' : (dev > 0 ? '+' + dev + ' sem.' : dev + ' sem.')),
+      deviationStyle: 'font-size: 20px; font-weight: 700; color: ' + (dev === null ? '#5E5770' : (dev > 2 ? '#B42318' : (dev > 0 ? '#9A5B05' : '#17723D'))),
+      tasksDoneLabel: doneT + ' de ' + st.tasks.length,
+      overLabel: overPeople.length + (overPeople.length === 1 ? ' pessoa' : ' pessoas'),
+      overStyle: 'font-size: 20px; font-weight: 700; color: ' + (overPeople.length ? '#9A5B05' : '#26213A'),
+      timelineHint: st.baseline ? 'Linha de base congelada. Mudanças agora geram desvio.' : 'Gerada a partir do modelo e das datas da iniciativa. Arraste as barras e congele a linha de base.',
+      freezeLabel: st.baseline ? 'Atualizar linha de base' : 'Congelar linha de base',
+      suggested: suggested, suggestedWhy: why,
+      farolDot: 'width: 8px; height: 8px; border-radius: 50%; margin: 0 8px 0 4px; background: ' + f0[2],
+      farolOptions: ['ok', 'aten', 'crit'].map(function (k) {
+        var o = GP_FAROL[k], on = st.farol === k;
+        return { label: o[0], pressed: on ? 'true' : 'false', dot: 'width: 8px; height: 8px; border-radius: 50%; background: ' + o[2],
+          style: 'display: flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px; border-radius: 18px; font-size: 13px; font-weight: 600; border: ' + (on ? '2px solid ' + o[2] : '1px solid #E2DCD0') + '; background: ' + (on ? o[1] : '#FFFFFF') + '; color: ' + (on ? o[2] : '#4A4458'),
+          pick: function () { self.setState({ farol: k }); } };
+      }),
+      milestones: [['Contrato assinado', '16/10/2026', 'Atingido', 'ok'], ['API de estoque pronta', '30/10/2026', 'Em risco', 'risk'], ['Primeira versão para testes', '18/12/2026', 'Previsto', 'plan'], ['Go-live com representantes', '01/02/2027', 'Previsto', 'plan']].map(function (m) {
+        var c = m[3] === 'ok' ? ['#E3F5EA', '#17723D'] : (m[3] === 'risk' ? ['#FEF3DC', '#9A5B05'] : ['#EDEAE3', '#4A4458']);
+        return { name: m[0], date: m[1], status: m[2], pill: 'font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 10px; background: ' + c[0] + '; color: ' + c[1],
+          diamond: 'width: 12px; height: 12px; transform: rotate(45deg); border-radius: 2px; flex: 0 0 12px; background: ' + (m[3] === 'plan' ? '#FFFFFF' : '#6D4AFF') + '; border: 2px solid #6D4AFF' };
+      }),
+      reports: reports, draftDate: st.draftDate, draftA: st.draftA, draftB: st.draftB, draftC: st.draftC, reportError: st.reportError,
+      setDate: function (e) { self.setState({ draftDate: e.target.value, reportError: false }); },
+      setA: function (e) { self.setState({ draftA: e.target.value, reportError: false }); },
+      setB: function (e) { self.setState({ draftB: e.target.value }); },
+      setC: function (e) { self.setState({ draftC: e.target.value }); },
+      publishReport: function () {
+        var s = self.state;
+        if (!s.draftA.trim() || !s.draftDate) { self.setState({ reportError: true }); return; }
+        var endN = self.endOf(s.phases), endB = s.baseline ? self.endOf(s.baseline) : null;
+        var r = { date: s.draftDate, farol: s.farol, dev: devLabel(endB === null ? null : endN - endB), a: s.draftA, b: s.draftB || '—', c: s.draftC || '—' };
+        self.setState({ reports: s.reports.concat([r]), draftA: '', draftB: '', draftC: '' });
+      },
+      freeze: function () { self.setState({ baseline: self.state.phases.map(function (p) { return Object.assign({}, p); }) }); },
+      resetPlan: function () { self.setState({ phases: gpPlan() }); },
+      onMove: function (e) {
+        var d = self.state.drag; if (!d) return;
+        var dw = Math.round((e.clientX - d.x0) / W), changed = false;
+        var next = self.state.phases.map(function (p) {
+          if (p.id !== d.id) return p;
+          if (d.mode === 'move') { var ns = Math.max(0, Math.min(GP_WEEKS - p.d, d.s0 + dw)); if (ns !== p.s) { changed = true; return Object.assign({}, p, { s: ns }); } }
+          else { var nd = Math.max(1, Math.min(GP_WEEKS - p.s, d.d0 + dw)); if (nd !== p.d) { changed = true; return Object.assign({}, p, { d: nd }); } }
+          return p;
+        });
+        if (changed) self.setState({ phases: next });
+      },
+      onUp: function () { if (self.state.drag) self.setState({ drag: null }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

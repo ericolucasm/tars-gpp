@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>TARS GPP — Cadastros</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FBFAF7}
+a{color:#4B2FD1;text-decoration:none}a:hover{color:#3A22A8}
+nav a[href^="#"]:not([aria-current]){color:#ABA4B7 !important}
+nav a[href^="#"]:not([aria-current]) span{opacity:.6}
+button,input{font-family:inherit}
+button{cursor:pointer}
+input[type=range]{accent-color:#6D4AFF}
+</style>
+</helmet>
+<div style="font-family: 'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif; color: #26213A; background: #FBFAF7; min-height: 100vh; display: flex; flex-wrap: wrap; align-items: stretch">
+<div style="flex: 1 1 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 16px; background: #26213A; color: #E7E0FF; font-size: 12px">
+<span style="font-weight: 600; margin-right: 4px">Protótipo · ver como:</span>
+<a href="InicioColaborador.dc.html" style="padding: 5px 12px; border-radius: 14px; color: #E7E0FF; border: 1px solid #5A5270">Colaborador</a>
+<a href="InicioGestor.dc.html" style="padding: 5px 12px; border-radius: 14px; color: #E7E0FF; border: 1px solid #5A5270">Gestor de área</a>
+<a href="InicioGP.dc.html" style="padding: 5px 12px; border-radius: 14px; color: #E7E0FF; border: 1px solid #5A5270">Gerente de projeto</a>
+<a href="InicioPMO.dc.html" aria-current="page" style="padding: 5px 12px; border-radius: 14px; color: #FFFFFF; background: #6D4AFF; border: 1px solid #6D4AFF; font-weight: 600">PMO</a>
+</div>
+
+<nav aria-label="Menu principal" style="flex: 1 1 248px; max-width: 100%; background: #F3F0EA; border-right: 1px solid #E2DCD0; padding: 16px 12px; box-sizing: border-box; display: flex; flex-direction: column; gap: 2px; font-size: 14px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 4px 6px 14px">
+<div style="width: 32px; height: 32px; border-radius: 9px; background: #6D4AFF; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px">T</div>
+<div style="display: flex; flex-direction: column"><span style="font-weight: 700; font-size: 16px">TARS GPP</span><span style="font-size: 11px; color: #5E5770">Gestão de Portfólios e Projetos</span></div>
+</div>
+<a href="NovaIniciativaPMO.dc.html" style="display: flex; align-items: center; justify-content: center; height: 40px; border-radius: 10px; background: #6D4AFF; color: #FFFFFF; font-weight: 600; margin-bottom: 12px">+ Nova iniciativa</a>
+<a href="InicioPMO.dc.html" style="display: flex; padding: 9px 10px; border-radius: 9px; color: #4A4458">Início</a>
+<span style="font-size: 11px; color: #6E6780; margin: 14px 10px 4px; font-weight: 600; letter-spacing: 0.4px">GESTÃO</span>
+<a href="Main.dc.html" style="display: flex; padding: 9px 10px; border-radius: 9px; color: #4A4458">Portfólio</a>
+<a href="Ciclos.dc.html" style="display: flex; padding: 9px 10px; border-radius: 9px; color: #4A4458">Ciclos de planejamento</a>
+<a href="Avaliacao.dc.html" style="display: flex; padding: 9px 10px; border-radius: 9px; color: #4A4458">Avaliação e priorização</a>
+<a href="ProjetoPMO.dc.html" style="display: flex; padding: 9px 10px; border-radius: 9px; color: #4A4458">Projetos</a>
+<span style="font-size: 11px; color: #6E6780; margin: 14px 10px 4px; font-weight: 600; letter-spacing: 0.4px">CONFIGURAÇÃO</span>
+<a href="Cadastros.dc.html" aria-current="page" style="display: flex; padding: 9px 10px; border-radius: 9px; background: #E7E0FF; color: #4B2FD1; font-weight: 600">Cadastros</a>
+<a href="Configuracoes.dc.html" style="display: flex; padding: 9px 10px; border-radius: 9px; color: #4A4458">Configurações</a>
+<div style="flex: 1"></div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 10px; border-top: 1px solid #E2DCD0; margin-top: 12px">
+<span style="width: 30px; height: 30px; border-radius: 50%; background: #E7E0FF; color: #4B2FD1; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600">MG</span>
+<span style="display: flex; flex-direction: column; font-size: 13px"><span style="font-weight: 600">Mariana</span><span style="font-size: 11px; color: #5E5770">PMO · Administradora</span></span>
+</div>
+</nav>
+
+<main style="flex: 999 1 560px; min-width: 0; padding: 28px 32px 40px; box-sizing: border-box; display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<span style="font-size: 12px; color: #5E5770">Configuração / Cadastros</span>
+<h1 style="margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.3px">Cadastros</h1>
+<p style="margin: 0; font-size: 14px; color: #5E5770">A base que faz a governança funcionar. O TARS já vem com tudo preenchido; ajuste ao jeito da sua empresa.</p>
+</div>
+
+<div role="tablist" aria-label="Tipos de cadastro" style="display: flex; flex-wrap: wrap; gap: 6px; border-bottom: 1px solid #E2DCD0; padding-bottom: 8px">
+<sc-for list="{{ tabs }}" as="t" hint-placeholder-count="6">
+<button role="tab" aria-selected="{{ t.selected }}" onClick="{{ t.pick }}" style="{{ t.style }}">{{ t.label }}</button>
+</sc-for>
+</div>
+
+<sc-if value="{{ isPessoas }}" hint-placeholder-val="{{ true }}">
+<section style="display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; align-items: center">
+<span style="font-size: 13px; color: #5E5770">O gestor de cada pessoa vem da área: é o responsável cadastrado nela.</span>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<button style="height: 38px; padding: 0 14px; border-radius: 10px; border: 1px solid #E2DCD0; background: #FFFFFF; color: #26213A; font-size: 13px">Importar planilha</button>
+<button style="height: 38px; padding: 0 14px; border-radius: 10px; border: 1px dashed #BDB2F5; background: #FBFAFF; color: #3A22A8; font-size: 13px; font-weight: 600">Conectar Microsoft Entra (AD) · em breve</button>
+<button style="height: 38px; padding: 0 14px; border-radius: 10px; border: 0; background: #6D4AFF; color: #FFFFFF; font-weight: 600; font-size: 13px">Convidar pessoa</button>
+</div>
+</div>
+<div style="overflow-x: auto; background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px">
+<div style="min-width: 900px">
+<div style="display: grid; grid-template-columns: 2fr 1.4fr 1.4fr 1.8fr 0.9fr 0.9fr; gap: 10px; padding: 12px 16px; font-size: 12px; color: #5E5770; font-weight: 600; border-bottom: 1px solid #EFEBE3; background: #FAF8F4"><span>Pessoa</span><span>Área</span><span>Gestor</span><span>Perfis</span><span>Cede até</span><span>Status</span></div>
+<sc-for list="{{ people }}" as="p" hint-placeholder-count="6">
+<div style="display: grid; grid-template-columns: 2fr 1.4fr 1.4fr 1.8fr 0.9fr 0.9fr; gap: 10px; padding: 12px 16px; font-size: 13px; border-bottom: 1px solid #F3F0EA; align-items: center">
+<span style="display: flex; align-items: center; gap: 10px"><span style="width: 30px; height: 30px; border-radius: 50%; background: #E7E0FF; color: #4B2FD1; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600">{{ p.ini }}</span><span style="display: flex; flex-direction: column"><span style="font-weight: 600">{{ p.name }}</span><span style="font-size: 12px; color: #5E5770">{{ p.email }}</span></span></span>
+<span>{{ p.area }}</span>
+<span style="color: #4A4458">{{ p.manager }}</span>
+<span style="display: flex; flex-wrap: wrap; gap: 4px"><sc-for list="{{ p.roles }}" as="r" hint-placeholder-count="1"><span style="font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; background: #EFEAFE; color: #4B2FD1">{{ r }}</span></sc-for></span>
+<span>{{ p.cap }}</span>
+<span style="{{ p.statusStyle }}">{{ p.status }}</span>
+</div>
+</sc-for>
+</div>
+</div>
+</section>
+</sc-if>
+
+<sc-if value="{{ isAreas }}" hint-placeholder-val="{{ false }}">
+<section style="display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; align-items: center">
+<span style="font-size: 13px; color: #5E5770">O responsável aprova as iniciativas da área e enxerga tudo o que está abaixo dela.</span>
+<button style="height: 38px; padding: 0 14px; border-radius: 10px; border: 0; background: #6D4AFF; color: #FFFFFF; font-weight: 600; font-size: 13px">Nova área</button>
+</div>
+<div style="background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 8px">
+<sc-for list="{{ areas }}" as="a" hint-placeholder-count="8">
+<div style="{{ a.rowStyle }}">
+<span style="{{ a.nameStyle }}">{{ a.name }}</span>
+<span style="font-size: 12px; color: #5E5770; flex: 1">{{ a.kind }}</span>
+<span style="display: flex; align-items: center; gap: 8px; font-size: 13px"><span style="width: 26px; height: 26px; border-radius: 50%; background: #E7E0FF; color: #4B2FD1; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600">{{ a.ini }}</span>{{ a.owner }}</span>
+<span style="font-size: 12px; color: #5E5770; min-width: 80px; text-align: right">{{ a.people }}</span>
+</div>
+</sc-for>
+</div>
+</section>
+</sc-if>
+
+<sc-if value="{{ isFases }}" hint-placeholder-val="{{ false }}">
+<section style="display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; align-items: center">
+<span style="font-size: 13px; color: #5E5770">Biblioteca de fases. Os modelos combinam essas fases e o GP pode incluir outras no projeto.</span>
+<button style="height: 38px; padding: 0 14px; border-radius: 10px; border: 0; background: #6D4AFF; color: #FFFFFF; font-weight: 600; font-size: 13px">Nova fase</button>
+</div>
+<div style="overflow-x: auto; background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px">
+<div style="min-width: 760px">
+<div style="display: grid; grid-template-columns: 1.6fr 0.9fr 2.6fr 0.9fr; gap: 10px; padding: 12px 16px; font-size: 12px; color: #5E5770; font-weight: 600; border-bottom: 1px solid #EFEBE3; background: #FAF8F4"><span>Fase</span><span>Duração padrão</span><span>Critério para concluir</span><span>Em modelos</span></div>
+<sc-for list="{{ phases }}" as="f" hint-placeholder-count="8">
+<div style="display: grid; grid-template-columns: 1.6fr 0.9fr 2.6fr 0.9fr; gap: 10px; padding: 12px 16px; font-size: 13px; border-bottom: 1px solid #F3F0EA; align-items: center">
+<span style="font-weight: 600">{{ f.name }}</span><span>{{ f.dur }}</span><span style="color: #4A4458">{{ f.exit }}</span><span>{{ f.used }}</span>
+</div>
+</sc-for>
+</div>
+</div>
+</section>
+</sc-if>
+
+<sc-if value="{{ isModelos }}" hint-placeholder-val="{{ false }}">
+<section style="display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; align-items: center">
+<span style="font-size: 13px; color: #5E5770">No play, o projeto nasce com as fases do modelo e as datas da iniciativa.</span>
+<button style="height: 38px; padding: 0 14px; border-radius: 10px; border: 0; background: #6D4AFF; color: #FFFFFF; font-weight: 600; font-size: 13px">Novo modelo</button>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px">
+<sc-for list="{{ models }}" as="m" hint-placeholder-count="4">
+<div style="background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; gap: 8px"><span style="font-size: 15px; font-weight: 700">{{ m.name }}</span><span style="font-size: 12px; color: #5E5770">{{ m.total }}</span></div>
+<span style="font-size: 12px; color: #5E5770">{{ m.desc }}</span>
+<div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center">
+<sc-for list="{{ m.steps }}" as="s" hint-placeholder-count="4"><span style="font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 10px; background: #EFEAFE; color: #3A22A8">{{ s }}</span></sc-for>
+</div>
+</div>
+</sc-for>
+</div>
+</section>
+</sc-if>
+
+<sc-if value="{{ isCriterios }}" hint-placeholder-val="{{ false }}">
+<section style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start">
+<div style="flex: 1 1 380px; background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 8px"><h2 style="margin: 0; font-size: 16px; font-weight: 700">Critérios de priorização</h2><span style="{{ sumStyle }}">{{ sumLabel }}</span></div>
+<sc-for list="{{ weights }}" as="w" hint-placeholder-count="4">
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600">
+<span style="display: flex; justify-content: space-between"><span>{{ w.name }}</span><span>{{ w.pct }}</span></span>
+<span style="font-size: 12px; font-weight: 400; color: #5E5770">{{ w.desc }}</span>
+<input type="range" min="0" max="60" step="5" value="{{ w.v }}" onChange="{{ w.set }}" aria-label="Peso de {{ w.name }}">
+</label>
+</sc-for>
+</div>
+<div style="flex: 1 1 320px; display: flex; flex-direction: column; gap: 16px">
+<div style="background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 16px; font-weight: 700">Tipos de iniciativa</h2>
+<span style="font-size: 13px"><strong>Estratégica</strong> · faz a empresa crescer ou mudar</span>
+<span style="font-size: 13px"><strong>Melhoria</strong> · deixa um processo melhor</span>
+<span style="font-size: 13px"><strong>Obrigatória</strong> · lei, norma ou auditoria; entra independente da nota</span>
+<span style="font-size: 13px"><strong>Manutenção</strong> · mantém algo funcionando</span>
+</div>
+<div style="background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 16px; font-weight: 700">Faixas de custo do formulário</h2>
+<div style="display: flex; flex-wrap: wrap; gap: 6px"><span style="font-size: 12px; padding: 4px 10px; border-radius: 10px; background: #EDEAE3">Até R$ 10 mil</span><span style="font-size: 12px; padding: 4px 10px; border-radius: 10px; background: #EDEAE3">R$ 10–50 mil</span><span style="font-size: 12px; padding: 4px 10px; border-radius: 10px; background: #EDEAE3">R$ 50–200 mil</span><span style="font-size: 12px; padding: 4px 10px; border-radius: 10px; background: #EDEAE3">Acima de R$ 200 mil</span></div>
+</div>
+</div>
+</section>
+</sc-if>
+
+<sc-if value="{{ isMotivos }}" hint-placeholder-val="{{ false }}">
+<section style="display: flex; flex-direction: column; gap: 12px">
+<span style="font-size: 13px; color: #5E5770">Motivos padronizados permitem responder “por que dizemos não?” com dados, no fim de cada ciclo.</span>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px">
+<sc-for list="{{ reasons }}" as="g" hint-placeholder-count="3">
+<div style="background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 8px">
+<h2 style="margin: 0; font-size: 15px; font-weight: 700">{{ g.title }}</h2>
+<sc-for list="{{ g.items }}" as="i" hint-placeholder-count="4"><span style="font-size: 13px; padding: 8px 10px; border-radius: 9px; background: #F7F5F0">{{ i }}</span></sc-for>
+<button style="height: 36px; border-radius: 9px; border: 1px dashed #BDB2F5; background: #FBFAFF; color: #3A22A8; font-size: 12px; font-weight: 600">+ Adicionar motivo</button>
+</div>
+</sc-for>
+</div>
+</section>
+</sc-if>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1200}}'>
+var CD_TABS = [['pessoas', 'Pessoas'], ['areas', 'Áreas e hierarquia'], ['fases', 'Fases'], ['modelos', 'Modelos de projeto'], ['criterios', 'Critérios e tipos'], ['motivos', 'Motivos']];
+var CD_PEOPLE = [
+  ['Mariana', 'mariana@acme.com.br', 'PMO', '—', ['PMO', 'Admin'], '—', 'Ativa'],
+  ['Fernanda Oliveira', 'fernanda@acme.com.br', 'Logística', 'Ricardo Moura', ['Gestora de área'], '20%', 'Ativa'],
+  ['Carlos Andrade', 'carlos@acme.com.br', 'Vendas', 'Sérgio Lima', ['Gerente de projeto'], '50%', 'Ativo'],
+  ['João Silva', 'joao@acme.com.br', 'Logística', 'Fernanda Oliveira', ['Colaborador'], '20%', 'Ativo'],
+  ['Clara Mendes', 'clara@acme.com.br', 'Expedição', 'Fernanda Oliveira', ['Gestora de área', 'Colaboradora'], '20%', 'Ativa'],
+  ['Pedro Lima', 'pedro@acme.com.br', 'TI', 'Marcos Teixeira', ['Colaborador'], '60%', 'Ativo'],
+  ['Paula Ribeiro', 'paula@acme.com.br', 'Diretoria Comercial', '—', ['Gestora de área', 'Patrocinadora'], '10%', 'Ativa'],
+  ['Tiago Moraes', 'tiago@acme.com.br', 'Compras', 'Helena Castro', ['Gestor de área'], '20%', 'Convite enviado']
+];
+var CD_AREAS = [
+  [0, 'Diretoria de Operações', 'Diretoria', 'Ricardo Moura', 'RM', '42 pessoas'],
+  [1, 'Logística', 'Gerência', 'Fernanda Oliveira', 'FO', '18 pessoas'],
+  [2, 'Expedição', 'Coordenação', 'Clara Mendes', 'CM', '9 pessoas'],
+  [2, 'Armazém', 'Coordenação', 'Bruno Reis', 'BR', '7 pessoas'],
+  [1, 'Operações industriais', 'Gerência', 'Marcos Rocha', 'MR', '16 pessoas'],
+  [1, 'Qualidade', 'Gerência', 'Júlia Tavares', 'JT', '8 pessoas'],
+  [0, 'Diretoria Comercial', 'Diretoria', 'Paula Ribeiro', 'PR', '21 pessoas'],
+  [1, 'Vendas', 'Gerência', 'Sérgio Lima', 'SL', '14 pessoas'],
+  [1, 'Marketing', 'Gerência', 'Luiza Prado', 'LP', '6 pessoas'],
+  [0, 'Diretoria Administrativa', 'Diretoria', 'Helena Castro', 'HC', '19 pessoas'],
+  [1, 'Financeiro', 'Gerência', 'Camila Alves', 'CA', '6 pessoas'],
+  [1, 'RH', 'Gerência', 'Renata Silva', 'RS', '4 pessoas'],
+  [1, 'TI', 'Gerência', 'Marcos Teixeira', 'MT', '5 pessoas'],
+  [1, 'Compras', 'Gerência', 'Tiago Moraes', 'TM', '3 pessoas']
+];
+var CD_PHASES = [
+  ['Iniciação', '2 semanas', 'Termo de abertura aprovado pelo patrocinador', '4'],
+  ['Levantamento de requisitos', '2 semanas', 'Requisitos validados pela área solicitante', '1'],
+  ['Planejamento', '3 semanas', 'Cronograma, equipe e riscos aprovados; linha de base congelada', '4'],
+  ['Contratação de fornecedor', '3 semanas', 'Contrato assinado', '2'],
+  ['Execução', '8 semanas', 'Entregas do escopo concluídas', '2'],
+  ['Desenvolvimento', '10 semanas', 'Funcionalidades prontas para teste', '1'],
+  ['Testes', '4 semanas', 'Aceite dos testes pela área', '1'],
+  ['Piloto', '2 semanas', 'Piloto avaliado e ajustes definidos', '0'],
+  ['Treinamento', '2 semanas', 'Usuários-chave treinados', '1'],
+  ['Implantação', '2 semanas', 'Solução em uso pela área', '2'],
+  ['Operação assistida', '3 semanas', 'Operação estável sem apoio do projeto', '1'],
+  ['Encerramento', '1 semana', 'Aceite final e lições aprendidas registradas', '4']
+];
+var CD_MODELS = [
+  ['Projeto de melhoria', '14 semanas', 'Para melhorias de processo sem fornecedor externo.', ['Iniciação', 'Planejamento', 'Execução', 'Encerramento']],
+  ['Software com fornecedor', '26 semanas', 'Desenvolvimento contratado de um sistema ou aplicativo.', ['Iniciação', 'Planejamento', 'Contratação de fornecedor', 'Desenvolvimento', 'Testes', 'Implantação', 'Encerramento']],
+  ['Implantação de sistema', '17 semanas', 'Adoção de um sistema pronto (ERP, CRM, ponto).', ['Iniciação', 'Levantamento de requisitos', 'Planejamento', 'Implantação', 'Treinamento', 'Operação assistida', 'Encerramento']],
+  ['Obra ou infraestrutura', '17 semanas', 'Reformas, layout, equipamentos.', ['Iniciação', 'Planejamento', 'Contratação de fornecedor', 'Execução', 'Encerramento']]
+];
+var CD_REASONS = [
+  ['Recusa', ['Sem orçamento no ciclo', 'Sobreposição com outra iniciativa', 'Benefício não demonstrado', 'Fora da estratégia atual']],
+  ['Pausa', ['Aguardando orçamento', 'Recurso realocado para prioridade maior', 'Dependência de fornecedor', 'Decisão da diretoria']],
+  ['Cancelamento', ['Problema deixou de existir', 'Substituído por outra solução', 'Custo acima do benefício', 'Mudança de estratégia']]
+];
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { tab: 'pessoas', w: [35, 25, 25, 15] };
+  }
+  renderVals() {
+    var self = this, st = this.state;
+    var tabs = CD_TABS.map(function (t) {
+      var on = st.tab === t[0];
+      return { label: t[1], selected: on ? 'true' : 'false', pick: function () { self.setState({ tab: t[0] }); },
+        style: 'height: 38px; padding: 0 14px; border-radius: 10px; font-size: 13px; font-weight: ' + (on ? '700' : '500') + '; border: 0; background: ' + (on ? '#E7E0FF' : 'transparent') + '; color: ' + (on ? '#3A22A8' : '#4A4458') };
+    });
+    var people = CD_PEOPLE.map(function (p) {
+      var ini = p[0].split(' ').map(function (x) { return x[0]; }).slice(0, 2).join('');
+      var pend = p[6] !== 'Ativa' && p[6] !== 'Ativo';
+      return { name: p[0], email: p[1], area: p[2], manager: p[3], roles: p[4], cap: p[5], status: p[6], ini: ini,
+        statusStyle: 'font-size: 12px; font-weight: 600; color: ' + (pend ? '#9A5B05' : '#17723D') };
+    });
+    var areas = CD_AREAS.map(function (a) {
+      return { name: a[1], kind: a[2], owner: a[3], ini: a[4], people: a[5],
+        rowStyle: 'display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 10px 12px 10px ' + (12 + a[0] * 28) + 'px; border-radius: 10px; border-bottom: 1px solid #F3F0EA; background: ' + (a[0] === 0 ? '#FAF8F4' : '#FFFFFF'),
+        nameStyle: 'font-size: ' + (a[0] === 0 ? '14px' : '13px') + '; font-weight: ' + (a[0] === 2 ? '500' : '700') + '; min-width: 200px' };
+    });
+    var phases = CD_PHASES.map(function (f) { return { name: f[0], dur: f[1], exit: f[2], used: f[3] + (f[3] === '1' ? ' modelo' : ' modelos') }; });
+    var models = CD_MODELS.map(function (m) { return { name: m[0], total: m[1], desc: m[2], steps: m[3] }; });
+    var reasons = CD_REASONS.map(function (r) { return { title: r[0], items: r[1] }; });
+    var names = [['Impacto', 'Quanto resolve o problema ou gera de resultado'], ['Urgência', 'Quanto custa esperar'], ['Alinhamento estratégico', 'Quanto contribui para os objetivos da empresa'], ['Facilidade', 'Quanto menor o esforço e o risco, maior a nota']];
+    var sum = st.w.reduce(function (a, b) { return a + b; }, 0);
+    var weights = names.map(function (n, i) {
+      return { name: n[0], desc: n[1], v: st.w[i], pct: st.w[i] + '%',
+        set: function (e) { var w = self.state.w.slice(); w[i] = Math.round(Number(e.target.value)); self.setState({ w: w }); } };
+    });
+    return {
+      tabs: tabs, people: people, areas: areas, phases: phases, models: models, reasons: reasons, weights: weights,
+      sumLabel: sum === 100 ? 'Total 100%' : 'Total ' + sum + '% · precisa somar 100%',
+      sumStyle: 'font-size: 12px; font-weight: 700; color: ' + (sum === 100 ? '#17723D' : '#B42318'),
+      isPessoas: st.tab === 'pessoas', isAreas: st.tab === 'areas', isFases: st.tab === 'fases',
+      isModelos: st.tab === 'modelos', isCriterios: st.tab === 'criterios', isMotivos: st.tab === 'motivos'
+    };
+  }
+}
+</script>
+</body>
+</html>

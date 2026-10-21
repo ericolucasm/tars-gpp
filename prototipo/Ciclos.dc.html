@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>TARS GPP — Ciclos de planejamento</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FBFAF7}
+a{color:#4B2FD1;text-decoration:none}a:hover{color:#3A22A8}
+nav a[href^="#"]:not([aria-current]){color:#ABA4B7 !important}
+nav a[href^="#"]:not([aria-current]) span{opacity:.6}
+button,input{font-family:inherit}
+button{cursor:pointer}
+</style>
+</helmet>
+<div style="font-family: 'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif; color: #26213A; background: #FBFAF7; min-height: 100vh; display: flex; flex-wrap: wrap; align-items: stretch">
+<div style="flex: 1 1 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 16px; background: #26213A; color: #E7E0FF; font-size: 12px">
+<span style="font-weight: 600; margin-right: 4px">Protótipo · ver como:</span>
+<a href="InicioColaborador.dc.html" style="padding: 5px 12px; border-radius: 14px; color: #E7E0FF; border: 1px solid #5A5270">Colaborador</a>
+<a href="InicioGestor.dc.html" style="padding: 5px 12px; border-radius: 14px; color: #E7E0FF; border: 1px solid #5A5270">Gestor de área</a>
+<a href="InicioGP.dc.html" style="padding: 5px 12px; border-radius: 14px; color: #E7E0FF; border: 1px solid #5A5270">Gerente de projeto</a>
+<a href="InicioPMO.dc.html" aria-current="page" style="padding: 5px 12px; border-radius: 14px; color: #FFFFFF; background: #6D4AFF; border: 1px solid #6D4AFF; font-weight: 600">PMO</a>
+</div>
+
+<nav aria-label="Menu principal" style="flex: 1 1 248px; max-width: 100%; background: #F3F0EA; border-right: 1px solid #E2DCD0; padding: 16px 12px; box-sizing: border-box; display: flex; flex-direction: column; gap: 2px; font-size: 14px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 4px 6px 14px">
+<div style="width: 32px; height: 32px; border-radius: 9px; background: #6D4AFF; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px">T</div>
+<div style="display: flex; flex-direction: column"><span style="font-weight: 700; font-size: 16px">TARS GPP</span><span style="font-size: 11px; color: #5E5770">Gestão de Portfólios e Projetos</span></div>
+</div>
+<a href="NovaIniciativaPMO.dc.html" style="display: flex; align-items: center; justify-content: center; height: 40px; border-radius: 10px; background: #6D4AFF; color: #FFFFFF; font-weight: 600; margin-bottom: 12px">+ Nova iniciativa</a>
+<a href="InicioPMO.dc.html" style="display: flex; padding: 9px 10px; border-radius: 9px; color: #4A4458">Início</a>
+<span style="font-size: 11px; color: #6E6780; margin: 14px 10px 4px; font-weight: 600; letter-spacing: 0.4px">GESTÃO</span>
+<a href="Main.dc.html" style="display: flex; padding: 9px 10px; border-radius: 9px; color: #4A4458">Portfólio</a>
+<a href="Ciclos.dc.html" aria-current="page" style="display: flex; padding: 9px 10px; border-radius: 9px; background: #E7E0FF; color: #4B2FD1; font-weight: 600">Ciclos de planejamento</a>
+<a href="Avaliacao.dc.html" style="display: flex; padding: 9px 10px; border-radius: 9px; color: #4A4458">Avaliação e priorização</a>
+<a href="ProjetoPMO.dc.html" style="display: flex; padding: 9px 10px; border-radius: 9px; color: #4A4458">Projetos</a>
+<span style="font-size: 11px; color: #6E6780; margin: 14px 10px 4px; font-weight: 600; letter-spacing: 0.4px">CONFIGURAÇÃO</span>
+<a href="Cadastros.dc.html" style="display: flex; padding: 9px 10px; border-radius: 9px; color: #4A4458">Cadastros</a>
+<a href="Configuracoes.dc.html" style="display: flex; padding: 9px 10px; border-radius: 9px; color: #4A4458">Configurações</a>
+<div style="flex: 1"></div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 10px; border-top: 1px solid #E2DCD0; margin-top: 12px">
+<span style="width: 30px; height: 30px; border-radius: 50%; background: #E7E0FF; color: #4B2FD1; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600">MG</span>
+<span style="display: flex; flex-direction: column; font-size: 13px"><span style="font-weight: 600">Mariana</span><span style="font-size: 11px; color: #5E5770">PMO · Administradora</span></span>
+</div>
+</nav>
+
+<main style="flex: 999 1 560px; min-width: 0; padding: 28px 32px 40px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; align-items: flex-end">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<span style="font-size: 12px; color: #5E5770">Gestão / Ciclos de planejamento</span>
+<h1 style="margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.3px">Ciclos de planejamento</h1>
+<p style="margin: 0; font-size: 14px; color: #5E5770">Defina quando as áreas podem enviar iniciativas e acompanhe cada janela até as decisões.</p>
+</div>
+<button style="height: 40px; padding: 0 16px; border-radius: 10px; border: 0; background: #6D4AFF; color: #FFFFFF; font-weight: 600; font-size: 13px">Novo ciclo</button>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start">
+<div style="flex: 1 1 280px; min-width: 0; display: flex; flex-direction: column; gap: 10px">
+<sc-for list="{{ cycles }}" as="c" hint-placeholder-count="2">
+<button onClick="{{ c.pick }}" aria-pressed="{{ c.pressed }}" style="{{ c.style }}">
+<span style="display: flex; justify-content: space-between; align-items: center; gap: 8px"><span style="font-size: 15px; font-weight: 700">{{ c.name }}</span><span style="{{ c.pillStyle }}">{{ c.statusLabel }}</span></span>
+<span style="font-size: 12px; color: #5E5770">{{ c.window }}</span>
+<span style="font-size: 12px; color: #4A4458">{{ c.summary }}</span>
+</button>
+</sc-for>
+<div style="padding: 14px; border-radius: 12px; background: #F3F0EA; font-size: 12px; color: #4A4458; line-height: 1.55">Modo de captação da Acme: <strong>misto</strong>. Iniciativas urgentes ou obrigatórias entram a qualquer momento, fora do ciclo. Altere em Configurações.</div>
+</div>
+
+<div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+<sc-if value="{{ isCurrent }}" hint-placeholder-val="{{ true }}">
+<section style="background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; align-items: flex-start">
+<div style="display: flex; flex-direction: column; gap: 4px"><h2 style="margin: 0; font-size: 20px; font-weight: 700">Planejamento 2027</h2><span style="font-size: 13px; color: #5E5770">Iniciativas para executar a partir de janeiro de 2027</span></div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-if value="{{ isOpen }}" hint-placeholder-val="{{ true }}"><button onClick="{{ closeWindow }}" style="height: 40px; padding: 0 16px; border-radius: 10px; border: 0; background: #6D4AFF; color: #FFFFFF; font-weight: 600; font-size: 13px">Encerrar inscrições</button></sc-if>
+<sc-if value="{{ isEval }}" hint-placeholder-val="{{ false }}"><a href="Avaliacao.dc.html" style="height: 40px; padding: 0 16px; border-radius: 10px; background: #6D4AFF; color: #FFFFFF; font-weight: 600; font-size: 13px; display: inline-flex; align-items: center">Ir para avaliação</a></sc-if>
+</div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px">
+<sc-for list="{{ stages }}" as="s" hint-placeholder-count="5">
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="{{ s.bar }}"></div><span style="{{ s.label }}">{{ s.name }}</span><span style="font-size: 11px; color: #5E5770">{{ s.date }}</span></div>
+</sc-for>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px">
+<div style="background: #F7F5F0; border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; color: #5E5770">Recebidas</span><span style="font-size: 22px; font-weight: 700">19</span></div>
+<div style="background: #F7F5F0; border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; color: #5E5770">Aguardando gestor</span><span style="font-size: 22px; font-weight: 700">6</span></div>
+<div style="background: #F7F5F0; border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; color: #5E5770">Prontas para avaliar</span><span style="font-size: 22px; font-weight: 700">13</span></div>
+<div style="background: #F7F5F0; border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; color: #5E5770">Áreas que enviaram</span><span style="font-size: 22px; font-weight: 700">7 de 9</span></div>
+</div>
+<sc-if value="{{ isOpen }}" hint-placeholder-val="{{ true }}">
+<div style="padding: 12px 14px; border-radius: 12px; background: #FEF3DC; color: #6B3F03; font-size: 13px">Compras e Qualidade ainda não enviaram nenhuma iniciativa. <button style="border: 0; background: transparent; color: #6B3F03; font-weight: 700; text-decoration: underline; font-size: 13px; padding: 0">Enviar lembrete</button></div>
+</sc-if>
+
+<div style="border-top: 1px solid #EFEBE3; padding-top: 16px; display: flex; flex-direction: column; gap: 14px">
+<h3 style="margin: 0; font-size: 15px; font-weight: 700">Configuração da janela</h3>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px">
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600">Abertura das inscrições<input type="date" value="2026-09-01" style="height: 42px; padding: 0 10px; border-radius: 10px; border: 1px solid #E2DCD0; font-size: 14px; color: #26213A"></label>
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600">Fechamento<input type="date" value="2026-10-31" style="height: 42px; padding: 0 10px; border-radius: 10px; border: 1px solid #E2DCD0; font-size: 14px; color: #26213A"></label>
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600">Avaliação do PMO até<input type="date" value="2026-11-20" style="height: 42px; padding: 0 10px; border-radius: 10px; border: 1px solid #E2DCD0; font-size: 14px; color: #26213A"></label>
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600">Comunicar decisões até<input type="date" value="2026-12-04" style="height: 42px; padding: 0 10px; border-radius: 10px; border: 1px solid #E2DCD0; font-size: 14px; color: #26213A"></label>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px">
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600">Orçamento de referência do ciclo<input type="text" value="R$ 1.200.000" style="height: 42px; padding: 0 12px; border-radius: 10px; border: 1px solid #E2DCD0; font-size: 14px; color: #26213A"><span style="font-size: 12px; font-weight: 400; color: #5E5770">Usado na avaliação para comparar o custo das pré-aprovadas.</span></label>
+<div style="display: flex; flex-direction: column; gap: 8px"><span style="font-size: 13px; font-weight: 600">Quem pode enviar</span>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{ audience }}" as="a" hint-placeholder-count="2">
+<button onClick="{{ a.pick }}" aria-pressed="{{ a.pressed }}" style="{{ a.style }}">{{ a.label }}</button>
+</sc-for>
+</div></div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 13px; font-weight: 600">Avisos automáticos</span>
+<label style="display: flex; align-items: center; gap: 10px; font-size: 13px"><input type="checkbox" checked="{{ true }}" style="width: 18px; height: 18px; accent-color: #6D4AFF">Avisar todas as áreas na abertura</label>
+<label style="display: flex; align-items: center; gap: 10px; font-size: 13px"><input type="checkbox" checked="{{ true }}" style="width: 18px; height: 18px; accent-color: #6D4AFF">Lembrar áreas sem envio 7 dias antes do fechamento</label>
+<label style="display: flex; align-items: center; gap: 10px; font-size: 13px"><input type="checkbox" checked="{{ true }}" style="width: 18px; height: 18px; accent-color: #6D4AFF">Cobrar gestores com aprovações paradas há mais de 3 dias</label>
+</div>
+</div>
+</section>
+</sc-if>
+
+<sc-if value="{{ isPast }}" hint-placeholder-val="{{ false }}">
+<section style="background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 4px"><h2 style="margin: 0; font-size: 20px; font-weight: 700">Planejamento 2026</h2><span style="font-size: 13px; color: #5E5770">Ciclo encerrado · decisões comunicadas em 05/12/2025</span></div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px">
+<div style="background: #F7F5F0; border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; color: #5E5770">Recebidas</span><span style="font-size: 22px; font-weight: 700">24</span></div>
+<div style="background: #F7F5F0; border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; color: #5E5770">Pré-aprovadas</span><span style="font-size: 22px; font-weight: 700">11</span></div>
+<div style="background: #F7F5F0; border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; color: #5E5770">Viraram projeto</span><span style="font-size: 22px; font-weight: 700">9</span></div>
+<div style="background: #F7F5F0; border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; color: #5E5770">Backlog</span><span style="font-size: 22px; font-weight: 700">5</span></div>
+<div style="background: #F7F5F0; border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; color: #5E5770">Recusadas</span><span style="font-size: 22px; font-weight: 700">8</span></div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 13px; font-weight: 700">Principais motivos de recusa</span>
+<span style="font-size: 13px; color: #4A4458">Sem orçamento no ciclo (4) · Sobreposição com outra iniciativa (2) · Benefício não demonstrado (2)</span>
+</div>
+</section>
+</sc-if>
+</div>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1300}}'>
+var CY_STAGES = [
+  ['Inscrições', '01/09 – 31/10'], ['Aprovação dos gestores', 'até 07/11'], ['Avaliação do PMO', 'até 20/11'], ['Comunicação', 'até 04/12'], ['Play dos projetos', 'a partir de jan.']
+];
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { sel: '2027', status: 'insc', audience: 'all' };
+  }
+  renderVals() {
+    var self = this, st = this.state;
+    var cur = st.status === 'insc' ? 0 : 2;
+    var cycles = [
+      { id: '2027', name: 'Planejamento 2027', window: 'Inscrições 01/09 a 31/10/2026', summary: '19 iniciativas recebidas', status: st.status === 'insc' ? 'Inscrições abertas' : 'Em avaliação', tone: 'on' },
+      { id: '2026', name: 'Planejamento 2026', window: 'Inscrições 01/09 a 31/10/2025', summary: '24 recebidas · 9 viraram projeto', status: 'Encerrado', tone: 'off' }
+    ].map(function (c) {
+      var on = st.sel === c.id;
+      return { name: c.name, window: c.window, summary: c.summary, statusLabel: c.status, pressed: on ? 'true' : 'false',
+        style: 'display: flex; flex-direction: column; gap: 6px; text-align: left; padding: 14px; border-radius: 14px; background: #FFFFFF; color: #26213A; border: ' + (on ? '2px solid #6D4AFF' : '1px solid #E2DCD0'),
+        pillStyle: 'font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 10px; background: ' + (c.tone === 'on' ? '#E7E0FF' : '#EDEAE3') + '; color: ' + (c.tone === 'on' ? '#4B2FD1' : '#4A4458'),
+        pick: function () { self.setState({ sel: c.id }); } };
+    });
+    var stages = CY_STAGES.map(function (s, i) {
+      var done = i < cur, now = i === cur;
+      return { name: s[0], date: s[1],
+        bar: 'height: 6px; border-radius: 3px; background: ' + (done ? '#9C8CF0' : (now ? '#6D4AFF' : '#EFEBE3')),
+        label: 'font-size: 12px; font-weight: ' + (now ? '700' : '600') + '; color: ' + (now ? '#3A22A8' : '#4A4458') };
+    });
+    var audience = [['all', 'Todas as áreas'], ['sel', 'Áreas selecionadas']].map(function (a) {
+      var on = st.audience === a[0];
+      return { label: a[1], pressed: on ? 'true' : 'false', pick: function () { self.setState({ audience: a[0] }); },
+        style: 'min-height: 40px; padding: 0 14px; border-radius: 20px; font-size: 13px; border: 1px solid ' + (on ? '#6D4AFF' : '#E2DCD0') + '; background: ' + (on ? '#EFEAFE' : '#FFFFFF') + '; color: ' + (on ? '#3A22A8' : '#26213A') + '; font-weight: ' + (on ? '600' : '400') };
+    });
+    return {
+      cycles: cycles, stages: stages, audience: audience,
+      isCurrent: st.sel === '2027', isPast: st.sel === '2026',
+      isOpen: st.status === 'insc', isEval: st.status === 'aval',
+      closeWindow: function () { self.setState({ status: 'aval' }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

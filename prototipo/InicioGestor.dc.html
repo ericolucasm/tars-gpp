@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>TARS GPP — Início do gestor de área</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FBFAF7}
+a{color:#4B2FD1;text-decoration:none}a:hover{color:#3A22A8}
+nav a[href^="#"]:not([aria-current]){color:#ABA4B7 !important}
+nav a[href^="#"]:not([aria-current]) span{opacity:.6}
+</style>
+</helmet>
+<div style="font-family: 'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif; color: #26213A; background: #FBFAF7; min-height: 100vh; display: flex; flex-wrap: wrap; align-items: stretch">
+<div style="flex: 1 1 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 16px; background: #26213A; color: #E7E0FF; font-size: 12px">
+<span style="font-weight: 600; margin-right: 4px">Protótipo · ver como:</span>
+<a href="InicioColaborador.dc.html" style="padding: 5px 12px; border-radius: 14px; color: #E7E0FF; border: 1px solid #5A5270">Colaborador</a>
+<a href="InicioGestor.dc.html" aria-current="page" style="padding: 5px 12px; border-radius: 14px; color: #FFFFFF; background: #6D4AFF; border: 1px solid #6D4AFF; font-weight: 600">Gestor de área</a>
+<a href="InicioGP.dc.html" style="padding: 5px 12px; border-radius: 14px; color: #E7E0FF; border: 1px solid #5A5270">Gerente de projeto</a>
+<a href="InicioPMO.dc.html" style="padding: 5px 12px; border-radius: 14px; color: #E7E0FF; border: 1px solid #5A5270">PMO</a>
+</div>
+
+<nav aria-label="Menu principal" style="flex: 1 1 248px; max-width: 100%; background: #F3F0EA; border-right: 1px solid #E2DCD0; padding: 16px 12px; box-sizing: border-box; display: flex; flex-direction: column; gap: 2px; font-size: 14px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 4px 6px 14px">
+<div style="width: 32px; height: 32px; border-radius: 9px; background: #6D4AFF; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px">T</div>
+<div style="display: flex; flex-direction: column"><span style="font-weight: 700; font-size: 16px">TARS GPP</span><span style="font-size: 11px; color: #5E5770">Gestão de Portfólios e Projetos</span></div>
+</div>
+<a href="NovaIniciativaGestor.dc.html" style="display: flex; align-items: center; justify-content: center; height: 40px; border-radius: 10px; background: #6D4AFF; color: #FFFFFF; font-weight: 600; margin-bottom: 12px">+ Nova iniciativa</a>
+<a href="InicioGestor.dc.html" aria-current="page" style="display: flex; padding: 9px 10px; border-radius: 9px; background: #E7E0FF; color: #4B2FD1; font-weight: 600">Início</a>
+<span style="font-size: 11px; color: #6E6780; margin: 14px 10px 4px; font-weight: 600; letter-spacing: 0.4px">MINHA ÁREA</span>
+<a href="GestorArea.dc.html" style="display: flex; padding: 9px 10px; border-radius: 9px; color: #4A4458">Visão da área</a>
+<div style="flex: 1"></div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 10px; border-top: 1px solid #E2DCD0; margin-top: 12px">
+<span style="width: 30px; height: 30px; border-radius: 50%; background: #E7E0FF; color: #4B2FD1; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600">FO</span>
+<span style="display: flex; flex-direction: column; font-size: 13px"><span style="font-weight: 600">Fernanda Oliveira</span><span style="font-size: 11px; color: #5E5770">Gestora · Logística</span></span>
+</div>
+</nav>
+
+<main style="flex: 999 1 560px; min-width: 0; padding: 28px 32px 40px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<span style="font-size: 12px; color: #5E5770">Sábado, 17 de outubro</span>
+<h1 style="margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.3px">Bom dia, Fernanda</h1>
+<p style="margin: 0; font-size: 14px; color: #5E5770">Você tem 4 decisões pendentes. Uma iniciativa obrigatória espera há 5 dias.</p>
+</div>
+
+<section aria-label="Precisa de você" style="background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 18px; font-weight: 700">Precisa de você</h2>
+<a href="GestorArea.dc.html" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; border: 1px solid #F0D9A8; background: #FFFCF5; color: #26213A"><span style="display: flex; flex-direction: column; flex: 1"><span style="font-size: 14px; font-weight: 600">Aprovar: Adequação das empilhadeiras à norma de segurança</span><span style="font-size: 12px; color: #5E5770">Clara Mendes · obrigatória · esperando há 5 dias</span></span><span style="font-size: 13px; font-weight: 600; color: #4B2FD1">Decidir →</span></a>
+<a href="GestorArea.dc.html" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; border: 1px solid #EFEBE3; color: #26213A"><span style="display: flex; flex-direction: column; flex: 1"><span style="font-size: 14px; font-weight: 600">Aprovar mais 2 iniciativas do time</span><span style="font-size: 12px; color: #5E5770">Separação de pedidos (João) · Etiquetagem automática (Bruno)</span></span><span style="font-size: 13px; font-weight: 600; color: #4B2FD1">Decidir →</span></a>
+<a href="GestorArea.dc.html" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; border: 1px solid #EFEBE3; color: #26213A"><span style="display: flex; flex-direction: column; flex: 1"><span style="font-size: 14px; font-weight: 600">Pedido de alocação</span><span style="font-size: 12px; color: #5E5770">Reforma do CD pede +20% de Bruno Reis a partir de abril</span></span><span style="font-size: 13px; font-weight: 600; color: #4B2FD1">Responder →</span></a>
+<a href="GestorArea.dc.html" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; border: 1px solid #EFEBE3; color: #26213A"><span style="display: flex; flex-direction: column; flex: 1"><span style="font-size: 14px; font-weight: 600">Clara Mendes está acima do que você cedeu</span><span style="font-size: 12px; color: #5E5770">30% em projetos, limite de 20%</span></span><span style="font-size: 13px; font-weight: 600; color: #4B2FD1">Ajustar →</span></a>
+</section>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px">
+<a href="GestorArea.dc.html" style="background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px; color: #26213A">
+<h2 style="margin: 0; font-size: 15px; font-weight: 700">Projetos da área</h2>
+<span style="font-size: 13px; display: flex; justify-content: space-between; align-items: center"><span>Roteirização de entregas</span><span style="font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 10px; background: #E3F5EA; color: #17723D">OK</span></span>
+<span style="font-size: 13px; display: flex; justify-content: space-between; align-items: center"><span>Inventário rotativo</span><span style="font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 10px; background: #FEF3DC; color: #9A5B05">Atenção</span></span>
+<span style="font-size: 12px; color: #5E5770">+ 1 em pré-projeto e 1 no backlog</span>
+</a>
+<a href="GestorArea.dc.html" style="background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 10px; color: #26213A">
+<span style="font-size: 12px; font-weight: 700; color: #4B2FD1; letter-spacing: 0.3px">CICLO PLANEJAMENTO 2027</span>
+<span style="font-size: 15px; font-weight: 700">Sua área enviou 5 iniciativas</span>
+<span style="font-size: 13px; color: #4A4458">2 já aprovadas por você · 3 aguardando · inscrições até 31/10</span>
+</a>
+<a href="GestorArea.dc.html" style="background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 10px; color: #26213A">
+<h2 style="margin: 0; font-size: 15px; font-weight: 700">Time em projetos</h2>
+<span style="font-size: 26px; font-weight: 700">3 de 4</span>
+<span style="font-size: 13px; color: #4A4458">pessoas alocadas · média de 15% do tempo</span>
+</a>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

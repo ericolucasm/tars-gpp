@@ -1,0 +1,170 @@
+{
+  "v": 3,
+  "attachments": {},
+  "boards": {
+    "Main.dc.html": {
+      "expand": "fill",
+      "h": 980,
+      "is_interactive": true,
+      "title": "Portfólio — esteira de governança",
+      "w": 1440,
+      "x": 2,
+      "y": 0
+    },
+    "NovaIniciativa.dc.html": {
+      "expand": "fill",
+      "h": 1500,
+      "is_interactive": true,
+      "title": "Nova iniciativa — visão do colaborador",
+      "w": 1440,
+      "x": 1520,
+      "y": 0
+    },
+    "GerenteProjeto.dc.html": {
+      "expand": "fill",
+      "h": 2600,
+      "is_interactive": true,
+      "title": "Projeto — visão do gerente de projeto",
+      "w": 1440,
+      "x": 1520,
+      "y": 1620
+    },
+    "GestorArea.dc.html": {
+      "expand": "fill",
+      "h": 1400,
+      "is_interactive": true,
+      "title": "Visão do gestor de área",
+      "w": 1440,
+      "x": 2,
+      "y": 1620
+    },
+    "Ciclos.dc.html": {
+      "expand": "fill",
+      "h": 1300,
+      "is_interactive": true,
+      "title": "Ciclos de planejamento — PMO",
+      "w": 1440,
+      "x": 3040,
+      "y": 0
+    },
+    "Avaliacao.dc.html": {
+      "expand": "fill",
+      "h": 1400,
+      "is_interactive": true,
+      "title": "Avaliação e priorização — PMO",
+      "w": 1440,
+      "x": 4560,
+      "y": 0
+    },
+    "Cadastros.dc.html": {
+      "expand": "fill",
+      "h": 1200,
+      "is_interactive": true,
+      "title": "Cadastros — PMO",
+      "w": 1440,
+      "x": 3040,
+      "y": 1620
+    },
+    "InicioPMO.dc.html": {
+      "expand": "fill",
+      "h": 1100,
+      "is_interactive": true,
+      "title": "Início — PMO",
+      "w": 1440,
+      "x": 4560,
+      "y": 4340
+    },
+    "InicioGP.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "is_interactive": true,
+      "title": "Início — gerente de projeto",
+      "w": 1440,
+      "x": 3040,
+      "y": 4340
+    },
+    "InicioGestor.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "is_interactive": true,
+      "title": "Início — gestor de área",
+      "w": 1440,
+      "x": 1520,
+      "y": 4340
+    },
+    "InicioColaborador.dc.html": {
+      "expand": "fill",
+      "h": 1150,
+      "is_interactive": true,
+      "title": "Início — colaborador",
+      "w": 1440,
+      "x": 2,
+      "y": 4340
+    },
+    "Configuracoes.dc.html": {
+      "expand": "fill",
+      "h": 1300,
+      "is_interactive": true,
+      "title": "Configurações — raias do portfólio",
+      "w": 1440,
+      "x": 4560,
+      "y": 1620
+    },
+    "ProjetoPMO.dc.html": {
+      "expand": "fill",
+      "h": 2600,
+      "is_interactive": true,
+      "title": "Projeto — visão do PMO",
+      "w": 1440,
+      "x": 6080,
+      "y": 0
+    },
+    "NovaIniciativaPMO.dc.html": {
+      "expand": "fill",
+      "h": 1500,
+      "is_interactive": true,
+      "title": "Nova iniciativa — PMO",
+      "w": 1440,
+      "x": 6080,
+      "y": 2720
+    },
+    "NovaIniciativaGestor.dc.html": {
+      "expand": "fill",
+      "h": 1500,
+      "is_interactive": true,
+      "title": "Nova iniciativa — gestor de área",
+      "w": 1440,
+      "x": 7600,
+      "y": 0
+    }
+  },
+  "createdOnFiles": {
+    "at": "2026-10-17T18:30:00Z",
+    "v": 1
+  },
+  "designSystems": [],
+  "launch": {
+    "file": "InicioPMO.dc.html",
+    "view": "focused"
+  },
+  "notes": {},
+  "order": [
+    "InicioPMO.dc.html",
+    "InicioGP.dc.html",
+    "InicioGestor.dc.html",
+    "InicioColaborador.dc.html",
+    "Main.dc.html",
+    "NovaIniciativa.dc.html",
+    "GerenteProjeto.dc.html",
+    "GestorArea.dc.html",
+    "Ciclos.dc.html",
+    "Avaliacao.dc.html",
+    "Cadastros.dc.html",
+    "Configuracoes.dc.html",
+    "ProjetoPMO.dc.html",
+    "NovaIniciativaPMO.dc.html",
+    "NovaIniciativaGestor.dc.html"
+  ],
+  "pages": [],
+  "title": "TARS GPP — Protótipo"
+}
