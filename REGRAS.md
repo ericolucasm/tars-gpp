@@ -123,6 +123,20 @@ Na V1, todos os itens e números são **calculados a partir dos dados reais**:
 
 > **[Decisão V1]** No protótipo, alguns números eram ilustrativos e não batiam entre telas (ex.: "13 prontas para avaliar" na tela inicial e 9 linhas na Avaliação). Na V1, todas as telas leem a mesma base, então os números do seed podem ser diferentes dos do protótipo, mas são sempre consistentes entre si.
 
-## 9. Fora do escopo da V1 (fase 2)
+## 9. Adições da V1 que não existiam no protótipo
+
+Itens que o protótipo sugeria mas não desenhava. Todos usam o mesmo visual:
+
+- **Lista de Projetos** (menu PMO › Projetos): o protótipo apontava para um projeto só.
+- **Filtro "Todas as áreas"** do portfólio passou a funcionar.
+- **Faixa de decisão da mudança de linha de base** na página do projeto (PMO aprova ou recusa).
+- **Confirmar fim de fase**, no detalhe da fase, com o critério de conclusão da biblioteca.
+- **Status do marco**: clicar na etiqueta alterna Previsto → Em risco → Atingido.
+- **Editores em Cadastros**: convidar e editar pessoa, nova área, nova fase, novo modelo, adicionar e remover motivo, salvar pesos.
+- **Ciclo de vida do ciclo**: "Novo ciclo", "Abrir inscrições", "Encerrar ciclo".
+- **[Decisão V1] Alocação de uma pessoa** = pico de alocação simultânea nas fases ainda não concluídas dos projetos em execução. Isso enxerga a sobrecarga que vem pela frente, não só a de hoje.
+- **[Decisão V1] Rótulos com gênero** ("Gestora", "Ativa") só quando o cadastro informa o tratamento. Sem essa informação, o sistema usa a forma neutra ("Gestor(a)").
+
+## 10. Fora do escopo da V1 (fase 2)
 
 Envio de e-mails e avisos agendados · anexos · importar planilha de pessoas · integração com Microsoft Entra (AD) · abas cinzas de Configurações (Empresa, Modo de captação, Notificações, Plano e cobrança) · multiempresa com cobrança.
