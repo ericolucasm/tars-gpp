@@ -56,6 +56,10 @@ Daí em diante, convide as pessoas em **Cadastros → Convidar pessoa**: o Supab
 
 > ⚠️ `AUTH_MODE=dev` deixa qualquer pessoa entrar sem senha. Use só localmente ou numa demo privada.
 
+## Segurança do banco
+
+O Supabase expõe o schema `public` numa API REST que pode ser chamada com a chave anon (pública). O TARS não usa essa API: o servidor fala direto com o Postgres. Por isso, **toda tabela nasce com RLS ligado e sem políticas**, o que fecha a API pública (migração `0001`). **Ao criar uma tabela nova, inclua o `ENABLE ROW LEVEL SECURITY` na migração.**
+
 ## Teste ponta a ponta
 
 Com o servidor rodando em modo dev e a demo recém-carregada:
