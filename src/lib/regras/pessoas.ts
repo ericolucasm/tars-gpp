@@ -65,7 +65,7 @@ export function rotuloGestorCurto(t: Trat) {
 }
 
 export function rotuloAtivo(status: string, t: Trat) {
-  if (status === 'convite') return 'Convite enviado';
+  if (status === 'convite') return 'Aguardando 1º acesso';
   return t === 'f' ? 'Ativa' : t === 'm' ? 'Ativo' : 'Ativo(a)';
 }
 

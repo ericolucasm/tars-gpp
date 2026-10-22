@@ -4,14 +4,15 @@ import { db, schema as t } from '@/db';
 import { getSessao, modoAuth, perfilPrincipal } from '@/lib/sessao';
 import { s } from '@/lib/css';
 import { Marca, sCartaoAuth, sTelaAuth } from '@/components/Marca';
-import { FormLogin } from './FormLogin';
+import { BotaoGoogle } from './BotaoGoogle';
 import { BotaoDev } from './BotaoDev';
 
 export const dynamic = 'force-dynamic';
 
 const ROTULO: Record<string, string> = { pmo: 'PMO', gp: 'Gerente de projeto', gestor: 'Gestor de área', colaborador: 'Colaborador' };
 
-export default async function Login() {
+export default async function Login({ searchParams }: { searchParams: Promise<{ erro?: string; error?: string }> }) {
+  const { erro, error } = await searchParams;
   if (await getSessao()) redirect('/inicio');
 
   if (modoAuth() === 'dev') {
@@ -34,11 +35,21 @@ export default async function Login() {
     );
   }
 
+  const configurado = !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && process.env.BETTER_AUTH_SECRET);
   return (
     <div style={sTelaAuth}>
       <div style={sCartaoAuth}>
         <Marca />
-        <FormLogin />
+        <div style={s('display: flex; flex-direction: column; gap: 4px')}>
+          <h1 style={s('margin: 0; font-size: 22px; font-weight: 700')}>Entrar</h1>
+          <p style={s('margin: 0; font-size: 13px; color: #5E5770')}>Use a conta Google do e-mail cadastrado pela sua empresa.</p>
+        </div>
+        {(erro || error) && (
+          <div role="alert" style={s('padding: 12px 14px; border-radius: 12px; background: #FEF3DC; color: #6B3F03; font-size: 13px; line-height: 1.5')}>
+            Este e-mail ainda não tem acesso ao TARS. Peça a um administrador para cadastrar você em Cadastros › Pessoas e tente de novo.
+          </div>
+        )}
+        {configurado ? <BotaoGoogle /> : <span style={s('font-size: 13px; color: #B42318')}>Login com Google ainda não configurado (GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET e BETTER_AUTH_SECRET).</span>}
       </div>
     </div>
   );

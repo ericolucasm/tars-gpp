@@ -5,7 +5,7 @@ import { db, schema as t } from '@/db';
 import type { Criterio } from '@/db/schema';
 import { somaPesos } from '@/lib/regras/avaliacao';
 import { subarvore } from '@/lib/regras/pessoas';
-import { supabaseAdmin } from '@/lib/supabase/server';
+import { urlDoApp } from '@/lib/auth';
 import { contexto, executar, exigir, exigirAdminCtx } from './_ctx';
 
 async function ctxAdmin() {
@@ -37,12 +37,8 @@ export async function salvarPessoa(f: PessoaForm) {
     }
     await db.insert(t.pessoas).values({ orgId: dados.org.id, ...campos, status: f.externo ? 'ativo' : 'convite' });
     if (f.externo) return { ok: true, msg: 'Fornecedor cadastrado.' };
-    const admin = supabaseAdmin();
-    if (!admin) return { ok: true, msg: 'Pessoa cadastrada. O envio do convite por e-mail depende do Supabase configurado.' };
-    const base = process.env.NEXT_PUBLIC_SITE_URL ?? (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : 'http://localhost:3000');
-    const { error } = await admin.auth.admin.inviteUserByEmail(email, { redirectTo: `${base}/auth/definir-senha` });
-    if (error) return { ok: true, msg: `Pessoa cadastrada, mas o convite falhou: ${error.message}. Ela pode usar "Primeiro acesso" na tela de login.` };
-    return { ok: true, msg: `Convite enviado para ${email}.` };
+    // Acesso liberado: a pessoa entra com a conta Google deste e-mail
+    return { ok: true, msg: `Pessoa cadastrada. Avise ${f.nome.trim().split(' ')[0]} para entrar em ${urlDoApp()} com a conta Google ${email}.` };
   });
 }
 

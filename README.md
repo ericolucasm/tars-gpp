@@ -8,8 +8,8 @@ As regras de negócio e as decisões tomadas estão em **[REGRAS.md](REGRAS.md)*
 | Peça | Papel |
 |---|---|
 | **Next.js 15** (App Router) | Telas e "backend" no mesmo projeto. As ações do usuário são *Server Actions*: funções que rodam no servidor e validam permissão e regra antes de gravar. |
-| **Postgres** (Supabase) + **Drizzle ORM** | Banco relacional. O Drizzle descreve as tabelas em TypeScript (`src/db/schema.ts`) e gera as migrações (`drizzle/`). |
-| **Supabase Auth** | Login por e-mail e senha, convites e recuperação de senha. |
+| **Postgres** (Neon, via Vercel) + **Drizzle ORM** | Banco relacional. O Drizzle descreve as tabelas em TypeScript (`src/db/schema.ts`) e gera as migrações (`drizzle/`). |
+| **Better Auth** + **Google** | Login com conta Google. Biblioteca que roda dentro do app e guarda sessões no próprio Postgres. Só entra quem está cadastrado em Pessoas. |
 | **Vercel** | Hospedagem com deploy automático a cada push. |
 
 ## Organização do código
@@ -40,25 +40,22 @@ npm test                          # testes das regras de negócio
 npm run db:reset && npm run db:migrate   # zera e recarrega a demo
 ```
 
-## Colocar no ar (Supabase + Vercel)
+## Colocar no ar (Vercel + Neon + Google)
 
-1. **Supabase**: crie o projeto (região São Paulo).
-2. **Vercel → Settings → Environment Variables** (ou use a integração Vercel + Supabase, que preenche quase tudo):
-   - `DATABASE_URL`: string de conexão do pooler (porta 6543). Se usar a integração, ela cria `POSTGRES_URL` e `POSTGRES_URL_NON_POOLING`, que também funcionam.
-   - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
-   - `SEED_DEMO=true` (carrega a Acme no primeiro deploy, se o banco estiver vazio)
-   - `TARS_ADMIN_EMAIL` e `TARS_ADMIN_NOME`: **seu acesso real** (vira PMO + Admin)
-3. **Supabase → Authentication → Users → Add user**: crie o usuário com o mesmo `TARS_ADMIN_EMAIL` e uma senha.
-4. **Supabase → Authentication → URL Configuration**: em *Site URL*, coloque a URL da Vercel. Em *Redirect URLs*, adicione `https://SEU-APP.vercel.app/auth/definir-senha`.
-5. Faça um novo deploy. O comando `vercel-build` aplica as migrações e depois compila.
+1. **Banco**: Vercel → Storage → Neon → conectar ao projeto com o prefixo `DATABASE` (cria `DATABASE_URL` e `DATABASE_URL_UNPOOLED`).
+2. **Google Cloud Console** → APIs e serviços → Credenciais → *Criar credenciais › ID do cliente OAuth* (tipo **Aplicativo da Web**):
+   - Origem JavaScript autorizada: `https://SEU-DOMINIO`
+   - URI de redirecionamento autorizado: `https://SEU-DOMINIO/api/auth/callback/google`
+3. **Vercel → Settings → Environment Variables**: `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` (`https://SEU-DOMINIO`), `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `SEED_DEMO=true`, `TARS_ADMIN_EMAIL` e `TARS_ADMIN_NOME`.
+4. Deploy. O `vercel-build` aplica as migrações (e cria você como PMO + Admin) e depois compila.
 
-Daí em diante, convide as pessoas em **Cadastros → Convidar pessoa**: o Supabase envia o e-mail para cada uma criar a senha.
+Para dar acesso a alguém: **Cadastros → Pessoas → Liberar acesso** com o e-mail Google da pessoa. Ela entra com "Entrar com Google". E-mails não cadastrados veem "Este e-mail ainda não tem acesso".
 
-> ⚠️ `AUTH_MODE=dev` deixa qualquer pessoa entrar sem senha. Use só localmente ou numa demo privada.
+> ⚠️ `AUTH_MODE=dev` deixa qualquer pessoa entrar sem senha. Use só localmente.
 
 ## Segurança do banco
 
-O Supabase expõe o schema `public` numa API REST que pode ser chamada com a chave anon (pública). O TARS não usa essa API: o servidor fala direto com o Postgres. Por isso, **toda tabela nasce com RLS ligado e sem políticas**, o que fecha a API pública (migração `0001`). **Ao criar uma tabela nova, inclua o `ENABLE ROW LEVEL SECURITY` na migração.**
+O TARS acessa o banco só pelo servidor. Mesmo assim, **toda tabela nasce com RLS ligado e sem políticas** (migrações `0001` e `0002`): se um dia o banco for exposto por uma API REST (como a do Supabase), nada fica aberto por acidente. **Ao criar uma tabela nova, inclua o `ENABLE ROW LEVEL SECURITY` na migração.**
 
 ## Teste ponta a ponta
 

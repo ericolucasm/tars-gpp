@@ -69,7 +69,7 @@ function AbaPessoas({ p, rodar, pend }: AbaProps) {
       </div>
       {ed && (
         <div style={sEditor}>
-          <h2 style={s('margin: 0; font-size: 16px; font-weight: 700')}>{ed.id ? 'Editar pessoa' : 'Convidar pessoa'}</h2>
+          <h2 style={s('margin: 0; font-size: 16px; font-weight: 700')}>{ed.id ? 'Editar pessoa' : 'Liberar acesso para uma pessoa'}</h2>
           <div style={sGrade}>
             <label style={sLab}>Nome<input value={ed.nome} onChange={(e) => set('nome', e.target.value)} style={sIn} /></label>
             <label style={sLab}>E-mail<input type="email" value={ed.email} onChange={(e) => set('email', e.target.value)} style={sIn} /></label>
@@ -88,7 +88,7 @@ function AbaPessoas({ p, rodar, pend }: AbaProps) {
           <label style={s('display: flex; align-items: center; gap: 10px; font-size: 13px')}><input type="checkbox" checked={ed.externo} onChange={(e) => set('externo', e.target.checked)} style={s('width: 18px; height: 18px; accent-color: #6D4AFF')} />Fornecedor externo (sem login e sem limite de cedência)</label>
           <div style={s('display: flex; justify-content: flex-end; gap: 8px')}>
             <button type="button" onClick={() => setEd(null)} style={sBtnS}>Cancelar</button>
-            <button type="button" disabled={pend} onClick={() => rodar(() => A.salvarPessoa(ed), () => setEd(null))} style={sBtnP}>{ed.id ? 'Salvar' : ed.externo ? 'Cadastrar' : 'Enviar convite'}</button>
+            <button type="button" disabled={pend} onClick={() => rodar(() => A.salvarPessoa(ed), () => setEd(null))} style={sBtnP}>{ed.id ? 'Salvar' : ed.externo ? 'Cadastrar' : 'Liberar acesso'}</button>
           </div>
         </div>
       )}

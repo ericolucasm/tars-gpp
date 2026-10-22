@@ -1,10 +1,10 @@
 import 'server-only';
 import { cache } from 'react';
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { eq, or } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { db, schema as t } from '@/db';
-import { supabaseServidor } from './supabase/server';
+import { auth } from './auth';
 import type { Pessoa } from './dados';
 
 export type Perfil = 'colaborador' | 'gestor' | 'gp' | 'pmo';
@@ -13,8 +13,8 @@ export const PERFIS: Perfil[] = ['colaborador', 'gestor', 'gp', 'pmo'];
 export const COOKIE_DEV = 'tars_dev';
 export const COOKIE_VER = 'tars_ver';
 
-export function modoAuth(): 'dev' | 'supabase' {
-  return process.env.AUTH_MODE === 'dev' ? 'dev' : 'supabase';
+export function modoAuth(): 'dev' | 'google' {
+  return process.env.AUTH_MODE === 'dev' ? 'dev' : 'google';
 }
 
 /** Perfil "mais alto" de uma pessoa: define a tela inicial. */
@@ -47,15 +47,14 @@ async function pessoaLogada(): Promise<Pessoa | null> {
     if (!id) return null;
     return (await db.query.pessoas.findFirst({ where: eq(t.pessoas.id, id) })) ?? null;
   }
-  const sb = await supabaseServidor();
-  const { data } = await sb.auth.getUser();
-  const user = data.user;
+  const sessao = await auth().api.getSession({ headers: await headers() });
+  const user = sessao?.user;
   if (!user) return null;
-  const email = (user.email ?? '').toLowerCase();
-  const p = await db.query.pessoas.findFirst({ where: or(eq(t.pessoas.authUserId, user.id), eq(t.pessoas.email, email)) });
-  if (!p) return null;
-  if (!p.authUserId || p.status !== 'ativo') {
-    // primeiro acesso: liga a conta do Supabase à pessoa cadastrada e ativa o convite
+  const email = user.email.trim().toLowerCase();
+  const p = await db.query.pessoas.findFirst({ where: eq(t.pessoas.email, email) });
+  if (!p || p.externo) return null;
+  if (p.authUserId !== user.id || p.status !== 'ativo') {
+    // primeiro acesso: liga a conta Google à pessoa cadastrada e ativa o convite
     await db.update(t.pessoas).set({ authUserId: user.id, status: 'ativo' }).where(eq(t.pessoas.id, p.id));
     return { ...p, authUserId: user.id, status: 'ativo' };
   }

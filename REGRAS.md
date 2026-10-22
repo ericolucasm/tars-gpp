@@ -19,7 +19,7 @@ Marcações:
 | PMO | Tudo da Gestão (Portfólio, Ciclos, Avaliação, Projetos) | [Protótipo] |
 | Admin | Configuração (Cadastros, Configurações) + seletor "ver como" | [Decisão V1] pedido do Erico |
 
-- **[Decisão V1]** Login real (Supabase Auth, e-mail e senha). Cada pessoa tem um ou mais perfis; a tela inicial usa o perfil "mais alto" (PMO > GP > Gestor > Colaborador).
+- **[Decisão V1]** Login com **conta Google** (Better Auth). Só entra quem está cadastrado em Pessoas com o mesmo e-mail; fornecedores externos não entram. Cada pessoa tem um ou mais perfis; a tela inicial usa o perfil "mais alto" (PMO > GP > Gestor > Colaborador).
 - **[Decisão V1]** Só o **Admin** vê a barra "ver como". Ao escolher um perfil, o admin passa a ver o sistema **como uma pessoa com aquele perfil** (persona, escolhida num seletor). Ações feitas nesse modo ficam registradas com o admin como autor real ("Mariana como Fernanda").
 - **[Implícita]** O gestor de uma pessoa é o responsável da área dela (Cadastros: "O gestor de cada pessoa vem da área"). Se a pessoa **é** a responsável, o gestor dela é o responsável da área-mãe.
 - **[Implícita]** "Time" de um gestor = pessoas da área dele + responsáveis das subáreas diretas (Fernanda vê Bruno, Clara, João e Diego).

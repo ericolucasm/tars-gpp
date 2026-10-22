@@ -12,7 +12,7 @@ import { hojeISO } from '../src/lib/regras/datas';
 // - TARS_ADMIN_EMAIL: garante que essa pessoa existe como PMO + Admin (seu acesso real).
 async function main() {
   // Migrações preferem a conexão direta (sem pooler), quando existir
-  const url = process.env.POSTGRES_URL_NON_POOLING || process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.SUPABASE_DB_URL;
+  const url = process.env.DATABASE_URL_UNPOOLED || process.env.POSTGRES_URL_NON_POOLING || process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.SUPABASE_DB_URL;
   if (!url) {
     console.warn('⚠ Sem DATABASE_URL: migrações não aplicadas.');
     return;
