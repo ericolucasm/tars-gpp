@@ -1,4 +1,4 @@
-import { drizzle } from 'drizzle-orm/postgres-js';
+import { drizzle, type PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import * as schema from './schema';
 
@@ -8,12 +8,23 @@ export function databaseUrl() {
   return url;
 }
 
-// Uma conexão por processo. Em dev o Next recarrega módulos, então guardamos no globalThis.
-const g = globalThis as unknown as { __tarsSql?: ReturnType<typeof postgres> };
-// prepare: false é exigido pelo pooler do Supabase (modo transação)
-const sql = g.__tarsSql ?? postgres(databaseUrl(), { prepare: false, max: 5 });
-if (process.env.NODE_ENV !== 'production') g.__tarsSql = sql;
+type DBReal = PostgresJsDatabase<typeof schema>;
 
-export const db = drizzle(sql, { schema });
-export type DB = typeof db;
+// A conexão só é aberta no primeiro uso (não na importação): o build roda sem banco
+// e cada instância serverless abre a sua quando precisa. Em dev, reaproveitada no globalThis.
+const g = globalThis as unknown as { __tarsDb?: DBReal };
+
+function conectar(): DBReal {
+  if (!g.__tarsDb) {
+    // prepare: false é exigido pelos poolers (Supabase/Neon em modo transação)
+    g.__tarsDb = drizzle(postgres(databaseUrl(), { prepare: false, max: 5 }), { schema });
+  }
+  return g.__tarsDb;
+}
+
+export const db = new Proxy({} as DBReal, {
+  get: (_, prop) => Reflect.get(conectar(), prop),
+});
+
+export type DB = DBReal;
 export { schema };
