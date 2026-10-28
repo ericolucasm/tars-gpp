@@ -70,9 +70,10 @@ export const getSessao = cache(async (): Promise<Sessao | null> => {
   if (real.admin) {
     const todas = await db.select().from(t.pessoas).where(eq(t.pessoas.orgId, real.orgId)).orderBy(t.pessoas.seq);
     const perfil: Perfil = (PERFIS as string[]).includes(perfilCookie) ? (perfilCookie as Perfil) : perfilPrincipal(real);
-    // A própria admin só aparece se tiver esse perfil (na visão Colaborador, só se for colaboradora de fato)
-    const servePropria = perfil === 'colaborador' ? perfilPrincipal(real) === 'colaborador' : real.perfis.includes(perfil);
-    const personas = todas.filter((p) => !p.externo && p.status === 'ativo'
+    // A própria admin aparece na visão Colaborador (todos são colaboradores) e nas visões dos perfis que ela tem.
+    // Entram também pessoas que ainda não fizeram o 1º acesso: o admin pode testar o sistema na visão delas.
+    const servePropria = perfil === 'colaborador' || real.perfis.includes(perfil);
+    const personas = todas.filter((p) => !p.externo
       && (perfil === 'colaborador' || p.perfis.includes(perfil))
       && (p.id !== real.id || servePropria));
     // ordem: a própria admin, depois quem tem esse perfil como principal, depois ordem de cadastro
