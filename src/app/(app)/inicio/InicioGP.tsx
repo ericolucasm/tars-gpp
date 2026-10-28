@@ -11,7 +11,7 @@ import { Saudacao } from './Saudacao';
 
 export function InicioGP({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao; hoje: string }) {
   const eu = sessao.pessoa;
-  const meus = d.iniciativas.filter((i) => i.gpId === eu.id && noRaia(d, i, 'exe'));
+  const meus = d.iniciativas.filter((i) => (sessao.coringa || i.gpId === eu.id) && noRaia(d, i, 'exe'));
   const infos = meus.map((i) => ({ i, info: infoProjeto(d, i, hoje) }));
   const sexta = proximaSexta(hoje);
   const semanaIni = segundaDaSemana(hoje);

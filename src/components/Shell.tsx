@@ -49,7 +49,7 @@ export function Shell({ sessao, dados, atual, children, mainStyle }: { sessao: S
   } else if (sessao.perfil === 'gp') {
     secoes.push({ itens: [it('/inicio', 'Início', 'inicio')] });
     const exe = new Set(dados.raias.filter((r) => r.tipoCard === 'Projeto' && r.chave !== 'con').map((r) => r.id));
-    const meus = dados.iniciativas.filter((i) => i.gpId === p.id && exe.has(i.raiaId));
+    const meus = dados.iniciativas.filter((i) => (sessao.coringa || i.gpId === p.id) && exe.has(i.raiaId));
     secoes.push({ titulo: 'MEUS PROJETOS', itens: meus.map((m) => ({ href: `/projetos/${m.id}`, rotulo: nomeMenu(m.titulo), ativo: atual === `projeto:${m.id}` })) });
   } else {
     topo = it('/iniciativas/nova', '+ Nova iniciativa', 'nova');
@@ -65,7 +65,7 @@ export function Shell({ sessao, dados, atual, children, mainStyle }: { sessao: S
           rotulo={sessao.admin ? 'Admin · ver como:' : 'Ver como:'}
           perfis={sessao.perfis.map((x) => ({ id: x, rotulo: ROTULO_PERFIL[x] }))}
           ativo={sessao.perfil}
-          personas={sessao.admin ? sessao.personas.map((x) => ({ id: x.id, nome: x.nome })) : []}
+          personas={sessao.admin ? sessao.personas.map((x) => ({ id: x.id, nome: x.id === sessao.real.id ? 'Eu (vê tudo)' : x.nome })) : []}
           persona={sessao.pessoa.id}
         />
       )}

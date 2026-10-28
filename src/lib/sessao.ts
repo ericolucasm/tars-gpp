@@ -37,7 +37,9 @@ export type Sessao = {
   perfil: Perfil; // visão ativa
   perfis: Perfil[]; // visões que essa pessoa pode alternar
   admin: boolean;
-  personas: Pessoa[]; // admin: pessoas disponíveis para a visão ativa
+  /** Admin agindo como ele mesmo: em qualquer visão, enxerga e opera tudo daquele perfil (modo teste). */
+  coringa: boolean;
+  personas: Pessoa[]; // admin: pessoas disponíveis para a visão ativa (a própria admin sempre primeiro)
 };
 
 async function pessoaLogada(): Promise<Pessoa | null> {
@@ -70,22 +72,18 @@ export const getSessao = cache(async (): Promise<Sessao | null> => {
   if (real.admin) {
     const todas = await db.select().from(t.pessoas).where(eq(t.pessoas.orgId, real.orgId)).orderBy(t.pessoas.seq);
     const perfil: Perfil = (PERFIS as string[]).includes(perfilCookie) ? (perfilCookie as Perfil) : perfilPrincipal(real);
-    // A própria admin aparece na visão Colaborador (todos são colaboradores) e nas visões dos perfis que ela tem.
-    // Entram também pessoas que ainda não fizeram o 1º acesso: o admin pode testar o sistema na visão delas.
-    const servePropria = perfil === 'colaborador' || real.perfis.includes(perfil);
-    const personas = todas.filter((p) => !p.externo
-      && (perfil === 'colaborador' || p.perfis.includes(perfil))
-      && (p.id !== real.id || servePropria));
-    // ordem: a própria admin, depois quem tem esse perfil como principal, depois ordem de cadastro
-    const peso = (p: Pessoa) => (p.id === real.id ? 0 : perfilPrincipal(p) === perfil ? 1 : 2);
-    personas.sort((a, b) => peso(a) - peso(b) || (a.seq ?? 0) - (b.seq ?? 0));
-    const pessoa = personas.find((p) => p.id === personaCookie) ?? personas[0] ?? real;
-    return { orgId: real.orgId, real, pessoa, perfil, perfis: PERFIS, admin: true, personas };
+    // A própria admin vem sempre primeiro (modo coringa); depois, quem tem esse perfil, para conferir a visão de alguém.
+    // Entram também pessoas que ainda não fizeram o 1º acesso.
+    const outras = todas.filter((p) => !p.externo && p.id !== real.id && (perfil === 'colaborador' || p.perfis.includes(perfil)));
+    outras.sort((a, b) => Number(perfilPrincipal(b) === perfil) - Number(perfilPrincipal(a) === perfil) || (a.seq ?? 0) - (b.seq ?? 0));
+    const personas = [real, ...outras];
+    const pessoa = personas.find((p) => p.id === personaCookie) ?? real;
+    return { orgId: real.orgId, real, pessoa, perfil, perfis: PERFIS, admin: true, coringa: pessoa.id === real.id, personas };
   }
 
   const perfis = perfisDe(real);
   const perfil = perfis.includes(perfilCookie as Perfil) ? (perfilCookie as Perfil) : perfilPrincipal(real);
-  return { orgId: real.orgId, real, pessoa: real, perfil, perfis, admin: false, personas: [] };
+  return { orgId: real.orgId, real, pessoa: real, perfil, perfis, admin: false, coringa: false, personas: [] };
 });
 
 export async function exigirSessao(): Promise<Sessao> {
@@ -109,5 +107,5 @@ export async function exigirAdmin(): Promise<Sessao> {
 
 /** Permissões vêm dos perfis da pessoa em nome de quem se age. */
 export function temPerfil(s: Sessao, perfil: string) {
-  return s.pessoa.perfis.includes(perfil);
+  return s.coringa || s.pessoa.perfis.includes(perfil);
 }

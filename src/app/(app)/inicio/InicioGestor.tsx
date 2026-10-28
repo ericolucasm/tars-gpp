@@ -10,12 +10,12 @@ import { Saudacao } from './Saudacao';
 
 export function InicioGestor({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao; hoje: string }) {
   const eu = sessao.pessoa;
-  const aprovacoes = d.iniciativas.filter((i) => noRaia(d, i, 'sol') && i.solStatus === 'aguardando_gestor' && i.aprovadorId === eu.id)
+  const aprovacoes = d.iniciativas.filter((i) => noRaia(d, i, 'sol') && i.solStatus === 'aguardando_gestor' && (sessao.coringa || i.aprovadorId === eu.id))
     .sort((a, b) => (a.enviadaEm?.getTime() ?? 0) - (b.enviadaEm?.getTime() ?? 0));
   const urgentes = aprovacoes.filter((i) => i.tipo === 'obr' || i.urgencia === 'urg');
   const demais = aprovacoes.filter((i) => !urgentes.includes(i));
-  const pedidos = d.pedidos.filter((p) => p.status === 'pendente' && gestorDe(pessoa(d, p.pessoaId)!, d.areas) === eu.id);
-  const time = timeDireto(eu.id, d.pessoas, d.areas);
+  const pedidos = d.pedidos.filter((p) => p.status === 'pendente' && (sessao.coringa || gestorDe(pessoa(d, p.pessoaId)!, d.areas) === eu.id));
+  const time = sessao.coringa ? d.pessoas.filter((p) => !p.externo && p.id !== eu.id) : timeDireto(eu.id, d.pessoas, d.areas);
   const alocTime = time.map((p) => ({ p, aloc: alocacaoDe(d, p.id, hoje) }));
   const acima = alocTime.filter((x) => x.p.cedeAte != null && x.aloc > x.p.cedeAte);
   const espera = (iso: Date | null) => (iso ? Math.max(0, diffDias(hoje, iso.toISOString().slice(0, 10))) : 0);
@@ -45,14 +45,14 @@ export function InicioGestor({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao;
     itens.push(<ItemAcao key={x.p.id} href="/area#capacidade" titulo={`${x.p.nome} está acima do que você cedeu`} sub={`${x.aloc}% em projetos, limite de ${x.p.cedeAte}%`} acao="Ajustar →" />);
   }
 
-  const minhas = new Set(areasSobGestao(eu.id, d.areas));
+  const minhas = new Set(sessao.coringa ? d.areas.map((a) => a.id) : areasSobGestao(eu.id, d.areas));
   const daArea = d.iniciativas.filter((i) => i.areaId && minhas.has(i.areaId));
   const projetos = daArea.filter((i) => noRaia(d, i, 'exe'));
   const nPre = daArea.filter((i) => noRaia(d, i, 'pre')).length;
   const nBkl = daArea.filter((i) => noRaia(d, i, 'bkl')).length;
   const ciclo = cicloAtual(d);
   const doCiclo = ciclo ? daArea.filter((i) => i.cicloId === ciclo.id && i.enviadaEm && i.solStatus !== 'rascunho') : [];
-  const aprovadasPorMim = doCiclo.filter((i) => i.aprovadorId === eu.id && i.aprovadaGestorEm).length;
+  const aprovadasPorMim = doCiclo.filter((i) => (sessao.coringa || i.aprovadorId === eu.id) && i.aprovadaGestorEm).length;
   const aguardando = doCiclo.filter((i) => i.solStatus === 'aguardando_gestor').length;
   const alocados = alocTime.filter((x) => x.aloc > 0).length;
   const media = alocTime.length ? Math.round(alocTime.reduce((sum, x) => sum + x.aloc, 0) / alocTime.length) : 0;

@@ -173,10 +173,11 @@ try {
   p = await como('mariana@acme.com.br', 'pmo');
   await ir(p, '/inicio');
   await p.getByRole('button', { name: 'Gestor de área' }).click();
-  await p.getByText('Olá, Fernanda').or(p.getByText(/Fernanda$/)).first().waitFor();
-  await p.waitForURL('**/inicio');
+  await p.locator('button[aria-pressed="true"]', { hasText: 'Gestor de área' }).waitFor();
+  await p.getByRole('heading', { name: /Mariana/ }).waitFor(); // coringa: continua sendo a própria admin
+  await p.locator('select').first().selectOption({ label: 'Fernanda Oliveira' });
   await p.getByRole('heading', { name: /Fernanda/ }).waitFor();
-  ok('Admin alterna para a visão do gestor (como Fernanda)');
+  ok('Admin vira gestor como ela mesma (coringa) e também pode escolher a Fernanda');
   await p.getByRole('button', { name: 'PMO' }).click();
   await p.getByRole('heading', { name: /Mariana/ }).waitFor();
   await ir(p, '/cadastros?aba=criterios');
