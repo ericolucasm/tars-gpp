@@ -15,7 +15,7 @@ Guia curto para quem desenvolve com o Claude Code, sem precisar saber programar.
 ClickUp (task com responsável) → sessão do Claude → branch → Pull Request → link de preview → merge → no ar
 ```
 
-1. **Escolha uma task** no ClickUp (lista Task List do TARS DEV) e coloque você como responsável. Assim ninguém pega a mesma task.
+1. **Escolha uma task** no ClickUp (lista Task List do TARS DEV) e coloque você como responsável. Assim ninguém pega a mesma task. Tasks em **to do** são pegas automaticamente pela verificação periódica; para trabalhar numa task com a sua sessão, deixe-a no backlog e peça diretamente.
 2. **Peça ao Claude**, por exemplo:
    > "Pega a task *Nome da task* no ClickUp, discute comigo e implementa."
 3. O Claude explica o plano, implementa e roda os testes. Depois **abre um Pull Request** (o pedido para juntar a mudança ao sistema principal).
@@ -27,14 +27,16 @@ ClickUp (task com responsável) → sessão do Claude → branch → Pull Reques
 
 | Status | Quem move | Significado |
 |---|---|---|
-| to do | quem cria | Ideia nova, ainda em discussão |
-| aprovada | sócios | Combinado que vai ser feito |
-| em desenvolvimento | Claude | Alguém está implementando |
-| em teste | Claude | No ar ou no preview, aguardando validação |
-| complete | sócios | Validado |
+| backlog | quem cria | Toda task nova nasce aqui: ideias e pedidos ainda não liberados |
+| to do | sócios | Liberada: o Claude implementa sozinho na próxima verificação automática |
+| em desenvolvimento | Claude | Sendo implementada |
+| em teste | Claude | Pronta, com Pull Request e preview; a task traz o comentário de entrega |
+| complete | sócios | Validado (e com merge feito) |
 | cancelled | sócios | Descartado |
 
-Use o campo **prioridade** (urgent, high, normal, low): é ele que define a ordem de implementação.
+Use o campo **prioridade** (urgent, high, normal, low): é ele que define a ordem de implementação. Só mova para **to do** o que estiver claro: o Claude implementa sem perguntar. Se algo estiver ambíguo, ele comenta as dúvidas e devolve para o backlog.
+
+Toda entrega traz na task um comentário com: entendimento do pedido, o que mudou, decisões tomadas e por quê, como testar, validação feita, riscos e links.
 
 ## Dicas
 

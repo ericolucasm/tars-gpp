@@ -39,14 +39,24 @@ O Playwright já vem instalado no container (`require('playwright')`); não rode
 ## Fluxo de trabalho
 
 1. **Tarefas vêm do ClickUp** — workspace "TARS DEV" (id `1600390000001547`), lista "Task List" (id `1600390000006463`).
-   Status: `to do` → `aprovada` → `em desenvolvimento` → `em teste` → `complete` (`cancelled` para descartadas).
-   - `to do`: leia e discuta (comente na task o entendimento, o impacto, o esforço e as dúvidas). Não implemente sem aprovação.
-   - `aprovada`: implemente em ordem de prioridade (urgent → high → normal → low; sem prioridade = normal, por ordem de criação).
-   - Ao começar, mova para `em desenvolvimento`. Ao publicar, mova para `em teste` e comente o que mudou, como testar e o link do commit ou PR.
-   - `complete` quem move são os sócios, depois de validar.
-2. **Branch por task** → Pull Request para a `main`. A Vercel gera um link de preview por PR. Merge na `main` = produção.
-3. Antes de abrir o PR: `npm run typecheck && npm test`. Se mexeu em fluxo de tela, rode também o e2e.
-4. Dois devs trabalham em paralelo: cada task tem um responsável no ClickUp; prefira PRs pequenos para evitar conflito.
+   Status: `backlog` → `to do` → `em desenvolvimento` → `em teste` → `complete` (`cancelled` para descartadas).
+   - `backlog`: toda task nova nasce aqui. Se pedirem, leia e discuta (comente entendimento, impacto, esforço e dúvidas). **Nunca implemente a partir do backlog.**
+   - `to do`: os sócios liberaram para implementar. Implemente direto, sem pedir confirmação, em ordem de prioridade (urgent → high → normal → low; sem prioridade = normal, por ordem de criação).
+   - Ao começar, mova para `em desenvolvimento` (isso também evita que outra sessão pegue a mesma task). Ao terminar, mova para `em teste` com o comentário de entrega abaixo.
+   - `complete` quem move são os sócios, depois de validar. O merge na `main` só acontece quando um sócio pedir.
+   - Se a task for ambígua a ponto de as interpretações levarem a entregas diferentes, ou depender de algo externo (conta, chave, decisão de negócio), não chute: comente as perguntas, devolva para `backlog` e siga para a próxima.
+2. **Comentário de entrega (obrigatório, em português, para quem pediu):**
+   - **Entendimento:** o que foi pedido e o diagnóstico (ex.: por que a pessoa não encontrava a função).
+   - **O que mudou:** por tela/perfil, em linguagem de usuário.
+   - **Decisões tomadas e por quê:** cada regra decidida, a justificativa e a alternativa descartada. Peça validação.
+   - **Como testar:** roteiro curto com as pessoas da demo (dropdown "Admin · ver como").
+   - **Validação feita:** testes e e2e que rodaram e o resultado; o que não foi possível validar.
+   - **Impacto técnico e riscos:** banco (migrações), segurança, o que pode quebrar.
+   - **Links:** Pull Request e preview.
+3. **Branch por task** → Pull Request para a `main`. A Vercel gera um link de preview por PR. Merge na `main` = produção.
+4. Antes de abrir o PR: `npm run typecheck && npm test`. Se mexeu em fluxo de tela, rode também o e2e e inclua um passo novo quando o fluxo for novo.
+5. Dois devs trabalham em paralelo: cada task tem um responsável no ClickUp; prefira PRs pequenos para evitar conflito.
+6. **Verificação automática:** uma tarefa agendada abre uma sessão periodicamente para implementar o que estiver em `to do`, seguindo exatamente este fluxo.
 
 ## Cuidados
 
