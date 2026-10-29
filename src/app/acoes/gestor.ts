@@ -30,7 +30,7 @@ export async function devolverParaAjuste(iniciativaId: string, nota: string) {
     exigir(ini && noRaia(dados, ini, 'sol') && ini.solStatus === 'aguardando_gestor', 'Esta iniciativa não está mais aguardando aprovação.');
     exigir(ini.aprovadorId === eu.id || ehPmo, 'Só o gestor responsável pode devolver.');
     const agora = new Date();
-    await db.update(t.iniciativas).set({ solStatus: 'devolvida', devolucaoNota: nota.trim() || null, devolvidaEm: agora, updatedAt: agora }).where(eq(t.iniciativas.id, ini.id));
+    await db.update(t.iniciativas).set({ solStatus: 'devolvida', devolucaoNota: nota.trim() || null, devolvidaEm: agora, devolvidaPorId: eu.id, devolucaoOrigem: 'gestor', updatedAt: agora }).where(eq(t.iniciativas.id, ini.id));
     await db.insert(t.transicoes).values({ orgId: dados.org.id, iniciativaId: ini.id, acao: 'devolver', deRaiaId: ini.raiaId, paraRaiaId: ini.raiaId, motivo: nota.trim() || null, ...autoria });
     const sol = pessoa(dados, ini.solicitanteId);
     await notificar(dados.org.id, [ini.solicitanteId], `${eu.nome} devolveu "${ini.titulo}" para ajuste.`, `/iniciativas/${ini.id}/editar`);

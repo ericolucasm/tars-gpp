@@ -74,6 +74,8 @@ Raias padrão, na ordem: Solicitações → Backlog → Pré-projeto → Em exec
 - **[Protótipo]** Pessoa acima do cedido = alocação atual maior que o limite.
 - **[Protótipo]** Pedido de alocação: o gestor **cede** (o limite sobe pelo valor pedido) ou **recusa** (o GP é avisado).
 
+- **[Decisão V1] PMO pede ajuste:** na Avaliação, o PMO pode devolver ao solicitante uma iniciativa que ainda aguarda avaliação, escrevendo o que precisa ser ajustado (texto obrigatório). O solicitante vê o pedido (etapa "Avaliação do PMO" vira "Ajuste pedido") e, ao reenviar, a iniciativa **volta direto para a avaliação do PMO, no mesmo ciclo**, sem passar de novo pelo gestor, que já aprovou e é avisado do pedido. Enquanto isso, ela aparece na Avaliação em "Aguardando ajuste da área". Itens no backlog ou já comunicados não podem ser devolvidos.
+
 ## 5. Ciclos de planejamento
 
 - **[Protótipo]** Etapas: Inscrições → Aprovação dos gestores → Avaliação do PMO → Comunicação → Play dos projetos.

@@ -1,8 +1,8 @@
 import { exigirPerfil } from '@/lib/sessao';
 import { carregarOrg } from '@/lib/dados';
-import { dinheiro, hojeISO } from '@/lib/regras/datas';
+import { dinheiro, haQuanto, hojeISO } from '@/lib/regras/datas';
 import { CRITERIOS_AVALIACAO } from '@/lib/regras/avaliacao';
-import { custoDe, listaAvaliacao, nomeArea, pessoasAcimaDoCedido, projetosDaPessoa, TIPOS } from '@/lib/visoes';
+import { chaveDaRaia, custoDe, listaAvaliacao, nomeArea, pessoa, pessoasAcimaDoCedido, projetosDaPessoa, TIPOS } from '@/lib/visoes';
 import { Shell } from '@/components/Shell';
 import { TelaAvaliacao } from './TelaAvaliacao';
 
@@ -39,7 +39,14 @@ export default async function Avaliacao() {
         linhas={itens.map((x) => ({
           id: x.ini.id, titulo: x.ini.titulo, area: nomeArea(d, x.ini.areaId), tipo: TIPOS[x.ini.tipo]?.rotulo ?? '', custo: custoDe(x.ini), custoLabel: dinheiro(custoDe(x.ini)),
           obrigatoria: x.ini.tipo === 'obr', notas: x.notas, decisao: x.decisao, motivoRecusa: x.motivoRecusa, comunicado: x.comunicado,
+          podePedirAjuste: !x.comunicado && chaveDaRaia(d, x.ini.raiaId) === 'sol', solicitante: pessoa(d, x.ini.solicitanteId)?.nome ?? '',
         }))}
+        emAjuste={d.iniciativas
+          .filter((i) => chaveDaRaia(d, i.raiaId) === 'sol' && i.solStatus === 'devolvida' && i.devolucaoOrigem === 'pmo')
+          .map((i) => ({
+            id: i.id, titulo: i.titulo, area: nomeArea(d, i.areaId), solicitante: pessoa(d, i.solicitanteId)?.nome ?? '', nota: i.devolucaoNota ?? '',
+            quando: haQuanto(i.devolvidaEm?.toISOString().slice(0, 10) ?? null, hoje),
+          }))}
       />
     </Shell>
   );

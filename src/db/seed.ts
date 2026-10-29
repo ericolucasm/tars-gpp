@@ -205,7 +205,7 @@ export async function seedDemo(db: DB, hoje: string) {
       justificativaUrgencia: 'Prazo legal em março', cicloId: null, enviadaEm: ts('2026-10-12') });
     await add({ titulo: 'Controle de devoluções no armazém', tipo: 'mel', sol: 'João Silva', area: 'Logística', raia: 'sol', solStatus: 'devolvida', aprovadorId: pes['Fernanda Oliveira'],
       problema: 'Devoluções chegam sem registro e se perdem no armazém.', faixaCusto: 'Não sei', urgencia: 'esp', cicloId: c2027.id,
-      devolucaoNota: 'Detalhe o custo estimado e quem mais é impactado.', enviadaEm: ts('2026-10-13'), devolvidaEm: ts('2026-10-16') });
+      devolucaoNota: 'Detalhe o custo estimado e quem mais é impactado.', enviadaEm: ts('2026-10-13'), devolvidaEm: ts('2026-10-16'), devolvidaPorId: pes['Fernanda Oliveira'], devolucaoOrigem: 'gestor' });
     // Solicitações já aprovadas pelo gestor (aguardando PMO)
     await add({ titulo: 'Automatizar controle de ponto', tipo: 'mel', sol: 'Renata Silva', area: 'RH', raia: 'sol', solStatus: 'aguardando_pmo', aprovadorId: pes['Helena Castro'],
       problema: 'O fechamento do ponto é manual e consome 3 dias do RH por mês.', faixaCusto: 'R$ 10–50 mil', custoEstimado: 35000, urgencia: 'esp', cicloId: c2027.id,

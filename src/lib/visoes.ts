@@ -147,7 +147,7 @@ export function subDoCard(d: DadosOrg, i: Iniciativa, hoje: string): string {
       if (!i.cicloId && i.urgencia === 'urg' && i.justificativaUrgencia) return `Entrada urgente: ${i.justificativaUrgencia.charAt(0).toLowerCase()}${i.justificativaUrgencia.slice(1)}`;
       return `Aprovada pelo gestor ${haQuanto(dia(i.aprovadaGestorEm), hoje)}`;
     }
-    if (i.solStatus === 'devolvida') return `Devolvida para ajuste ${haQuanto(dia(i.devolvidaEm), hoje)}`;
+    if (i.solStatus === 'devolvida') return `Devolvida para ajuste${i.devolucaoOrigem === 'pmo' ? ' pelo PMO' : ''} ${haQuanto(dia(i.devolvidaEm), hoje)}`;
     return `Enviada por ${sol ? nomeCurto(sol.nome) : '—'} ${haQuanto(dia(i.enviadaEm), hoje)}`;
   }
   if (c === 'bkl') return i.esforco ? `Esforço estimado: ${i.esforco}` : `Classificada ${haQuanto(dia(i.classificadaEm), hoje)}`;
@@ -173,7 +173,7 @@ export function situacaoDoCard(d: DadosOrg, i: Iniciativa): string {
   if (c === 'sol') {
     if (i.solStatus === 'aguardando_gestor') return 'Aguardando gestor';
     if (i.solStatus === 'aguardando_pmo') return 'Aguardando avaliação do PMO';
-    if (i.solStatus === 'devolvida') return 'Devolvida ao solicitante';
+    if (i.solStatus === 'devolvida') return i.devolucaoOrigem === 'pmo' ? 'Ajuste pedido pelo PMO' : 'Devolvida ao solicitante';
   }
   return i.situacao ?? '';
 }

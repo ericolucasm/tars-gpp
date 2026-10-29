@@ -5,6 +5,7 @@ import { hojeISO } from '@/lib/regras/datas';
 import { Shell } from '@/components/Shell';
 import { FormIniciativa } from '../../FormIniciativa';
 import { contextoForm } from '../../contexto-form';
+import { pessoa } from '@/lib/visoes';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,6 +26,8 @@ export default async function EditarIniciativa({ params }: { params: Promise<{ i
           faixaCusto: i.faixaCusto, fornecedor: i.fornecedor,
         }}
         nota={i.solStatus === 'devolvida' ? i.devolucaoNota : null}
+        quemPediu={i.solStatus === 'devolvida' ? (pessoa(d, i.devolvidaPorId)?.nome ?? null) : null}
+        voltaAoPmo={i.solStatus === 'devolvida' && i.devolucaoOrigem === 'pmo'}
         editavel={i.solStatus === 'rascunho' || i.solStatus === 'devolvida'}
       />
     </Shell>

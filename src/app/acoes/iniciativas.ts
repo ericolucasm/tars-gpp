@@ -39,19 +39,25 @@ export async function salvarIniciativa(f: DadosForm, enviar: boolean) {
       cicloId: f.urgencia === 'urg' ? null : ciclo?.id ?? null,
       aprovadorId: aprovador, areaId: eu.areaId, updatedAt: agora,
     };
-    const status = !enviar ? 'rascunho' : aprovador ? 'aguardando_gestor' : 'aguardando_pmo';
-    const envio = enviar ? { enviadaEm: agora, devolucaoNota: null, ...(aprovador ? {} : { aprovadaGestorEm: agora }) } : {};
+    const atual = f.id ? dados.iniciativas.find((i) => i.id === f.id) : undefined;
+    // Ajuste pedido pelo PMO: o gestor já aprovou, então o reenvio volta direto para a avaliação do PMO, no mesmo ciclo.
+    const voltaAoPmo = enviar && atual?.solStatus === 'devolvida' && atual.devolucaoOrigem === 'pmo';
+    const status = !enviar ? 'rascunho' : voltaAoPmo || !aprovador ? 'aguardando_pmo' : 'aguardando_gestor';
+    const envio = enviar ? { enviadaEm: agora, devolucaoNota: null, ...(aprovador && !voltaAoPmo ? {} : { aprovadaGestorEm: atual?.aprovadaGestorEm ?? agora }) } : {};
+    const doCiclo = voltaAoPmo ? { cicloId: atual!.cicloId, aprovadorId: atual!.aprovadorId } : {};
 
     if (f.id) {
-      const atual = dados.iniciativas.find((i) => i.id === f.id);
       exigir(atual && atual.solicitanteId === eu.id, 'Só quem enviou pode editar esta iniciativa.');
       exigir(atual.raiaId === sol.id && ['rascunho', 'devolvida'].includes(atual.solStatus ?? ''), 'Esta iniciativa já está em avaliação e não pode mais ser editada.');
-      await db.update(t.iniciativas).set({ ...campos, solStatus: status, ...envio }).where(and(eq(t.iniciativas.id, f.id), eq(t.iniciativas.orgId, dados.org.id)));
+      await db.update(t.iniciativas).set({ ...campos, ...doCiclo, solStatus: status, ...envio }).where(and(eq(t.iniciativas.id, f.id), eq(t.iniciativas.orgId, dados.org.id)));
     } else {
       const [row] = await db.insert(t.iniciativas).values({ orgId: dados.org.id, solicitanteId: eu.id, raiaId: sol.id, solStatus: status, ...campos, ...envio }).returning({ id: t.iniciativas.id });
       novoId = row.id;
     }
-    if (enviar && aprovador) await notificar(dados.org.id, [aprovador], `${eu.nome} enviou "${campos.titulo}" para sua aprovação.`, '/area#aprovacoes');
+    if (voltaAoPmo) {
+      const quem = atual!.devolvidaPorId ? [atual!.devolvidaPorId] : dados.pessoas.filter((p) => p.perfis.includes('pmo')).map((p) => p.id);
+      await notificar(dados.org.id, quem, `${eu.nome} ajustou "${campos.titulo}" e reenviou para a avaliação.`, '/avaliacao');
+    } else if (enviar && aprovador) await notificar(dados.org.id, [aprovador], `${eu.nome} enviou "${campos.titulo}" para sua aprovação.`, '/area#aprovacoes');
   });
   return { ...r, id: novoId };
 }

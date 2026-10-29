@@ -184,6 +184,47 @@ try {
   await p.getByText('Total 105% · precisa somar 100%').waitFor();
   ok('Cadastros: soma de pesos é validada');
   await p.context().close();
+
+  // 14. PMO pede ajuste e a iniciativa volta direto para a avaliação
+  const TITULO3 = 'Sinalização do pátio de carga';
+  p = await como('joao.silva@acme.com.br');
+  await ir(p, '/iniciativas/nova');
+  await p.getByPlaceholder('Reduzir o tempo de separação de pedidos').fill(TITULO3);
+  await p.getByPlaceholder(/A separação de um pedido leva/).fill('Caminhões manobram sem orientação no pátio.');
+  await p.getByRole('button', { name: /Melhoria/ }).click();
+  await p.getByRole('button', { name: 'Enviar para aprovação' }).click();
+  await p.getByText('Iniciativa enviada para aprovação').waitFor();
+  await p.context().close();
+  p = await como('fernanda.oliveira@acme.com.br');
+  await ir(p, '/area');
+  await p.locator('#aprovacoes > div').filter({ hasText: TITULO3 }).first().getByRole('button', { name: 'Aprovar e enviar ao PMO' }).click();
+  await p.getByText(`“${TITULO3}” aprovada e enviada ao PMO.`).waitFor();
+  await p.context().close();
+  p = await como('mariana@acme.com.br', 'pmo');
+  await ir(p, '/avaliacao');
+  const linha3 = p.locator('div').filter({ has: p.getByText(TITULO3, { exact: true }) }).filter({ has: p.getByRole('button', { name: 'Pedir ajuste à área' }) }).last();
+  await linha3.getByRole('button', { name: 'Pedir ajuste à área' }).click();
+  await p.getByRole('button', { name: 'Devolver ao solicitante' }).click();
+  await p.getByText('Escreva o que a área precisa ajustar.').waitFor();
+  await p.getByLabel(/precisa ajustar/).fill('Informe quantos caminhões passam por dia no pátio.');
+  await p.getByRole('button', { name: 'Devolver ao solicitante' }).click();
+  await p.getByText(new RegExp(`${TITULO3}.*devolvida para João Silva ajustar`)).waitFor();
+  await p.getByRole('heading', { name: /Aguardando ajuste da área/ }).waitFor();
+  await p.context().close();
+  p = await como('joao.silva@acme.com.br');
+  await ir(p, '/inicio');
+  await p.getByText('Informe quantos caminhões passam por dia no pátio.').waitFor();
+  await p.locator('div').filter({ hasText: TITULO3 }).filter({ has: p.getByRole('link', { name: 'Ajustar e reenviar' }) }).last().getByRole('link', { name: 'Ajustar e reenviar' }).click();
+  await p.getByText(/\(PMO\) pediu ajuste/).waitFor();
+  await p.getByRole('button', { name: 'Reenviar ao PMO' }).click();
+  await p.getByText('Iniciativa reenviada ao PMO').waitFor();
+  await p.context().close();
+  p = await como('mariana@acme.com.br', 'pmo');
+  await ir(p, '/avaliacao');
+  await p.getByText(TITULO3, { exact: true }).waitFor();
+  if (await p.getByRole('heading', { name: /Aguardando ajuste da área/ }).count()) throw new Error('Iniciativa ajustada continua em "Aguardando ajuste"');
+  ok('PMO pede ajuste, solicitante ajusta e a iniciativa volta direto para a avaliação');
+  await p.context().close();
 } catch (e) {
   console.error('✗ FALHOU no passo', passo + 1, '\n', e.message.split('\n').slice(0, 6).join('\n'));
   process.exitCode = 1;
