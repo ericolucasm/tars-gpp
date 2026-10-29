@@ -172,13 +172,12 @@ try {
   // 9. Admin: ver como + cadastros
   p = await como('mariana@acme.com.br', 'pmo');
   await ir(p, '/inicio');
-  await p.getByRole('button', { name: 'Gestor de área' }).click();
-  await p.locator('button[aria-pressed="true"]', { hasText: 'Gestor de área' }).waitFor();
-  await p.getByRole('heading', { name: /Mariana/ }).waitFor(); // coringa: continua sendo a própria admin
-  await p.locator('select').first().selectOption({ label: 'Fernanda Oliveira' });
+  const verComo = p.getByLabel('Admin · ver como');
+  await verComo.selectOption({ label: 'Fernanda Oliveira · Logística' });
   await p.getByRole('heading', { name: /Fernanda/ }).waitFor();
-  ok('Admin vira gestor como ela mesma (coringa) e também pode escolher a Fernanda');
-  await p.getByRole('button', { name: 'PMO' }).click();
+  await p.getByRole('link', { name: 'Visão da área' }).waitFor(); // menu de gestora, como a Fernanda vê
+  ok('Admin escolhe a Fernanda no "ver como" e vê o app como ela');
+  await verComo.selectOption({ label: 'Mariana · PMO (você)' });
   await p.getByRole('heading', { name: /Mariana/ }).waitFor();
   await ir(p, '/cadastros?aba=criterios');
   await p.getByLabel('Peso de Impacto').fill('40');

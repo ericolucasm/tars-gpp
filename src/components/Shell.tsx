@@ -31,6 +31,20 @@ function subtitulo(sessao: Sessao, dados: DadosOrg): string {
   }
 }
 
+const GRUPOS: [Perfil, string][] = [['pmo', 'PMO'], ['gestor', 'Gestores de área'], ['gp', 'Gerentes de projeto'], ['colaborador', 'Colaboradores']];
+
+/** Opções do "ver como" do admin: a própria admin primeiro e depois as pessoas cadastradas, por perfil principal. */
+function gruposVerComo(sessao: Sessao) {
+  if (!sessao.admin) return [];
+  const rotulo = (x: Sessao['personas'][number]) => `${x.nome}${x.area ? ' · ' + x.area : ''}`;
+  const [eu, ...outras] = sessao.personas;
+  return [
+    { titulo: 'Você', personas: [{ id: eu.id, rotulo: `${rotulo(eu)} (você)` }] },
+    ...GRUPOS.map(([g, titulo]) => ({ titulo, personas: outras.filter((x) => x.grupo === g).map((x) => ({ id: x.id, rotulo: rotulo(x) })) }))
+      .filter((g) => g.personas.length),
+  ];
+}
+
 export function Shell({ sessao, dados, atual, children, mainStyle }: { sessao: Sessao; dados: DadosOrg; atual: Atual; children: React.ReactNode; mainStyle?: string }) {
   const p = sessao.pessoa;
   const it = (href: string, rotulo: string, chave: Atual): Item => ({ href, rotulo, ativo: atual === chave });
@@ -41,7 +55,7 @@ export function Shell({ sessao, dados, atual, children, mainStyle }: { sessao: S
     topo = it('/iniciativas/nova', '+ Nova iniciativa', 'nova');
     secoes.push({ itens: [it('/inicio', 'Início', 'inicio')] });
     secoes.push({ titulo: 'GESTÃO', itens: [it('/portfolio', 'Portfólio', 'portfolio'), it('/ciclos', 'Ciclos de planejamento', 'ciclos'), it('/avaliacao', 'Avaliação e priorização', 'avaliacao'), { href: '/projetos', rotulo: 'Projetos', ativo: atual === 'projetos' || atual.startsWith('projeto:') }] });
-    if (sessao.admin) secoes.push({ titulo: 'CONFIGURAÇÃO', itens: [it('/cadastros', 'Cadastros', 'cadastros'), it('/configuracoes', 'Configurações', 'configuracoes')] });
+    if (p.admin) secoes.push({ titulo: 'CONFIGURAÇÃO', itens: [it('/cadastros', 'Cadastros', 'cadastros'), it('/configuracoes', 'Configurações', 'configuracoes')] });
   } else if (sessao.perfil === 'gestor') {
     topo = it('/iniciativas/nova', '+ Nova iniciativa', 'nova');
     secoes.push({ itens: [it('/inicio', 'Início', 'inicio')] });
@@ -49,7 +63,7 @@ export function Shell({ sessao, dados, atual, children, mainStyle }: { sessao: S
   } else if (sessao.perfil === 'gp') {
     secoes.push({ itens: [it('/inicio', 'Início', 'inicio')] });
     const exe = new Set(dados.raias.filter((r) => r.tipoCard === 'Projeto' && r.chave !== 'con').map((r) => r.id));
-    const meus = dados.iniciativas.filter((i) => (sessao.coringa || i.gpId === p.id) && exe.has(i.raiaId));
+    const meus = dados.iniciativas.filter((i) => i.gpId === p.id && exe.has(i.raiaId));
     secoes.push({ titulo: 'MEUS PROJETOS', itens: meus.map((m) => ({ href: `/projetos/${m.id}`, rotulo: nomeMenu(m.titulo), ativo: atual === `projeto:${m.id}` })) });
   } else {
     topo = it('/iniciativas/nova', '+ Nova iniciativa', 'nova');
@@ -62,10 +76,9 @@ export function Shell({ sessao, dados, atual, children, mainStyle }: { sessao: S
     <div style={s("font-family: 'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif; color: #26213A; background: #FBFAF7; min-height: 100vh; display: flex; flex-direction: column")}>
       {mostrarBarra && (
         <VerComo
-          rotulo={sessao.admin ? 'Admin · ver como:' : 'Ver como:'}
           perfis={sessao.perfis.map((x) => ({ id: x, rotulo: ROTULO_PERFIL[x] }))}
           ativo={sessao.perfil}
-          personas={sessao.admin ? sessao.personas.map((x) => ({ id: x.id, nome: x.id === sessao.real.id ? 'Eu (vê tudo)' : x.nome })) : []}
+          grupos={gruposVerComo(sessao)}
           persona={sessao.pessoa.id}
         />
       )}
