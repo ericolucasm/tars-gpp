@@ -30,16 +30,16 @@ export function perfisDe(p: Pessoa): Perfil[] {
   return PERFIS.filter((x) => set.has(x));
 }
 
+export type Persona = { id: string; nome: string; area: string; grupo: Perfil };
+
 export type Sessao = {
   orgId: string;
   real: Pessoa; // quem fez login
-  pessoa: Pessoa; // em nome de quem a tela é mostrada (persona do "ver como" ou a própria pessoa)
+  pessoa: Pessoa; // em nome de quem a tela é mostrada (pessoa escolhida no "ver como" ou a própria pessoa)
   perfil: Perfil; // visão ativa
   perfis: Perfil[]; // visões que essa pessoa pode alternar
-  admin: boolean;
-  /** Admin agindo como ele mesmo: em qualquer visão, enxerga e opera tudo daquele perfil (modo teste). */
-  coringa: boolean;
-  personas: Pessoa[]; // admin: pessoas disponíveis para a visão ativa (a própria admin sempre primeiro)
+  admin: boolean; // quem fez login é admin: pode "ver como" qualquer pessoa cadastrada
+  personas: Persona[]; // admin: pessoas disponíveis no "ver como" (a própria admin sempre primeiro)
 };
 
 async function pessoaLogada(): Promise<Pessoa | null> {
@@ -69,21 +69,23 @@ export const getSessao = cache(async (): Promise<Sessao | null> => {
   const store = await cookies();
   const [perfilCookie, personaCookie] = (store.get(COOKIE_VER)?.value ?? '').split('|');
 
+  let pessoa = real;
+  let personas: Persona[] = [];
   if (real.admin) {
-    const todas = await db.select().from(t.pessoas).where(eq(t.pessoas.orgId, real.orgId)).orderBy(t.pessoas.seq);
-    const perfil: Perfil = (PERFIS as string[]).includes(perfilCookie) ? (perfilCookie as Perfil) : perfilPrincipal(real);
-    // A própria admin vem sempre primeiro (modo coringa); depois, quem tem esse perfil, para conferir a visão de alguém.
-    // Entram também pessoas que ainda não fizeram o 1º acesso.
-    const outras = todas.filter((p) => !p.externo && p.id !== real.id && (perfil === 'colaborador' || p.perfis.includes(perfil)));
-    outras.sort((a, b) => Number(perfilPrincipal(b) === perfil) - Number(perfilPrincipal(a) === perfil) || (a.seq ?? 0) - (b.seq ?? 0));
-    const personas = [real, ...outras];
-    const pessoa = personas.find((p) => p.id === personaCookie) ?? real;
-    return { orgId: real.orgId, real, pessoa, perfil, perfis: PERFIS, admin: true, coringa: pessoa.id === real.id, personas };
+    // Admin pode "ser" qualquer pessoa cadastrada (inclusive quem ainda não fez o 1º acesso) para validar o fluxo.
+    const [todas, areas] = await Promise.all([
+      db.select().from(t.pessoas).where(eq(t.pessoas.orgId, real.orgId)).orderBy(t.pessoas.seq),
+      db.select({ id: t.areas.id, nome: t.areas.nome }).from(t.areas).where(eq(t.areas.orgId, real.orgId)),
+    ]);
+    const internas = todas.filter((p) => !p.externo);
+    pessoa = internas.find((p) => p.id === personaCookie) ?? real;
+    const nomeArea = (id: string | null) => areas.find((a) => a.id === id)?.nome ?? '';
+    personas = [real, ...internas.filter((p) => p.id !== real.id)].map((p) => ({ id: p.id, nome: p.nome, area: nomeArea(p.areaId), grupo: perfilPrincipal(p) }));
   }
 
-  const perfis = perfisDe(real);
-  const perfil = perfis.includes(perfilCookie as Perfil) ? (perfilCookie as Perfil) : perfilPrincipal(real);
-  return { orgId: real.orgId, real, pessoa: real, perfil, perfis, admin: false, coringa: false, personas: [] };
+  const perfis = perfisDe(pessoa);
+  const perfil = perfis.includes(perfilCookie as Perfil) ? (perfilCookie as Perfil) : perfilPrincipal(pessoa);
+  return { orgId: real.orgId, real, pessoa, perfil, perfis, admin: real.admin, personas };
 });
 
 export async function exigirSessao(): Promise<Sessao> {
@@ -107,5 +109,5 @@ export async function exigirAdmin(): Promise<Sessao> {
 
 /** Permissões vêm dos perfis da pessoa em nome de quem se age. */
 export function temPerfil(s: Sessao, perfil: string) {
-  return s.coringa || s.pessoa.perfis.includes(perfil);
+  return s.pessoa.perfis.includes(perfil);
 }

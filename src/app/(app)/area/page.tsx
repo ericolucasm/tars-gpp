@@ -13,14 +13,14 @@ export default async function Area() {
   const d = await carregarOrg(sessao.orgId);
   const hoje = hojeISO();
   const eu = sessao.pessoa;
-  const minhas = sessao.coringa ? d.areas.map((a) => a.id) : areasSobGestao(eu.id, d.areas);
+  const minhas = areasSobGestao(eu.id, d.areas);
   const principal = d.areas.find((a) => a.responsavelId === eu.id && a.id === eu.areaId) ?? d.areas.find((a) => a.responsavelId === eu.id);
   const subareas = d.areas.filter((a) => a.parentId === principal?.id);
   let dir = principal;
   while (dir?.parentId) dir = d.areas.find((a) => a.id === dir!.parentId);
 
   const aprovacoes = d.iniciativas
-    .filter((i) => noRaia(d, i, 'sol') && i.solStatus === 'aguardando_gestor' && (sessao.coringa || i.aprovadorId === eu.id))
+    .filter((i) => noRaia(d, i, 'sol') && i.solStatus === 'aguardando_gestor' && i.aprovadorId === eu.id)
     .sort((a, b) => (a.enviadaEm?.getTime() ?? 0) - (b.enviadaEm?.getTime() ?? 0))
     .map((i) => ({
       id: i.id, titulo: i.titulo, quem: pessoa(d, i.solicitanteId)?.nome ?? '', quando: haQuanto(i.enviadaEm?.toISOString(), hoje),
@@ -41,7 +41,7 @@ export default async function Area() {
     return { id: i.id, nome: i.titulo, tipo: projeto ? 'Projeto' : 'Iniciativa', etapa: raia?.nome ?? '', info, farol: c === 'exe' || c === 'pau' ? i.farol : null, custo: custoDe(i) };
   }).sort((a, b) => (a.tipo === b.tipo ? 0 : a.tipo === 'Projeto' ? -1 : 1));
 
-  const time = (sessao.coringa ? d.pessoas.filter((p) => !p.externo && p.id !== eu.id) : timeDireto(eu.id, d.pessoas, d.areas)).map((p) => {
+  const time = (timeDireto(eu.id, d.pessoas, d.areas)).map((p) => {
     const projs = projetosDaPessoa(d, p.id, hoje);
     return {
       id: p.id, nome: p.nome, ini: iniciais(p.nome),
@@ -53,7 +53,7 @@ export default async function Area() {
 
   const pedidos = d.pedidos.filter((x) => x.status === 'pendente').filter((x) => {
     const p = pessoa(d, x.pessoaId);
-    return p && (sessao.coringa || gestorDe(p, d.areas) === eu.id);
+    return p && gestorDe(p, d.areas) === eu.id;
   }).map((x) => ({
     id: x.id, texto: `${d.iniciativas.find((i) => i.id === x.iniciativaId)?.titulo ?? ''} pede +${x.deltaPct}% de ${pessoa(d, x.pessoaId)?.nome ?? ''}${x.aPartirDe ? ` a partir de ${x.aPartirDe}` : ''}.`, delta: x.deltaPct,
   }));
@@ -61,9 +61,9 @@ export default async function Area() {
   return (
     <Shell sessao={sessao} dados={d} atual="area">
       <VisaoArea
-        trilha={sessao.coringa ? 'Modo admin / Todas as áreas' : [dir && dir.id !== principal?.id ? dir.nome : null, principal?.nome].filter(Boolean).join(' / ')}
+        trilha={[dir && dir.id !== principal?.id ? dir.nome : null, principal?.nome].filter(Boolean).join(' / ')}
         nome={eu.nome}
-        escopo={sessao.coringa ? 'Todas as áreas (você vê como gestor de todas)' : `${principal?.nome ?? 'Minha área'}${subareas.length ? ` + ${subareas.length} ${subareas.length === 1 ? 'subárea' : 'subáreas'} (${subareas.map((a) => a.nome).join(', ')})` : ''}`}
+        escopo={`${principal?.nome ?? 'Minha área'}${subareas.length ? ` + ${subareas.length} ${subareas.length === 1 ? 'subárea' : 'subáreas'} (${subareas.map((a) => a.nome).join(', ')})` : ''}`}
         aprovacoes={aprovacoes}
         linhas={linhas}
         time={time}
