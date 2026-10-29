@@ -4,13 +4,14 @@ import { useEffect, useMemo, useState, useTransition } from 'react';
 import Link from 'next/link';
 import { s } from '@/lib/css';
 import { notaFinal, ordenarPorNota, podeComunicar } from '@/lib/regras/avaliacao';
-import { comunicarDecisoes, darNota, decidir, definirMotivoRecusa } from '@/app/acoes/avaliacao';
+import { comunicarDecisoes, darNota, decidir, definirMotivoRecusa, pedirAjustePmo } from '@/app/acoes/avaliacao';
 
 type Dec = 'pre' | 'bkl' | 'rec' | null;
-type Linha = { id: string; titulo: string; area: string; tipo: string; custo: number; custoLabel: string; obrigatoria: boolean; notas: number[]; decisao: Dec; motivoRecusa: string | null; comunicado: boolean };
+type Linha = { id: string; titulo: string; area: string; tipo: string; custo: number; custoLabel: string; obrigatoria: boolean; notas: number[]; decisao: Dec; motivoRecusa: string | null; comunicado: boolean; podePedirAjuste: boolean; solicitante: string };
+type EmAjuste = { id: string; titulo: string; area: string; solicitante: string; nota: string; quando: string };
 type Props = {
   cicloNome: string | null; orcamento: number; pesos: { nome: string; peso: number }[]; podeAjustarPesos: boolean;
-  alerta: { titulo: string; area: string; pessoa: string; projeto: string } | null; motivos: string[]; linhas: Linha[];
+  alerta: { titulo: string; area: string; pessoa: string; projeto: string } | null; motivos: string[]; linhas: Linha[]; emAjuste: EmAjuste[];
 };
 
 const CRIT = ['Impacto', 'Urgência', 'Alinhamento', 'Facilidade'];
@@ -21,7 +22,17 @@ export function TelaAvaliacao(p: Props) {
   const [linhas, setLinhas] = useState(p.linhas);
   const [toast, setToast] = useState<{ texto: string; ok: boolean } | null>(null);
   const [pend, start] = useTransition();
+  const [ajuste, setAjuste] = useState<{ id: string; nota: string } | null>(null);
   useEffect(() => setLinhas(p.linhas), [p.linhas]);
+
+  function pedirAjuste(id: string, nota: string) {
+    setToast(null);
+    start(async () => {
+      const r = await pedirAjustePmo(id, nota);
+      if (r.ok) { setAjuste(null); setLinhas((ls) => ls.filter((l) => l.id !== id)); }
+      setToast({ texto: r.ok ? r.msg ?? '' : r.erro, ok: r.ok });
+    });
+  }
   const pesos = p.pesos.map((x) => x.peso);
 
   // atualização otimista: a tela muda na hora e o servidor confirma em seguida
@@ -103,6 +114,9 @@ export function TelaAvaliacao(p: Props) {
                     <span style={s('font-size: 12px; color: #5E5770')}>{r.area} · {r.tipo} · {r.custoLabel}</span>
                     {r.obrigatoria && <span style={s('font-size: 11px; font-weight: 600; color: #7A4A04')}>Obrigatória: entra independente da nota</span>}
                     {trava && <span style={s('font-size: 11px; font-weight: 600; color: #5E5770')}>Decisão já comunicada</span>}
+                    {r.podePedirAjuste && ajuste?.id !== r.id && (
+                      <button type="button" disabled={pend} onClick={() => setAjuste({ id: r.id, nota: '' })} style={s('align-self: flex-start; padding: 0; border: 0; background: none; font-size: 12px; font-weight: 600; color: #4B2FD1; text-decoration: underline')}>Pedir ajuste à área</button>
+                    )}
                   </div>
                   {CRIT.map((nome, ci) => (
                     <div key={ci} style={s('display: flex; gap: 3px')}>
@@ -129,6 +143,18 @@ export function TelaAvaliacao(p: Props) {
                     })}
                   </div>
                 </div>
+                {ajuste?.id === r.id && (
+                  <div style={s('display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; border-radius: 12px; background: #F7F5F0')}>
+                    <label htmlFor={`ajuste-${r.id}`} style={s('font-size: 13px; font-weight: 600')}>O que {r.solicitante ? r.solicitante.split(' ')[0] : 'a área'} precisa ajustar?</label>
+                    <textarea id={`ajuste-${r.id}`} value={ajuste.nota} onChange={(e) => setAjuste({ id: r.id, nota: e.target.value })} rows={3} placeholder="Ex.: detalhe o custo estimado e quais áreas serão impactadas."
+                      style={s('padding: 10px 12px; border-radius: 10px; border: 1px solid #E2DCD0; font-size: 13px; font-family: inherit; color: #26213A; background: #FFFFFF; resize: vertical')} />
+                    <span style={s('font-size: 12px; color: #5E5770')}>A iniciativa volta para quem enviou. Depois do ajuste, ela retorna direto para esta avaliação, sem passar de novo pelo gestor.</span>
+                    <div style={s('display: flex; gap: 8px; flex-wrap: wrap')}>
+                      <button type="button" disabled={pend} onClick={() => pedirAjuste(r.id, ajuste.nota)} style={s('height: 36px; padding: 0 14px; border-radius: 9px; border: 0; background: #26213A; color: #FFFFFF; font-weight: 600; font-size: 13px')}>Devolver ao solicitante</button>
+                      <button type="button" disabled={pend} onClick={() => setAjuste(null)} style={s('height: 36px; padding: 0 14px; border-radius: 9px; border: 1px solid #E2DCD0; background: #FFFFFF; color: #26213A; font-size: 13px')}>Cancelar</button>
+                    </div>
+                  </div>
+                )}
                 {r.decisao === 'rec' && (
                   <label style={s('display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; padding-left: 4px')}>Motivo da recusa
                     <select value={r.motivoRecusa ?? p.motivos[0]} disabled={trava} onChange={(e) => { const m = e.target.value; mudar(r.id, (l) => ({ ...l, motivoRecusa: m }), () => definirMotivoRecusa(r.id, m)); }}
@@ -143,6 +169,19 @@ export function TelaAvaliacao(p: Props) {
           {ordenadas.length === 0 && <div style={s('padding: 18px 16px; font-size: 13px; color: #5E5770')}>Nenhuma iniciativa aguardando avaliação. Elas aparecem aqui depois de aprovadas pelos gestores.</div>}
         </div>
       </div>
+
+      {p.emAjuste.length > 0 && (
+        <section aria-label="Aguardando ajuste da área" style={s('background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px')}>
+          <h2 style={s('margin: 0; font-size: 15px; font-weight: 700')}>Aguardando ajuste da área ({p.emAjuste.length})</h2>
+          {p.emAjuste.map((x) => (
+            <div key={x.id} style={s('display: flex; flex-direction: column; gap: 3px; padding-top: 10px; border-top: 1px solid #F3F0EA')}>
+              <span style={s('font-size: 14px; font-weight: 600')}>{x.titulo}</span>
+              <span style={s('font-size: 12px; color: #5E5770')}>{x.area} · com {x.solicitante} · devolvida {x.quando}</span>
+              <span style={s('font-size: 13px; color: #4A4458')}>Pedido: “{x.nota}”</span>
+            </div>
+          ))}
+        </section>
+      )}
     </>
   );
 }

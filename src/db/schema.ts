@@ -129,6 +129,8 @@ export const iniciativas = pgTable('iniciativas', {
   solStatus: text('sol_status'), // rascunho | aguardando_gestor | devolvida | aguardando_pmo (só na raia sol)
   aprovadorId: uuid('aprovador_id'),
   devolucaoNota: text('devolucao_nota'),
+  devolvidaPorId: uuid('devolvida_por_id'),
+  devolucaoOrigem: text('devolucao_origem'), // gestor | pmo: define para onde a iniciativa volta ao ser reenviada
   situacao: text('situacao'),
   prioridade: text('prioridade'), // Alta | Média | Baixa
   progressoGates: jsonb('progresso_gates').$type<Record<string, boolean[]>>().notNull().default({}),

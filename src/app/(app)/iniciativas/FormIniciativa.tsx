@@ -33,7 +33,9 @@ const sErroCampo = s('font-size: 12px; font-weight: 400; color: #B42318');
 const campo = (erro: boolean) => ({ ...s('height: 44px; padding: 0 12px; border-radius: 10px; font-size: 14px; font-weight: 400; color: #26213A; background: #FFFFFF'), border: `1px solid ${erro ? '#B42318' : '#E2DCD0'}` });
 const area = (erro: boolean) => ({ ...s('padding: 10px 12px; border-radius: 10px; font-size: 14px; font-weight: 400; color: #26213A; resize: vertical; line-height: 1.5'), border: `1px solid ${erro ? '#B42318' : '#E2DCD0'}` });
 
-export function FormIniciativa({ ctx, inicial, nota, editavel = true }: { ctx: ContextoForm; inicial?: DadosForm; nota?: string | null; editavel?: boolean }) {
+export function FormIniciativa({ ctx, inicial, nota, quemPediu, voltaAoPmo: voltaProp = false, editavel = true }: { ctx: ContextoForm; inicial?: DadosForm; nota?: string | null; quemPediu?: string | null; voltaAoPmo?: boolean; editavel?: boolean }) {
+  // guardado na abertura: depois do reenvio a página recarrega e a iniciativa já não está mais devolvida
+  const [voltaAoPmo] = useState(voltaProp);
   const [f, setF] = useState<DadosForm>(inicial ?? VAZIO);
   const [tentou, setTentou] = useState(false);
   const [enviada, setEnviada] = useState(false);
@@ -80,14 +82,14 @@ export function FormIniciativa({ ctx, inicial, nota, editavel = true }: { ctx: C
       </div>
 
       {nota && !enviada && (
-        <div style={s('padding: 12px 14px; border-radius: 12px; background: #FEF3DC; color: #6B3F03; font-size: 13px; line-height: 1.5')}><strong>{ctx.aprovador} pediu ajuste:</strong> “{nota}”</div>
+        <div style={s('padding: 12px 14px; border-radius: 12px; background: #FEF3DC; color: #6B3F03; font-size: 13px; line-height: 1.5')}><strong>{quemPediu ?? ctx.aprovador}{voltaAoPmo ? ' (PMO)' : ''} pediu ajuste:</strong> “{nota}”</div>
       )}
 
       {enviada ? (
         <div style={s('background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 32px; display: flex; flex-direction: column; gap: 14px; max-width: 640px')}>
           <span style={s('width: 44px; height: 44px; border-radius: 50%; background: #E3F5EA; color: #17723D; display: flex; align-items: center; justify-content: center')}><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10" /></svg></span>
-          <h2 style={s('margin: 0; font-size: 22px; font-weight: 700')}>Iniciativa enviada para aprovação</h2>
-          <p style={s('margin: 0; font-size: 14px; color: #4A4458; line-height: 1.6')}>“{f.titulo || 'Sua iniciativa'}” foi para {ctx.aprovador}, {ctx.aprovadorCargo.charAt(0).toLowerCase() + ctx.aprovadorCargo.slice(1)}. Você acompanha cada passo na tela inicial.</p>
+          <h2 style={s('margin: 0; font-size: 22px; font-weight: 700')}>{voltaAoPmo ? 'Iniciativa reenviada ao PMO' : 'Iniciativa enviada para aprovação'}</h2>
+          <p style={s('margin: 0; font-size: 14px; color: #4A4458; line-height: 1.6')}>{voltaAoPmo ? <>“{f.titulo || 'Sua iniciativa'}” voltou para a avaliação do PMO, sem passar de novo pelo gestor. Você acompanha cada passo na tela inicial.</> : <>“{f.titulo || 'Sua iniciativa'}” foi para {ctx.aprovador}, {ctx.aprovadorCargo.charAt(0).toLowerCase() + ctx.aprovadorCargo.slice(1)}. Você acompanha cada passo na tela inicial.</>}</p>
           <div style={s('display: flex; flex-wrap: wrap; gap: 8px')}>
             <Link href={ctx.home} style={s('height: 40px; padding: 0 16px; border-radius: 10px; background: #6D4AFF; color: #FFFFFF; font-weight: 600; font-size: 13px; display: inline-flex; align-items: center')}>Voltar ao início</Link>
             <Link href="/iniciativas/nova" onClick={() => { setF(VAZIO); setTentou(false); setEnviada(false); setAviso(''); }} style={s('height: 40px; padding: 0 14px; border-radius: 10px; border: 1px solid #E2DCD0; background: #FFFFFF; color: #26213A; font-size: 13px; display: inline-flex; align-items: center')}>Cadastrar outra</Link>
@@ -186,7 +188,7 @@ export function FormIniciativa({ ctx, inicial, nota, editavel = true }: { ctx: C
             {aviso && <span style={s('font-size: 13px; color: #3A22A8; font-weight: 600')}>{aviso}</span>}
             <div style={s('display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px')}>
               <button type="button" disabled={pend} onClick={rascunho} style={s('height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid #E2DCD0; background: #FFFFFF; color: #26213A; font-size: 14px')}>Salvar rascunho</button>
-              <button type="button" disabled={pend} onClick={enviar} style={s('height: 44px; padding: 0 20px; border-radius: 10px; border: 0; background: #6D4AFF; color: #FFFFFF; font-weight: 600; font-size: 14px')}>{nota ? 'Reenviar para aprovação' : 'Enviar para aprovação'}</button>
+              <button type="button" disabled={pend} onClick={enviar} style={s('height: 44px; padding: 0 20px; border-radius: 10px; border: 0; background: #6D4AFF; color: #FFFFFF; font-weight: 600; font-size: 14px')}>{voltaAoPmo ? 'Reenviar ao PMO' : nota ? 'Reenviar para aprovação' : 'Enviar para aprovação'}</button>
             </div>
           </div>
 

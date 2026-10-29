@@ -4,7 +4,7 @@ import { eq } from 'drizzle-orm';
 import { db, schema as t } from '@/db';
 import { podeComunicar } from '@/lib/regras/avaliacao';
 import { listaAvaliacao, raiaChave } from '@/lib/visoes';
-import { contexto, executar, exigir, exigirPmo } from './_ctx';
+import { contexto, executar, exigir, exigirPmo, notificar } from './_ctx';
 
 async function linhaDaAvaliacao(iniciativaId: string) {
   const ctx = await contexto();
@@ -93,5 +93,24 @@ export async function comunicarDecisoes() {
       if (ciclo.etapa === 'avaliacao') await tx.update(t.ciclos).set({ etapa: 'comunicado', comunicadoEm: agora.toISOString().slice(0, 10) }).where(eq(t.ciclos.id, ciclo.id));
     });
     return { ok: true, msg: `Decisões enviadas: ${p} pré-aprovadas, ${b} no backlog, ${x} recusadas. Cada solicitante e gestor recebeu o resultado com o motivo.` };
+  });
+}
+
+/** PMO devolve uma iniciativa em avaliação ao solicitante, dizendo o que precisa ser ajustado. Ao reenviar, ela volta direto para o PMO. */
+export async function pedirAjustePmo(iniciativaId: string, nota: string) {
+  return executar(async () => {
+    const ctx = await contexto();
+    exigirPmo(ctx);
+    const { dados, eu, autoria } = ctx;
+    const ini = dados.iniciativas.find((i) => i.id === iniciativaId);
+    exigir(ini && raiaChave(dados, 'sol')?.id === ini.raiaId && ini.solStatus === 'aguardando_pmo', 'Só dá para pedir ajuste de iniciativas aguardando avaliação do PMO.');
+    exigir(nota.trim(), 'Escreva o que a área precisa ajustar.');
+    const agora = new Date();
+    await db.update(t.iniciativas).set({ solStatus: 'devolvida', devolucaoNota: nota.trim(), devolvidaEm: agora, devolvidaPorId: eu.id, devolucaoOrigem: 'pmo', updatedAt: agora }).where(eq(t.iniciativas.id, ini.id));
+    await db.insert(t.transicoes).values({ orgId: dados.org.id, iniciativaId: ini.id, acao: 'devolver_pmo', deRaiaId: ini.raiaId, paraRaiaId: ini.raiaId, motivo: nota.trim(), ...autoria });
+    await notificar(dados.org.id, [ini.solicitanteId], `O PMO pediu ajuste em "${ini.titulo}".`, `/iniciativas/${ini.id}/editar`);
+    await notificar(dados.org.id, [ini.aprovadorId], `O PMO pediu ajuste em "${ini.titulo}", que você aprovou.`, '/area');
+    const sol = dados.pessoas.find((p) => p.id === ini.solicitanteId);
+    return { ok: true, msg: `“${ini.titulo}” devolvida para ${sol?.nome ?? 'o solicitante'} ajustar. Ao reenviar, ela volta para a sua avaliação.` };
   });
 }

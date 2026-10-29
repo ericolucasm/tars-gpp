@@ -16,7 +16,11 @@ function passo(d: DadosOrg, i: Iniciativa, hoje: string) {
   const dia = (x: Date | null) => (x ? x.toISOString().slice(0, 10) : null);
   const ciclo = d.ciclos.find((x) => x.id === i.cicloId);
   if (c === 'sol' && i.solStatus === 'rascunho') return { at: 0, alerta: false, sub: 'Rascunho · ainda não enviada', acao: 'Continuar' };
-  if (c === 'sol' && i.solStatus === 'devolvida') return { at: 1, alerta: true, sub: `Devolvida para ajuste por ${aprov?.nome ?? 'seu gestor'} ${haDias(dia(i.devolvidaEm), hoje)}`, acao: 'Ajustar e reenviar' };
+  if (c === 'sol' && i.solStatus === 'devolvida') {
+    const pmo = i.devolucaoOrigem === 'pmo';
+    const quem = pessoa(d, i.devolvidaPorId)?.nome ?? (pmo ? 'PMO' : aprov?.nome ?? 'seu gestor');
+    return { at: pmo ? 2 : 1, alerta: true, sub: `Devolvida para ajuste ${pmo ? `pelo PMO (${quem})` : `por ${quem}`} ${haDias(dia(i.devolvidaEm), hoje)}`, acao: 'Ajustar e reenviar' };
+  }
   if (c === 'sol' && i.solStatus === 'aguardando_gestor') return { at: 1, alerta: false, sub: `Com ${aprov?.nome ?? 'seu gestor'} para aprovação desde ${haQuanto(dia(i.enviadaEm), hoje) === 'hoje' ? 'hoje' : br(dia(i.enviadaEm)).slice(0, 5)}` };
   if (c === 'sol') return { at: 2, alerta: false, sub: `Aprovada por ${aprov?.nome ?? 'seu gestor'} · aguardando avaliação do PMO` };
   if (c === 'bkl') return { at: 4, alerta: false, sub: `${ciclo ? `Avaliada no ciclo ${ciclo.ano}` : 'Avaliada'} · está no backlog, aguardando prioridade` };
@@ -65,7 +69,7 @@ export function InicioColaborador({ d, sessao, hoje }: { d: DadosOrg; sessao: Se
               {p.acao && <Link href={`/iniciativas/${i.id}/editar`} style={s('height: 36px; padding: 0 14px; border-radius: 9px; background: #6D4AFF; color: #FFFFFF; font-weight: 600; font-size: 13px; display: inline-flex; align-items: center')}>{p.acao}</Link>}
             </div>
             <Etapas etapas={PASSOS.map((n, k) => ({ nome: k === p.at && p.alerta ? 'Ajuste pedido' : n }))} atual={p.at} alerta={p.alerta} />
-            {p.alerta && i.devolucaoNota && <span style={s('font-size: 13px; color: #4A4458; padding: 10px 12px; border-radius: 10px; background: #F7F5F0')}>{primeiroNome(pessoa(d, i.aprovadorId)?.nome ?? 'Gestor')}: “{i.devolucaoNota}”</span>}
+            {p.alerta && i.devolucaoNota && <span style={s('font-size: 13px; color: #4A4458; padding: 10px 12px; border-radius: 10px; background: #F7F5F0')}>{primeiroNome(pessoa(d, i.devolvidaPorId ?? i.aprovadorId)?.nome ?? (i.devolucaoOrigem === 'pmo' ? 'PMO' : 'Gestor'))}{i.devolucaoOrigem === 'pmo' ? ' (PMO)' : ''}: “{i.devolucaoNota}”</span>}
           </div>
         ))}
       </section>
