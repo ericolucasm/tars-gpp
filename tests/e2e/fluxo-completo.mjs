@@ -47,6 +47,8 @@ try {
   await ir(p, '/area');
   await p.waitForURL(/\/area\/iniciativas$/); // endereço antigo leva para Iniciativas da área
   let card = p.locator('#aprovacoes > div').filter({ hasText: TITULO }).first();
+  await card.getByRole('button', { name: TITULO, exact: true }).click(); // gestora abre o detalhe antes de decidir
+  await card.getByRole('region', { name: `Detalhes de ${TITULO}` }).getByText('Hoje não temos visibilidade dos atrasos da expedição.').waitFor();
   await card.getByRole('button', { name: 'Aprovar e enviar ao PMO' }).click();
   await p.getByText(`“${TITULO}” aprovada e enviada ao PMO.`).waitFor();
   card = p.locator('#aprovacoes > div').filter({ hasText: TITULO2 }).first();
@@ -54,7 +56,7 @@ try {
   await card.getByPlaceholder('Detalhe o custo estimado e quem mais é impactado.').fill('Informe quantas pessoas serão treinadas.');
   await card.getByRole('button', { name: 'Devolver ao solicitante' }).click();
   await p.getByText(`“${TITULO2}” devolvida para João Silva ajustar.`).waitFor();
-  ok('Gestora aprova uma iniciativa e devolve a outra com comentário');
+  ok('Gestora abre o detalhe, aprova uma iniciativa e devolve a outra com comentário');
   await p.context().close();
 
   // 3. João vê a devolução e reenvia
@@ -199,7 +201,11 @@ try {
   await ir(p, '/inicio');
   await p.getByRole('link', { name: 'Projetos da área' }).first().click();
   await p.waitForURL(/\/area\/projetos$/);
-  await p.getByRole('region', { name: 'Projetos da área' }).getByText(TITULO).waitFor();
+  const projArea = p.getByRole('region', { name: 'Projetos da área' });
+  await projArea.getByRole('button', { name: TITULO, exact: true }).click();
+  const detProj = projArea.getByRole('region', { name: `Detalhes de ${TITULO}` });
+  await detProj.getByText('Andamento do projeto').waitFor();
+  await detProj.getByText('Gerente do projeto').waitFor();
   await p.getByRole('link', { name: 'Iniciativas da área' }).click();
   await p.waitForURL(/\/area\/iniciativas$/);
   await p.getByRole('region', { name: 'Aprovações pendentes' }).waitFor();
@@ -208,7 +214,7 @@ try {
   if (await p.getByRole('region', { name: 'Aprovações pendentes' }).count()) throw new Error('Gestão do time não deveria mostrar aprovações');
   await ir(p, '/area#capacidade'); // aviso antigo leva para Gestão do time
   await p.waitForURL(/\/area\/time$/);
-  ok('Gestora navega por Iniciativas da área, Projetos da área e Gestão do time');
+  ok('Gestora navega pelos três menus da área e abre o detalhe de um projeto');
   const ped = p.locator('#capacidade > div').filter({ hasText: 'Diego Santos' }).first();
   await ped.getByRole('button', { name: /Ceder \+10%/ }).click();
   await p.getByText(/Você cedeu \+10% de Diego Santos/).waitFor();

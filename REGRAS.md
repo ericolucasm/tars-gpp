@@ -73,6 +73,7 @@ Raias padrão, na ordem: Solicitações → Backlog → Pré-projeto → Em exec
   - **Projetos da área** (`/area/projetos`): projetos da área que estão rodando, ou seja, em execução e pausados (em execução primeiro). Concluídos e cancelados não aparecem.
   - **Gestão do time** (`/area/time`): quanto cada pessoa pode ceder e os pedidos de alocação.
   - Os quatro números do topo aparecem nos três menus e levam ao menu certo. O endereço antigo `/area` (e avisos antigos com `#aprovacoes` ou `#capacidade`) leva para o menu novo correspondente.
+- **[Decisão V1]** Em **Iniciativas da área** e **Projetos da área**, clicar numa iniciativa ou projeto abre logo abaixo o **mesmo detalhe da Avaliação do PMO** (problema, resultado esperado, solicitante, urgência, custo etc.). Nas aprovações, o detalhe aparece antes dos botões de decisão. Se já virou projeto, traz também o **andamento do projeto**: GP, farol, início, fim previsto, fase atual, desvio, tarefas concluídas e atrasadas, riscos abertos, próximo marco e último status.
 
 - **[Protótipo]** O gestor pode **Aprovar e enviar ao PMO** ou **Devolver para ajuste** com um comentário.
 - **[Implícita]** A iniciativa devolvida volta para o solicitante, que vê o comentário e o botão "Ajustar e reenviar". Ao reenviar, volta para o gestor.

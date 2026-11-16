@@ -4,10 +4,12 @@ import { useEffect, useState, useTransition } from 'react';
 import Link from 'next/link';
 import { s } from '@/lib/css';
 import { FAROL, type Farol } from '@/lib/regras/projeto';
+import { DetalheIniciativa, TituloExpansivel, cliqueNaLinha } from '@/components/DetalheIniciativa';
+import type { Detalhe } from '@/lib/detalhe';
 import { aprovarComoGestor, definirCedencia, devolverParaAjuste, responderPedido } from '@/app/acoes/gestor';
 
-type Aprovacao = { id: string; titulo: string; quem: string; quando: string; problema: string; tipo: string; urg: string; urgente: boolean; custo: string };
-type Linha = { id: string; nome: string; tipo: string; chave: string; etapa: string; info: string; farol: string | null };
+type Aprovacao = { id: string; titulo: string; quem: string; quando: string; problema: string; tipo: string; urg: string; urgente: boolean; custo: string; det: Detalhe };
+type Linha = { id: string; nome: string; tipo: string; chave: string; etapa: string; info: string; farol: string | null; det: Detalhe };
 export type Aba = 'iniciativas' | 'projetos' | 'time';
 
 const TEXTO: Record<Aba, string> = {
@@ -24,6 +26,7 @@ export function VisaoArea(p: { aba: Aba; trilha: string; nome: string; escopo: s
   const [nota, setNota] = useState('');
   const [caps, setCaps] = useState<Record<string, number>>(() => Object.fromEntries(p.time.map((m) => [m.id, m.cap])));
   const [pend, start] = useTransition();
+  const [aberta, setAberta] = useState<string | null>(null);
   useEffect(() => setCaps(Object.fromEntries(p.time.map((m) => [m.id, m.cap]))), [p.time]);
 
   const rodar = (fn: () => Promise<{ ok: boolean; msg?: string; erro?: string }>) => start(async () => {
@@ -61,13 +64,15 @@ export function VisaoArea(p: { aba: Aba; trilha: string; nome: string; escopo: s
         <div style={s('display: flex; flex-direction: column; gap: 2px')}><h2 style={s('margin: 0; font-size: 18px; font-weight: 700')}>Iniciativas aguardando sua aprovação</h2><span style={s('font-size: 12px; color: #5E5770')}>Ao aprovar, a iniciativa segue para avaliação do PMO no fechamento do ciclo.</span></div>
         {p.aprovacoes.map((a) => {
           const ret = devolvendo === a.id;
+          const aberto = aberta === a.id;
+          const alternar = () => setAberta(aberto ? null : a.id);
           return (
-            <div key={a.id} style={s('border: 1px solid #EFEBE3; border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 10px')}>
+            <div key={a.id} onClick={cliqueNaLinha(alternar)} style={{ ...s('border: 1px solid #EFEBE3; border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 10px; cursor: pointer'), background: aberto ? '#FAF8F4' : undefined }}>
               <div style={s('display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start')}>
                 <div style={s('display: flex; flex-direction: column; gap: 4px; flex: 1 1 280px; min-width: 0')}>
-                  <span style={s('font-size: 15px; font-weight: 600')}>{a.titulo}</span>
+                  <TituloExpansivel id={a.id} titulo={a.titulo} aberto={aberto} alternar={alternar} tamanho={15} />
                   <span style={s('font-size: 12px; color: #5E5770')}>{a.quem} · enviada {a.quando}</span>
-                  <span style={s('font-size: 13px; color: #4A4458; line-height: 1.5')}>{a.problema}</span>
+                  {!aberto && <span style={s('font-size: 13px; color: #4A4458; line-height: 1.5')}>{a.problema}</span>}
                 </div>
                 <div style={s('display: flex; flex-wrap: wrap; gap: 6px')}>
                   <span style={s('font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 10px; background: #EFEAFE; color: #4B2FD1')}>{a.tipo}</span>
@@ -75,6 +80,7 @@ export function VisaoArea(p: { aba: Aba; trilha: string; nome: string; escopo: s
                   <span style={s('font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 10px; background: #EDEAE3; color: #4A4458')}>{a.custo}</span>
                 </div>
               </div>
+              {aberto && <DetalheIniciativa id={a.id} titulo={a.titulo} det={a.det} />}
               {ret && (
                 <label style={s('display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600')}>O que precisa ser ajustado?
                   <textarea rows={2} value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Detalhe o custo estimado e quem mais é impactado." style={s('padding: 10px 12px; border-radius: 10px; border: 1px solid #E2DCD0; font-size: 14px; font-weight: 400; color: #26213A; resize: vertical')} />
@@ -100,7 +106,7 @@ export function VisaoArea(p: { aba: Aba; trilha: string; nome: string; escopo: s
       </section>}
 
       <div style={s('display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start')}>
-        {p.aba !== 'time' && <TabelaArea titulo={p.aba === 'iniciativas' ? 'Iniciativas da área no portfólio' : 'Projetos da área'} linhas={p.aba === 'iniciativas' ? iniciativas : projetos}
+        {p.aba !== 'time' && <TabelaArea aberta={aberta} setAberta={setAberta} titulo={p.aba === 'iniciativas' ? 'Iniciativas da área no portfólio' : 'Projetos da área'} linhas={p.aba === 'iniciativas' ? iniciativas : projetos}
           vazio={p.aba === 'iniciativas' ? 'Nenhuma iniciativa da área no portfólio ainda.' : 'Nenhum projeto da área rodando agora.'} />}
         {p.aba === 'time' && <section id="capacidade" aria-label="Capacidade do time" style={s('flex: 1 1 420px; min-width: 0; background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px')}>
           <div style={s('display: flex; flex-direction: column; gap: 2px')}><h2 style={s('margin: 0; font-size: 18px; font-weight: 700')}>Quanto o time pode ceder</h2><span style={s('font-size: 12px; color: #5E5770')}>Você conhece a operação: defina o máximo de cada pessoa para projetos.</span></div>
@@ -147,21 +153,26 @@ export function VisaoArea(p: { aba: Aba; trilha: string; nome: string; escopo: s
   );
 }
 
-function TabelaArea({ titulo, linhas, vazio }: { titulo: string; linhas: Linha[]; vazio: string }) {
+function TabelaArea({ titulo, linhas, vazio, aberta, setAberta }: { titulo: string; linhas: Linha[]; vazio: string; aberta: string | null; setAberta: (id: string | null) => void }) {
   return (
     <section aria-label={titulo} style={s('flex: 999 1 520px; min-width: 0; background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 10px')}>
       <h2 style={s('margin: 0; font-size: 18px; font-weight: 700')}>{titulo}</h2>
       <div style={s('overflow-x: auto')}>
         <div style={s('min-width: 560px; display: flex; flex-direction: column')}>
-          <div style={s('display: grid; grid-template-columns: 2.2fr 1.1fr 1.6fr 0.8fr; gap: 10px; padding: 8px 4px; font-size: 12px; color: #5E5770; font-weight: 600; border-bottom: 1px solid #EFEBE3')}><span>Nome</span><span>Etapa</span><span>Situação / GP</span><span>Farol</span></div>
+          <div style={s('display: grid; grid-template-columns: 2.2fr 1.1fr 1.6fr 0.8fr; gap: 10px; padding: 8px 4px; font-size: 12px; color: #5E5770; font-weight: 600; border-bottom: 1px solid #EFEBE3')}><span>Nome · clique para ver os detalhes</span><span>Etapa</span><span>Situação / GP</span><span>Farol</span></div>
           {linhas.map((r) => {
             const f = r.farol ? FAROL[r.farol as Farol] : null;
+            const aberto = aberta === r.id;
+            const alternar = () => setAberta(aberto ? null : r.id);
             return (
-              <div key={r.id} style={s('display: grid; grid-template-columns: 2.2fr 1.1fr 1.6fr 0.8fr; gap: 10px; padding: 12px 4px; font-size: 13px; border-bottom: 1px solid #F3F0EA; align-items: center')}>
-                <span style={s('display: flex; flex-direction: column')}><span style={s('font-weight: 600')}>{r.nome}</span><span style={s('font-size: 11px; color: #5E5770')}>{r.tipo}</span></span>
-                <span>{r.etapa}</span>
-                <span style={s('color: #4A4458')}>{r.info}</span>
-                {f ? <span style={{ ...s('font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 10px; justify-self: start'), background: f.bg, color: f.fg }}>{f.rotulo}</span> : <span style={s('font-size: 12px; color: #8A8296')}>—</span>}
+              <div key={r.id} onClick={cliqueNaLinha(alternar)} style={{ ...s('display: flex; flex-direction: column; gap: 10px; padding: 12px 4px; border-bottom: 1px solid #F3F0EA; cursor: pointer'), background: aberto ? '#FAF8F4' : undefined }}>
+                <div style={s('display: grid; grid-template-columns: 2.2fr 1.1fr 1.6fr 0.8fr; gap: 10px; font-size: 13px; align-items: center')}>
+                  <span style={s('display: flex; flex-direction: column')}><TituloExpansivel id={r.id} titulo={r.nome} aberto={aberto} alternar={alternar} tamanho={13} /><span style={s('font-size: 11px; color: #5E5770; padding-left: 16px')}>{r.tipo}</span></span>
+                  <span>{r.etapa}</span>
+                  <span style={s('color: #4A4458')}>{r.info}</span>
+                  {f ? <span style={{ ...s('font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 10px; justify-self: start'), background: f.bg, color: f.fg }}>{f.rotulo}</span> : <span style={s('font-size: 12px; color: #8A8296')}>—</span>}
+                </div>
+                {aberto && <DetalheIniciativa id={r.id} titulo={r.nome} det={r.det} />}
               </div>
             );
           })}
