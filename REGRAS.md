@@ -147,6 +147,7 @@ Itens que o protótipo sugeria mas não desenhava. Todos usam o mesmo visual:
 - **Editores em Cadastros**: convidar e editar pessoa, nova área, nova fase, novo modelo, adicionar e remover motivo, salvar pesos.
 - **Ciclo de vida do ciclo**: "Novo ciclo", "Abrir inscrições", "Encerrar ciclo".
 - **[Decisão V1] Alocação de uma pessoa** = pico de alocação simultânea nas fases ainda não concluídas dos projetos em execução. Isso enxerga a sobrecarga que vem pela frente, não só a de hoje.
+- **[Decisão V1] Menu lateral diferente do protótipo** (pedido da Mariana): os títulos de seção (GESTÃO, MINHA ÁREA, CONFIGURAÇÃO), que não são clicáveis, ficam menores, mais claros e com uma linha separadora acima. Os itens clicáveis têm texto escuro, uma seta › à direita e fundo ao passar o mouse. No protótipo os dois tinham aparência parecida e se confundiam.
 - **[Decisão V1] Rótulos com gênero** ("Gestora", "Ativa") só quando o cadastro informa o tratamento. Sem essa informação, o sistema usa a forma neutra ("Gestor(a)").
 
 ## 10. Fora do escopo da V1 (fase 2)
