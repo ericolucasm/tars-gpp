@@ -68,8 +68,21 @@ try {
   ok('Colaborador vê o comentário, ajusta e reenvia');
   await p.context().close();
 
-  // 4. PMO avalia e comunica
+  // 4a. PMO clica no número do painel do ciclo, chega na Avaliação filtrada e abre o detalhe
   p = await como('mariana@acme.com.br', 'pmo');
+  await ir(p, '/inicio');
+  await p.getByRole('link', { name: /^Prontas para avaliar: \d+\. Ver na avaliação$/ }).click();
+  await p.waitForURL(/\/avaliacao\?ciclo=.+&status=prontas/);
+  await p.getByRole('button', { name: TITULO, exact: true }).click();
+  const det = p.getByRole('region', { name: `Detalhes de ${TITULO}` });
+  await det.getByText('Hoje não temos visibilidade dos atrasos da expedição.').waitFor();
+  await det.getByText('João Silva', { exact: false }).first().waitFor();
+  await p.getByLabel('Status').selectOption('recebidas');
+  await p.waitForURL(/status=recebidas/);
+  await p.getByRole('button', { name: TITULO2, exact: true }).waitFor();
+  ok('PMO clica em "Prontas para avaliar" no painel, abre o detalhe e filtra por status');
+
+  // 4. PMO avalia e comunica
   await ir(p, '/avaliacao');
   await p.getByText(TITULO).waitFor();
   await p.getByRole('button', { name: 'Comunicar decisões às áreas' }).click();

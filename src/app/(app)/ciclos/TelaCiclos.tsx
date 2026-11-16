@@ -8,7 +8,7 @@ import { estiloPill } from '@/components/ui';
 
 export type CicloDet = {
   id: string; nome: string; descricao: string; etapa: string; etapaIdx: number; statusRotulo: string; janela: string; resumo: string;
-  etapas: { nome: string; data: string }[]; numeros: (string | number | undefined)[][]; semEnvio: string; motivos: string; comunicadoEm: string;
+  etapas: { nome: string; data: string }[]; numeros: { rotulo: string; valor: string | number | undefined; href?: string }[]; semEnvio: string; motivos: string; comunicadoEm: string;
   campos: CamposCiclo;
 };
 
@@ -97,7 +97,12 @@ export function TelaCiclos({ ciclos, empresa, modo, areas }: { ciclos: CicloDet[
               )}
 
               <div style={s('display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px')}>
-                {c.numeros.map(([r, v]) => <div key={String(r)} style={sNum}><span style={s('font-size: 12px; color: #5E5770')}>{r}</span><span style={s('font-size: 22px; font-weight: 700')}>{v}</span></div>)}
+                {c.numeros.map((n) => {
+                  const corpo = <><span style={s('font-size: 12px; color: #5E5770')}>{n.rotulo}</span><span style={s('font-size: 22px; font-weight: 700')}>{n.valor}</span></>;
+                  return n.href
+                    ? <Link key={n.rotulo} href={n.href} aria-label={`${n.rotulo}: ${n.valor}. Ver na avaliação`} style={{ ...sNum, color: '#26213A' }}>{corpo}</Link>
+                    : <div key={n.rotulo} style={sNum}>{corpo}</div>;
+                })}
               </div>
 
               {c.etapa === 'inscricoes' && c.semEnvio && (

@@ -2,7 +2,7 @@ import { exigirPerfil } from '@/lib/sessao';
 import { carregarOrg } from '@/lib/dados';
 import { addDias, br, hojeISO } from '@/lib/regras/datas';
 import { cicloVM, indiceEtapa, numerosAoVivo, rotuloEtapa, type Snapshot } from '@/lib/ciclo-vm';
-import { listaAvaliacao } from '@/lib/visoes';
+import { iniciativasDoFiltro, linkAvaliacao } from '@/lib/visoes';
 import { Shell } from '@/components/Shell';
 import { TelaCiclos, type CicloDet } from './TelaCiclos';
 
@@ -19,7 +19,8 @@ export default async function Ciclos() {
     const ativo = c.etapa !== 'encerrado';
     const n = ativo ? numerosAoVivo(d, c) : null;
     const f = (c.snapshot ?? {}) as Snapshot;
-    const prontas = ativo ? listaAvaliacao(d).itens.filter((x) => !x.comunicado && x.ini.solStatus === 'aguardando_pmo').length : 0;
+    const prontas = ativo ? iniciativasDoFiltro(d, c, 'prontas').length : 0;
+    const link = (f: Parameters<typeof linkAvaliacao>[1]) => (c.etapa === 'planejado' ? undefined : linkAvaliacao(c.id, f));
     const areasBloco = vm.blocos.find((b) => b.titulo === 'Áreas');
     return {
       id: c.id, nome: c.nome, descricao: c.descricao ?? '', etapa: c.etapa, etapaIdx: indiceEtapa(c), statusRotulo: rotuloEtapa(c),
@@ -33,8 +34,15 @@ export default async function Ciclos() {
         { nome: 'Play dos projetos', data: c.playAPartir ?? '' },
       ],
       numeros: ativo
-        ? [['Recebidas', n!.recebidas], ['Aguardando gestor', n!.aguardandoGestor], ['Prontas para avaliar', prontas], ['Áreas que enviaram', areasBloco?.linhas[0]?.v ?? '—']]
-        : [['Recebidas', f.recebidas], ['Pré-aprovadas', f.preAprovadas], ['Viraram projeto', f.viraramProjeto], ['Backlog', f.backlog], ['Recusadas', f.recusadas]].filter((x) => x[1] !== undefined),
+        ? [
+          { rotulo: 'Recebidas', valor: n!.recebidas, href: link('recebidas') },
+          { rotulo: 'Aguardando gestor', valor: n!.aguardandoGestor, href: link('gestor') },
+          { rotulo: 'Prontas para avaliar', valor: prontas, href: link('prontas') },
+          { rotulo: 'Fora do ciclo', valor: iniciativasDoFiltro(d, c, 'fora').length, href: link('fora') },
+          { rotulo: 'Áreas que enviaram', valor: areasBloco?.linhas[0]?.v ?? '—' },
+        ]
+        : ([['Recebidas', f.recebidas], ['Pré-aprovadas', f.preAprovadas], ['Viraram projeto', f.viraramProjeto], ['Backlog', f.backlog], ['Recusadas', f.recusadas]] as const)
+          .filter((x) => x[1] !== undefined).map(([rotulo, valor]) => ({ rotulo, valor })),
       semEnvio: areasBloco?.linhas.find((l) => l.k === 'Sem envio')?.v ?? '',
       motivos: (f.motivosRecusa ?? []).map(([m, q]) => `${m} (${q})`).join(' · '),
       comunicadoEm: c.comunicadoEm ? br(c.comunicadoEm) : '',

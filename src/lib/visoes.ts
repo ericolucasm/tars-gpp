@@ -1,4 +1,4 @@
-import type { DadosOrg, Iniciativa, Pessoa, ProjetoFase } from './dados';
+import type { Ciclo, DadosOrg, Iniciativa, Pessoa, ProjetoFase } from './dados';
 import { addDias, br, brCurto, diffDias, haQuanto, nomeMes } from './regras/datas';
 import { dataDaSemana, desvio, fimDoPlano, progresso, statusDaFase, tarefaAtrasada, type Fase } from './regras/projeto';
 import { acimaDoCedido, gestorDe, nomeCurto } from './regras/pessoas';
@@ -215,6 +215,46 @@ export function listaAvaliacao(d: DadosOrg) {
     return { ini: i, notas, decisao, motivoRecusa: av?.motivoRecusa ?? null, comunicado: !!av?.comunicado, nota: notaFinal(notas, d.org.config.pesos) };
   });
   return { ciclo, itens };
+}
+
+/** Filtros de status da Avaliação. Os mesmos recortes dos números do painel do ciclo (Início e Ciclos), para os números baterem com a lista. */
+export type FiltroAvaliacao = 'mesa' | 'recebidas' | 'gestor' | 'prontas' | 'fora';
+export const FILTROS_AVALIACAO: { chave: FiltroAvaliacao; rotulo: string }[] = [
+  { chave: 'mesa', rotulo: 'Na mesa do PMO' },
+  { chave: 'recebidas', rotulo: 'Recebidas' },
+  { chave: 'gestor', rotulo: 'Aguardando gestor' },
+  { chave: 'prontas', rotulo: 'Prontas para avaliar' },
+  { chave: 'fora', rotulo: 'Fora do ciclo' },
+];
+
+export function ehFiltroAvaliacao(x: unknown): x is FiltroAvaliacao {
+  return FILTROS_AVALIACAO.some((f) => f.chave === x);
+}
+
+/** Iniciativas de um ciclo num recorte de status. Fonte única para os números do painel e para a lista da Avaliação. */
+export function iniciativasDoFiltro(d: DadosOrg, c: Ciclo, filtro: FiltroAvaliacao): Iniciativa[] {
+  const atual = cicloAtual(d)?.id === c.id;
+  const recebidas = () => d.iniciativas.filter((i) => i.cicloId === c.id && i.solStatus !== 'rascunho' && i.enviadaEm);
+  switch (filtro) {
+    case 'mesa':
+      return atual ? listaAvaliacao(d).itens.map((x) => x.ini) : [];
+    case 'recebidas':
+      return recebidas();
+    case 'gestor':
+      return recebidas().filter((i) => noRaia(d, i, 'sol') && i.solStatus === 'aguardando_gestor');
+    case 'prontas':
+      // no ciclo em andamento inclui as fora do ciclo que já estão na mesa do PMO (como a lista da Avaliação)
+      return atual
+        ? listaAvaliacao(d).itens.filter((x) => !x.comunicado && x.ini.solStatus === 'aguardando_pmo').map((x) => x.ini)
+        : recebidas().filter((i) => noRaia(d, i, 'sol') && i.solStatus === 'aguardando_pmo');
+    case 'fora':
+      return d.iniciativas.filter((i) => !i.cicloId && i.enviadaEm && i.enviadaEm.toISOString().slice(0, 10) >= c.abertura && !noRaia(d, i, 'can'));
+  }
+}
+
+/** Link da Avaliação já filtrada por ciclo e status (números clicáveis do painel do ciclo). */
+export function linkAvaliacao(cicloId: string, filtro: FiltroAvaliacao) {
+  return `/avaliacao?ciclo=${cicloId}&status=${filtro}`;
 }
 
 // ---------- Datas auxiliares ----------
