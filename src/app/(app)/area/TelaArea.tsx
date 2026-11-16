@@ -3,6 +3,7 @@ import { carregarOrg } from '@/lib/dados';
 import { br, hojeISO, haQuanto } from '@/lib/regras/datas';
 import { areasSobGestao, gestorDe, iniciais, nomeCurto, timeDireto } from '@/lib/regras/pessoas';
 import { alocacaoDe, chaveDaRaia, custoDe, infoProjeto, nomeCurtoProjeto, noRaia, pessoa, projetosDaPessoa, situacaoDoCard, TIPOS, URGENCIAS } from '@/lib/visoes';
+import { detalheIniciativa } from '@/lib/detalhe';
 import { Shell } from '@/components/Shell';
 import { VisaoArea, type Aba } from './VisaoArea';
 
@@ -24,6 +25,7 @@ export async function TelaArea({ aba }: { aba: Aba }) {
     .map((i) => ({
       id: i.id, titulo: i.titulo, quem: pessoa(d, i.solicitanteId)?.nome ?? '', quando: haQuanto(i.enviadaEm?.toISOString(), hoje),
       problema: i.problema, tipo: TIPOS[i.tipo]?.rotulo ?? i.tipo, urg: URGENCIAS[i.urgencia] ?? '', urgente: i.urgencia === 'urg', custo: i.faixaCusto,
+      det: detalheIniciativa(d, i, hoje),
     }));
 
   const daArea = d.iniciativas.filter((i) => i.areaId && minhas.includes(i.areaId) && !noRaia(d, i, 'sol', 'can'));
@@ -37,7 +39,7 @@ export async function TelaArea({ aba }: { aba: Aba }) {
       const gp = pessoa(d, i.gpId);
       info = `GP: ${gp ? nomeCurto(gp.nome) : '—'} · ${ip.riscos.length ? `${ip.riscos.length} ${ip.riscos.length === 1 ? 'risco aberto' : 'riscos abertos'}` : `fim ${br(ip.fimPrevisto).slice(0, 5)}`}`;
     } else if (c === 'con') info = `Entregue em ${br(i.concluidaEm?.toISOString().slice(0, 10)).slice(0, 5)}`;
-    return { id: i.id, nome: i.titulo, tipo: projeto ? 'Projeto' : 'Iniciativa', chave: c ?? '', etapa: raia?.nome ?? '', info, farol: c === 'exe' || c === 'pau' ? i.farol : null, custo: custoDe(i) };
+    return { id: i.id, nome: i.titulo, tipo: projeto ? 'Projeto' : 'Iniciativa', chave: c ?? '', etapa: raia?.nome ?? '', info, farol: c === 'exe' || c === 'pau' ? i.farol : null, custo: custoDe(i), det: detalheIniciativa(d, i, hoje) };
   }).sort((a, b) => (a.tipo === b.tipo ? 0 : a.tipo === 'Projeto' ? -1 : 1));
 
   const time = (timeDireto(eu.id, d.pessoas, d.areas)).map((p) => {

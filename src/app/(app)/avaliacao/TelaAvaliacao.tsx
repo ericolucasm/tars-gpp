@@ -5,10 +5,11 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { s } from '@/lib/css';
 import { notaFinal, ordenarPorNota, podeComunicar } from '@/lib/regras/avaliacao';
+import { DetalheIniciativa } from '@/components/DetalheIniciativa';
+import type { Detalhe } from '@/lib/detalhe';
 import { comunicarDecisoes, darNota, decidir, definirMotivoRecusa } from '@/app/acoes/avaliacao';
 
 type Dec = 'pre' | 'bkl' | 'rec' | null;
-type Detalhe = { problema: string; resultado: string; campos: [string, string][] };
 type Linha = {
   id: string; titulo: string; area: string; tipo: string; custo: number; custoLabel: string; obrigatoria: boolean; notas: number[]; decisao: Dec; motivoRecusa: string | null; comunicado: boolean;
   editavel: boolean; situacao: string; det: Detalhe;
@@ -163,15 +164,7 @@ export function TelaAvaliacao(p: Props) {
                   </div>
                 </div>
                 {aberto && (
-                  <div id={`det-${r.id}`} role="region" aria-label={`Detalhes de ${r.titulo}`} style={s('display: flex; flex-direction: column; gap: 12px; padding: 14px; border-radius: 12px; background: #FFFFFF; border: 1px solid #EFEBE3; cursor: default')}>
-                    {r.det.problema && <div style={s('display: flex; flex-direction: column; gap: 4px')}><span style={s('font-size: 12px; font-weight: 700')}>Problema ou oportunidade</span><span style={s('font-size: 13px; color: #4A4458; line-height: 1.5')}>{r.det.problema}</span></div>}
-                    {r.det.resultado && <div style={s('display: flex; flex-direction: column; gap: 4px')}><span style={s('font-size: 12px; font-weight: 700')}>Resultado esperado</span><span style={s('font-size: 13px; color: #4A4458; line-height: 1.5')}>{r.det.resultado}</span></div>}
-                    <dl style={s('margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px 16px')}>
-                      {r.det.campos.map(([k, v]) => (
-                        <div key={k} style={s('display: flex; flex-direction: column; gap: 2px')}><dt style={s('font-size: 11px; color: #5E5770')}>{k}</dt><dd style={s('margin: 0; font-size: 13px; color: #26213A')}>{v}</dd></div>
-                      ))}
-                    </dl>
-                  </div>
+                  <DetalheIniciativa id={r.id} titulo={r.titulo} det={r.det} />
                 )}
                 {r.decisao === 'rec' && (
                   <label style={s('display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; padding-left: 4px')}>Motivo da recusa

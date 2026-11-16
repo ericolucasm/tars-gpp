@@ -1,42 +1,13 @@
 import { exigirPerfil } from '@/lib/sessao';
 import { carregarOrg } from '@/lib/dados';
-import { br, dinheiro, hojeISO } from '@/lib/regras/datas';
+import { dinheiro, hojeISO } from '@/lib/regras/datas';
 import { CRITERIOS_AVALIACAO } from '@/lib/regras/avaliacao';
-import type { DadosOrg, Iniciativa } from '@/lib/dados';
-import { custoDe, ehFiltroAvaliacao, FILTROS_AVALIACAO, iniciativasDoFiltro, listaAvaliacao, nomeArea, pessoa, pessoasAcimaDoCedido, projetosDaPessoa, rotuloCiclo, situacaoDoCard, TIPOS, URGENCIAS } from '@/lib/visoes';
+import { detalheIniciativa } from '@/lib/detalhe';
+import { custoDe, ehFiltroAvaliacao, FILTROS_AVALIACAO, iniciativasDoFiltro, listaAvaliacao, nomeArea, pessoasAcimaDoCedido, projetosDaPessoa, situacaoDoCard, TIPOS } from '@/lib/visoes';
 import { Shell } from '@/components/Shell';
 import { TelaAvaliacao } from './TelaAvaliacao';
 
 export const dynamic = 'force-dynamic';
-
-/** Informações da iniciativa para o PMO atuar (detalhe que abre abaixo da linha). */
-function detalhe(d: DadosOrg, i: Iniciativa) {
-  const sol = pessoa(d, i.solicitanteId);
-  const apr = pessoa(d, i.aprovadorId);
-  const pat = pessoa(d, i.patrocinadorId)?.nome ?? i.patrocinadorTexto ?? '';
-  const dia = (x: Date | null) => (x ? br(x.toISOString().slice(0, 10)) : '');
-  const raia = d.raias.find((r) => r.id === i.raiaId)?.nome ?? '';
-  const situacao = situacaoDoCard(d, i);
-  return {
-    problema: i.problema, resultado: i.resultadoEsperado,
-    campos: [
-      ['Situação', [raia, situacao].filter(Boolean).join(' · ')],
-      ['Ciclo', rotuloCiclo(d, i)],
-      ['Solicitante', sol ? `${sol.nome}${sol.areaId ? ' · ' + nomeArea(d, sol.areaId) : ''}` : ''],
-      ['Enviada em', dia(i.enviadaEm)],
-      ['Gestor que aprova', apr ? `${apr.nome}${i.aprovadaGestorEm ? ` · aprovou em ${dia(i.aprovadaGestorEm)}` : ''}` : ''],
-      ['Patrocinador', pat],
-      ['Urgência', `${URGENCIAS[i.urgencia] ?? ''}${i.justificativaUrgencia ? ` · ${i.justificativaUrgencia}` : ''}`],
-      ['Áreas impactadas', i.areasImpactadas.map((a) => nomeArea(d, a)).filter(Boolean).join(', ')],
-      ['Início desejado', i.inicioDesejado ?? ''],
-      ['Entrega desejada', i.entregaDesejada ?? ''],
-      ['Faixa de custo', `${i.faixaCusto}${i.custoEstimado ? ` · estimado ${dinheiro(i.custoEstimado)}` : ''}`],
-      ['Fornecedor', i.fornecedor],
-      ['Esforço', i.esforco ?? ''],
-      ['Devolução do gestor', i.devolucaoNota ?? ''],
-    ].filter(([, v]) => v) as [string, string][],
-  };
-}
 
 export default async function Avaliacao({ searchParams }: { searchParams: Promise<{ ciclo?: string; status?: string }> }) {
   const sessao = await exigirPerfil('pmo');
@@ -86,7 +57,7 @@ export default async function Avaliacao({ searchParams }: { searchParams: Promis
           ...itens.map((x) => ({
             id: x.ini.id, titulo: x.ini.titulo, area: nomeArea(d, x.ini.areaId), tipo: TIPOS[x.ini.tipo]?.rotulo ?? '', custo: custoDe(x.ini), custoLabel: dinheiro(custoDe(x.ini)),
             obrigatoria: x.ini.tipo === 'obr', notas: x.notas, decisao: x.decisao, motivoRecusa: x.motivoRecusa, comunicado: x.comunicado,
-            editavel: true, situacao: '', det: detalhe(d, x.ini),
+            editavel: true, situacao: '', det: detalheIniciativa(d, x.ini, hoje),
           })),
           // as demais do filtro aparecem só para consulta, com a avaliação que tiveram no ciclo escolhido
           ...visiveis.filter((i) => !naMesa.has(i.id)).map((i) => {
@@ -95,7 +66,7 @@ export default async function Avaliacao({ searchParams }: { searchParams: Promis
               id: i.id, titulo: i.titulo, area: nomeArea(d, i.areaId), tipo: TIPOS[i.tipo]?.rotulo ?? '', custo: custoDe(i), custoLabel: dinheiro(custoDe(i)),
               obrigatoria: i.tipo === 'obr', notas: av?.notas ?? [0, 0, 0, 0], decisao: (av?.decisao ?? null) as 'pre' | 'bkl' | 'rec' | null, motivoRecusa: av?.motivoRecusa ?? null,
               comunicado: !!av?.comunicado, editavel: false,
-              situacao: [d.raias.find((r) => r.id === i.raiaId)?.nome, situacaoDoCard(d, i)].filter(Boolean).join(' · '), det: detalhe(d, i),
+              situacao: [d.raias.find((r) => r.id === i.raiaId)?.nome, situacaoDoCard(d, i)].filter(Boolean).join(' · '), det: detalheIniciativa(d, i, hoje),
             };
           }),
         ]}
