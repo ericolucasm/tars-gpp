@@ -10,7 +10,7 @@ import { VerComo } from './VerComo';
 type Item = { href: string; rotulo: string; ativo?: boolean };
 
 export type Atual =
-  | 'inicio' | 'nova' | 'area' | 'portfolio' | 'ciclos' | 'avaliacao' | 'projetos' | 'cadastros' | 'configuracoes' | `projeto:${string}`;
+  | 'inicio' | 'nova' | 'area-iniciativas' | 'area-projetos' | 'area-time' | 'portfolio' | 'ciclos' | 'avaliacao' | 'projetos' | 'cadastros' | 'configuracoes' | `projeto:${string}`;
 
 const ROTULO_PERFIL: Record<Perfil, string> = { colaborador: 'Colaborador', gestor: 'Gestor de área', gp: 'Gerente de projeto', pmo: 'PMO' };
 
@@ -59,7 +59,7 @@ export function Shell({ sessao, dados, atual, children, mainStyle }: { sessao: S
   } else if (sessao.perfil === 'gestor') {
     topo = it('/iniciativas/nova', '+ Nova iniciativa', 'nova');
     secoes.push({ itens: [it('/inicio', 'Início', 'inicio')] });
-    secoes.push({ titulo: 'MINHA ÁREA', itens: [it('/area', 'Visão da área', 'area')] });
+    secoes.push({ titulo: 'MINHA ÁREA', itens: [it('/area/iniciativas', 'Iniciativas da área', 'area-iniciativas'), it('/area/projetos', 'Projetos da área', 'area-projetos'), it('/area/time', 'Gestão do time', 'area-time')] });
   } else if (sessao.perfil === 'gp') {
     secoes.push({ itens: [it('/inicio', 'Início', 'inicio')] });
     const exe = new Set(dados.raias.filter((r) => r.tipoCard === 'Projeto' && r.chave !== 'con').map((r) => r.id));
