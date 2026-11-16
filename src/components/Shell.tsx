@@ -16,9 +16,11 @@ export type Atual =
 const ROTULO_PERFIL: Record<Perfil, string> = { colaborador: 'Colaborador', gestor: 'Gestor de área', gp: 'Gerente de projeto', pmo: 'PMO' };
 
 const sNav = s('flex: 1 1 248px; max-width: 100%; background: #F3F0EA; border-right: 1px solid #E2DCD0; padding: 16px 12px; box-sizing: border-box; display: flex; flex-direction: column; gap: 2px; font-size: 14px');
-const sItem = s('display: flex; padding: 9px 10px; border-radius: 9px; color: #4A4458');
-const sItemAtivo = s('display: flex; padding: 9px 10px; border-radius: 9px; background: #E7E0FF; color: #4B2FD1; font-weight: 600');
-const sSecao = s('font-size: 11px; color: #6E6780; margin: 14px 10px 4px; font-weight: 600; letter-spacing: 0.4px');
+// Itens clicáveis: texto escuro, seta › à direita e fundo ao passar o mouse (classe tars-menu-item em globals.css).
+const sItem = s('display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 9px 10px; border-radius: 9px; color: #26213A; font-weight: 500');
+const sItemAtivo = s('display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 9px 10px; border-radius: 9px; background: #E7E0FF; color: #4B2FD1; font-weight: 600');
+// Títulos de seção (não clicáveis): menores, mais claros, espaçados e com linha separadora acima.
+const sSecao = s('display: block; font-size: 10.5px; color: #9A93A6; margin: 14px 10px 4px; padding-top: 14px; border-top: 1px solid #E2DCD0; font-weight: 700; letter-spacing: 1.2px; cursor: default; user-select: none');
 
 function subtitulo(sessao: Sessao, dados: DadosOrg): string {
   const p = sessao.pessoa;

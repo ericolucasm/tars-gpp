@@ -59,7 +59,7 @@ export function BarraDeNavegacao() {
 /** Item do menu lateral: ao clicar, já aparece como selecionado enquanto a tela carrega. */
 export function ItemMenu({ href, rotulo, ativo, estilo, estiloAtivo }: { href: string; rotulo: string; ativo?: boolean; estilo: React.CSSProperties; estiloAtivo: React.CSSProperties }) {
   return (
-    <Link href={href} aria-current={ativo ? 'page' : undefined} style={{ position: 'relative', display: 'block', borderRadius: 9 }}>
+    <Link href={href} aria-current={ativo ? 'page' : undefined} className="tars-menu-item" style={{ position: 'relative', display: 'block', borderRadius: 9 }}>
       <Conteudo rotulo={rotulo} ativo={!!ativo} estilo={estilo} estiloAtivo={estiloAtivo} />
     </Link>
   );
@@ -67,5 +67,11 @@ export function ItemMenu({ href, rotulo, ativo, estilo, estiloAtivo }: { href: s
 
 function Conteudo({ rotulo, ativo, estilo, estiloAtivo }: { rotulo: string; ativo: boolean; estilo: React.CSSProperties; estiloAtivo: React.CSSProperties }) {
   const { pending } = useLinkStatus();
-  return <span style={ativo || pending ? estiloAtivo : estilo}>{rotulo}</span>;
+  const on = ativo || pending;
+  return (
+    <span style={on ? estiloAtivo : estilo}>
+      <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{rotulo}</span>
+      <span aria-hidden style={{ fontSize: 16, lineHeight: 1, color: on ? '#6D4AFF' : '#B5AEC2', flex: '0 0 auto' }}>›</span>
+    </span>
+  );
 }
