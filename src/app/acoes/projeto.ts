@@ -187,7 +187,7 @@ async function sincronizarPedido(iniciativaId: string, pessoaId: string) {
     if (pendente) await db.update(t.pedidosAlocacao).set({ deltaPct: delta, aPartirDe }).where(eq(t.pedidosAlocacao.id, pendente.id));
     else {
       await db.insert(t.pedidosAlocacao).values({ orgId: ctx.dados.org.id, iniciativaId, pessoaId, deltaPct: delta, aPartirDe, solicitadoPor: ctx.eu.id });
-      await notificar(ctx.dados.org.id, [gestorDe(p, ctx.dados.areas)], `${ini.titulo} pede +${delta}% de ${p.nome}.`, '/area#capacidade');
+      await notificar(ctx.dados.org.id, [gestorDe(p, ctx.dados.areas)], `${ini.titulo} pede +${delta}% de ${p.nome}.`, '/area/time');
     }
   } else if (pendente) {
     await db.update(t.pedidosAlocacao).set({ status: 'cancelado' }).where(eq(t.pedidosAlocacao.id, pendente.id));

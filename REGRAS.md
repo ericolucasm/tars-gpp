@@ -14,7 +14,7 @@ Marcações:
 | Perfil | O que vê | Origem |
 |---|---|---|
 | Colaborador | Início (suas iniciativas e tarefas), Nova iniciativa | [Protótipo] |
-| Gestor de área | Início, Visão da área, Nova iniciativa | [Protótipo] |
+| Gestor de área | Início, Iniciativas da área, Projetos da área, Gestão do time, Nova iniciativa | [Protótipo] + [Decisão V1] |
 | Gerente de projeto (GP) | Início, Meus projetos | [Protótipo] |
 | PMO | Tudo da Gestão (Portfólio, Ciclos, Avaliação, Projetos) | [Protótipo] |
 | Admin | Configuração (Cadastros, Configurações) + seletor "ver como" | [Decisão V1] pedido do Erico |
@@ -66,7 +66,13 @@ Raias padrão, na ordem: Solicitações → Backlog → Pré-projeto → Em exec
 - **[Decisão V1]** Se não houver aprovador (topo da hierarquia), a iniciativa vai direto para avaliação do PMO.
 - **[Decisão V1]** Anexos ficam para a fase 2: o campo aparece, mas ainda não funciona.
 
-## 4. Aprovação do gestor (Visão da área)
+## 4. Aprovação do gestor (menus da área)
+
+- **[Decisão V1]** A antiga "Visão da área" do protótipo foi dividida em três menus (pedido da Mariana):
+  - **Iniciativas da área** (`/area/iniciativas`): iniciativas esperando a aprovação do gestor e as iniciativas da área que já seguem no portfólio (backlog, pré-projeto).
+  - **Projetos da área** (`/area/projetos`): projetos da área que estão rodando, ou seja, em execução e pausados (em execução primeiro). Concluídos e cancelados não aparecem.
+  - **Gestão do time** (`/area/time`): quanto cada pessoa pode ceder e os pedidos de alocação.
+  - Os quatro números do topo aparecem nos três menus e levam ao menu certo. O endereço antigo `/area` (e avisos antigos com `#aprovacoes` ou `#capacidade`) leva para o menu novo correspondente.
 
 - **[Protótipo]** O gestor pode **Aprovar e enviar ao PMO** ou **Devolver para ajuste** com um comentário.
 - **[Implícita]** A iniciativa devolvida volta para o solicitante, que vê o comentário e o botão "Ajustar e reenviar". Ao reenviar, volta para o gestor.

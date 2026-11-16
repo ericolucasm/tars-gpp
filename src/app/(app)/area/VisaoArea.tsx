@@ -1,16 +1,24 @@
 'use client';
 
 import { useEffect, useState, useTransition } from 'react';
+import Link from 'next/link';
 import { s } from '@/lib/css';
 import { FAROL, type Farol } from '@/lib/regras/projeto';
 import { aprovarComoGestor, definirCedencia, devolverParaAjuste, responderPedido } from '@/app/acoes/gestor';
 
 type Aprovacao = { id: string; titulo: string; quem: string; quando: string; problema: string; tipo: string; urg: string; urgente: boolean; custo: string };
-type Linha = { id: string; nome: string; tipo: string; etapa: string; info: string; farol: string | null };
+type Linha = { id: string; nome: string; tipo: string; chave: string; etapa: string; info: string; farol: string | null };
+export type Aba = 'iniciativas' | 'projetos' | 'time';
+
+const TEXTO: Record<Aba, string> = {
+  iniciativas: 'Iniciativas da sua área esperando aprovação e as que já seguem no portfólio.',
+  projetos: 'Projetos da sua área que estão rodando.',
+  time: 'Quanto cada pessoa do time pode ceder e os pedidos de alocação.',
+};
 type Membro = { id: string; nome: string; ini: string; papel: string; cap: number; aloc: number; alocado: string };
 type Pedido = { id: string; texto: string; delta: number };
 
-export function VisaoArea(p: { trilha: string; nome: string; escopo: string; aprovacoes: Aprovacao[]; linhas: Linha[]; time: Membro[]; pedidos: Pedido[]; emExecucao: number }) {
+export function VisaoArea(p: { aba: Aba; trilha: string; nome: string; escopo: string; aprovacoes: Aprovacao[]; linhas: Linha[]; time: Membro[]; pedidos: Pedido[]; emExecucao: number; rodando: number }) {
   const [toast, setToast] = useState('');
   const [devolvendo, setDevolvendo] = useState<string | null>(null);
   const [nota, setNota] = useState('');
@@ -25,7 +33,9 @@ export function VisaoArea(p: { trilha: string; nome: string; escopo: string; apr
   });
 
   const acima = p.time.filter((m) => m.aloc > (caps[m.id] ?? m.cap)).length;
-  const sKpi = s('background: #FFFFFF; border: 1px solid #E8E3D9; border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px');
+  const sKpi = s('background: #FFFFFF; border: 1px solid #E8E3D9; border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; color: #26213A');
+  const iniciativas = p.linhas.filter((l) => l.tipo !== 'Projeto');
+  const projetos = p.linhas.filter((l) => l.chave === 'exe' || l.chave === 'pau').sort((a, b) => (a.chave === b.chave ? 0 : a.chave === 'exe' ? -1 : 1));
 
   return (
     <>
@@ -33,21 +43,21 @@ export function VisaoArea(p: { trilha: string; nome: string; escopo: string; apr
         <div style={s('display: flex; flex-direction: column; gap: 4px')}>
           <span style={s('font-size: 12px; color: #5E5770')}>{p.trilha}</span>
           <h1 style={s('margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.3px')}>Olá, {p.nome.split(' ')[0]}</h1>
-          <p style={s('margin: 0; font-size: 14px; color: #5E5770')}>Iniciativas, projetos e pessoas da sua área em um só lugar.</p>
+          <p style={s('margin: 0; font-size: 14px; color: #5E5770')}>{TEXTO[p.aba]}</p>
         </div>
         <span style={s('height: 40px; padding: 0 14px; border-radius: 10px; border: 1px solid #E2DCD0; background: #FFFFFF; color: #26213A; font-size: 13px; display: inline-flex; align-items: center')}>{p.escopo}</span>
       </div>
 
       <div style={s('display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px')}>
-        <div style={sKpi}><span style={s('font-size: 12px; color: #5E5770')}>Aguardando sua decisão</span><span style={s('font-size: 26px; font-weight: 700; color: #4B2FD1')}>{p.aprovacoes.length + p.pedidos.length}</span></div>
-        <div style={sKpi}><span style={s('font-size: 12px; color: #5E5770')}>Iniciativas e projetos da área</span><span style={s('font-size: 26px; font-weight: 700')}>{p.linhas.length}</span></div>
-        <div style={sKpi}><span style={s('font-size: 12px; color: #5E5770')}>Projetos em execução</span><span style={s('font-size: 26px; font-weight: 700')}>{p.emExecucao}</span></div>
-        <div style={sKpi}><span style={s('font-size: 12px; color: #5E5770')}>Pessoas acima do cedido</span><span style={{ ...s('font-size: 26px; font-weight: 700'), color: acima > 0 ? '#9A5B05' : '#26213A' }}>{acima}</span></div>
+        <Link href="/area/iniciativas" style={sKpi}><span style={s('font-size: 12px; color: #5E5770')}>Iniciativas aguardando sua aprovação</span><span style={s('font-size: 26px; font-weight: 700; color: #4B2FD1')}>{p.aprovacoes.length}</span></Link>
+        <Link href="/area/projetos" style={sKpi}><span style={s('font-size: 12px; color: #5E5770')}>Projetos em execução</span><span style={s('font-size: 26px; font-weight: 700')}>{p.emExecucao}</span></Link>
+        <Link href="/area/time" style={sKpi}><span style={s('font-size: 12px; color: #5E5770')}>Pedidos de alocação</span><span style={{ ...s('font-size: 26px; font-weight: 700'), color: p.pedidos.length ? '#4B2FD1' : '#26213A' }}>{p.pedidos.length}</span></Link>
+        <Link href="/area/time" style={sKpi}><span style={s('font-size: 12px; color: #5E5770')}>Pessoas acima do cedido</span><span style={{ ...s('font-size: 26px; font-weight: 700'), color: acima > 0 ? '#9A5B05' : '#26213A' }}>{acima}</span></Link>
       </div>
 
       {toast && <div role="status" style={s('padding: 12px 16px; border-radius: 12px; background: #EFEAFE; color: #3A22A8; font-size: 13px; font-weight: 600')}>{toast}</div>}
 
-      <section id="aprovacoes" aria-label="Aprovações pendentes" style={s('background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px')}>
+      {p.aba === 'iniciativas' && <section id="aprovacoes" aria-label="Aprovações pendentes" style={s('background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px')}>
         <div style={s('display: flex; flex-direction: column; gap: 2px')}><h2 style={s('margin: 0; font-size: 18px; font-weight: 700')}>Iniciativas aguardando sua aprovação</h2><span style={s('font-size: 12px; color: #5E5770')}>Ao aprovar, a iniciativa segue para avaliação do PMO no fechamento do ciclo.</span></div>
         {p.aprovacoes.map((a) => {
           const ret = devolvendo === a.id;
@@ -87,31 +97,12 @@ export function VisaoArea(p: { trilha: string; nome: string; escopo: string; apr
           );
         })}
         {p.aprovacoes.length === 0 && <div style={s('border: 1px dashed #D6CFC2; border-radius: 12px; padding: 18px; font-size: 13px; color: #5E5770; text-align: center')}>Tudo em dia. Nenhuma iniciativa aguardando você.</div>}
-      </section>
+      </section>}
 
       <div style={s('display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start')}>
-        <section aria-label="Iniciativas e projetos da área" style={s('flex: 999 1 520px; min-width: 0; background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 10px')}>
-          <h2 style={s('margin: 0; font-size: 18px; font-weight: 700')}>Iniciativas e projetos da área</h2>
-          <div style={s('overflow-x: auto')}>
-            <div style={s('min-width: 560px; display: flex; flex-direction: column')}>
-              <div style={s('display: grid; grid-template-columns: 2.2fr 1.1fr 1.6fr 0.8fr; gap: 10px; padding: 8px 4px; font-size: 12px; color: #5E5770; font-weight: 600; border-bottom: 1px solid #EFEBE3')}><span>Nome</span><span>Etapa</span><span>Situação / GP</span><span>Farol</span></div>
-              {p.linhas.map((r) => {
-                const f = r.farol ? FAROL[r.farol as Farol] : null;
-                return (
-                  <div key={r.id} style={s('display: grid; grid-template-columns: 2.2fr 1.1fr 1.6fr 0.8fr; gap: 10px; padding: 12px 4px; font-size: 13px; border-bottom: 1px solid #F3F0EA; align-items: center')}>
-                    <span style={s('display: flex; flex-direction: column')}><span style={s('font-weight: 600')}>{r.nome}</span><span style={s('font-size: 11px; color: #5E5770')}>{r.tipo}</span></span>
-                    <span>{r.etapa}</span>
-                    <span style={s('color: #4A4458')}>{r.info}</span>
-                    {f ? <span style={{ ...s('font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 10px; justify-self: start'), background: f.bg, color: f.fg }}>{f.rotulo}</span> : <span style={s('font-size: 12px; color: #8A8296')}>—</span>}
-                  </div>
-                );
-              })}
-              {p.linhas.length === 0 && <span style={s('font-size: 13px; color: #5E5770; padding: 12px 4px')}>Nenhuma iniciativa ou projeto da área ainda.</span>}
-            </div>
-          </div>
-        </section>
-
-        <section id="capacidade" aria-label="Capacidade do time" style={s('flex: 1 1 420px; min-width: 0; background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px')}>
+        {p.aba !== 'time' && <TabelaArea titulo={p.aba === 'iniciativas' ? 'Iniciativas da área no portfólio' : 'Projetos da área'} linhas={p.aba === 'iniciativas' ? iniciativas : projetos}
+          vazio={p.aba === 'iniciativas' ? 'Nenhuma iniciativa da área no portfólio ainda.' : 'Nenhum projeto da área rodando agora.'} />}
+        {p.aba === 'time' && <section id="capacidade" aria-label="Capacidade do time" style={s('flex: 1 1 420px; min-width: 0; background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px')}>
           <div style={s('display: flex; flex-direction: column; gap: 2px')}><h2 style={s('margin: 0; font-size: 18px; font-weight: 700')}>Quanto o time pode ceder</h2><span style={s('font-size: 12px; color: #5E5770')}>Você conhece a operação: defina o máximo de cada pessoa para projetos.</span></div>
           {p.pedidos.map((x) => (
             <div key={x.id} style={s('padding: 12px; border-radius: 12px; background: #FEF3DC; display: flex; flex-direction: column; gap: 8px')}>
@@ -150,8 +141,33 @@ export function VisaoArea(p: { trilha: string; nome: string; escopo: string; apr
             );
           })}
           {p.time.length === 0 && <span style={s('font-size: 13px; color: #5E5770')}>Ninguém no seu time ainda.</span>}
-        </section>
+        </section>}
       </div>
     </>
+  );
+}
+
+function TabelaArea({ titulo, linhas, vazio }: { titulo: string; linhas: Linha[]; vazio: string }) {
+  return (
+    <section aria-label={titulo} style={s('flex: 999 1 520px; min-width: 0; background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 10px')}>
+      <h2 style={s('margin: 0; font-size: 18px; font-weight: 700')}>{titulo}</h2>
+      <div style={s('overflow-x: auto')}>
+        <div style={s('min-width: 560px; display: flex; flex-direction: column')}>
+          <div style={s('display: grid; grid-template-columns: 2.2fr 1.1fr 1.6fr 0.8fr; gap: 10px; padding: 8px 4px; font-size: 12px; color: #5E5770; font-weight: 600; border-bottom: 1px solid #EFEBE3')}><span>Nome</span><span>Etapa</span><span>Situação / GP</span><span>Farol</span></div>
+          {linhas.map((r) => {
+            const f = r.farol ? FAROL[r.farol as Farol] : null;
+            return (
+              <div key={r.id} style={s('display: grid; grid-template-columns: 2.2fr 1.1fr 1.6fr 0.8fr; gap: 10px; padding: 12px 4px; font-size: 13px; border-bottom: 1px solid #F3F0EA; align-items: center')}>
+                <span style={s('display: flex; flex-direction: column')}><span style={s('font-weight: 600')}>{r.nome}</span><span style={s('font-size: 11px; color: #5E5770')}>{r.tipo}</span></span>
+                <span>{r.etapa}</span>
+                <span style={s('color: #4A4458')}>{r.info}</span>
+                {f ? <span style={{ ...s('font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 10px; justify-self: start'), background: f.bg, color: f.fg }}>{f.rotulo}</span> : <span style={s('font-size: 12px; color: #8A8296')}>—</span>}
+              </div>
+            );
+          })}
+          {linhas.length === 0 && <span style={s('font-size: 13px; color: #5E5770; padding: 12px 4px')}>{vazio}</span>}
+        </div>
+      </div>
+    </section>
   );
 }

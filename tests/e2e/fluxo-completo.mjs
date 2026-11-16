@@ -45,6 +45,7 @@ try {
   // 2. Fernanda aprova uma e devolve a outra
   p = await como('fernanda.oliveira@acme.com.br');
   await ir(p, '/area');
+  await p.waitForURL(/\/area\/iniciativas$/); // endereço antigo leva para Iniciativas da área
   let card = p.locator('#aprovacoes > div').filter({ hasText: TITULO }).first();
   await card.getByRole('button', { name: 'Aprovar e enviar ao PMO' }).click();
   await p.getByText(`“${TITULO}” aprovada e enviada ao PMO.`).waitFor();
@@ -160,9 +161,21 @@ try {
   ok('PMO vê o pedido na tela inicial e aprova a mudança');
   await p.context().close();
 
-  // 8. Fernanda responde o pedido de alocação do Diego
+  // 8. Fernanda navega pelos três menus da área e responde o pedido de alocação do Diego
   p = await como('fernanda.oliveira@acme.com.br');
-  await ir(p, '/area');
+  await ir(p, '/inicio');
+  await p.getByRole('link', { name: 'Projetos da área' }).first().click();
+  await p.waitForURL(/\/area\/projetos$/);
+  await p.getByRole('region', { name: 'Projetos da área' }).getByText(TITULO).waitFor();
+  await p.getByRole('link', { name: 'Iniciativas da área' }).click();
+  await p.waitForURL(/\/area\/iniciativas$/);
+  await p.getByRole('region', { name: 'Aprovações pendentes' }).waitFor();
+  await p.getByRole('link', { name: 'Gestão do time' }).click();
+  await p.waitForURL(/\/area\/time$/);
+  if (await p.getByRole('region', { name: 'Aprovações pendentes' }).count()) throw new Error('Gestão do time não deveria mostrar aprovações');
+  await ir(p, '/area#capacidade'); // aviso antigo leva para Gestão do time
+  await p.waitForURL(/\/area\/time$/);
+  ok('Gestora navega por Iniciativas da área, Projetos da área e Gestão do time');
   const ped = p.locator('#capacidade > div').filter({ hasText: 'Diego Santos' }).first();
   await ped.getByRole('button', { name: /Ceder \+10%/ }).click();
   await p.getByText(/Você cedeu \+10% de Diego Santos/).waitFor();
@@ -175,7 +188,7 @@ try {
   const verComo = p.getByLabel('Admin · ver como');
   await verComo.selectOption({ label: 'Fernanda Oliveira · Logística' });
   await p.getByRole('heading', { name: /Fernanda/ }).waitFor();
-  await p.getByRole('link', { name: 'Visão da área' }).waitFor(); // menu de gestora, como a Fernanda vê
+  await p.getByRole('link', { name: 'Iniciativas da área' }).waitFor(); // menu de gestora, como a Fernanda vê
   ok('Admin escolhe a Fernanda no "ver como" e vê o app como ela');
   await verComo.selectOption({ label: 'Mariana · PMO (você)' });
   await p.getByRole('heading', { name: /Mariana/ }).waitFor();

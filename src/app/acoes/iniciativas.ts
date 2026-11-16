@@ -51,7 +51,7 @@ export async function salvarIniciativa(f: DadosForm, enviar: boolean) {
       const [row] = await db.insert(t.iniciativas).values({ orgId: dados.org.id, solicitanteId: eu.id, raiaId: sol.id, solStatus: status, ...campos, ...envio }).returning({ id: t.iniciativas.id });
       novoId = row.id;
     }
-    if (enviar && aprovador) await notificar(dados.org.id, [aprovador], `${eu.nome} enviou "${campos.titulo}" para sua aprovação.`, '/area#aprovacoes');
+    if (enviar && aprovador) await notificar(dados.org.id, [aprovador], `${eu.nome} enviou "${campos.titulo}" para sua aprovação.`, '/area/iniciativas');
   });
   return { ...r, id: novoId };
 }

@@ -28,21 +28,21 @@ export function InicioGestor({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao;
   const itens: React.ReactNode[] = [];
   for (const i of urgentes) {
     const sol = pessoa(d, i.solicitanteId);
-    itens.push(<ItemAcao key={i.id} href="/area#aprovacoes" tom="ambar" titulo={`Aprovar: ${i.titulo}`} sub={`${sol?.nome ?? ''} · ${i.tipo === 'obr' ? 'obrigatória' : 'urgente'} · esperando há ${espera(i.enviadaEm)} ${espera(i.enviadaEm) === 1 ? 'dia' : 'dias'}`} acao="Decidir →" />);
+    itens.push(<ItemAcao key={i.id} href="/area/iniciativas" tom="ambar" titulo={`Aprovar: ${i.titulo}`} sub={`${sol?.nome ?? ''} · ${i.tipo === 'obr' ? 'obrigatória' : 'urgente'} · esperando há ${espera(i.enviadaEm)} ${espera(i.enviadaEm) === 1 ? 'dia' : 'dias'}`} acao="Decidir →" />);
   }
   if (demais.length === 1) {
     const i = demais[0];
-    itens.push(<ItemAcao key="dem" href="/area#aprovacoes" titulo={`Aprovar: ${i.titulo}`} sub={`${pessoa(d, i.solicitanteId)?.nome ?? ''} · enviada há ${espera(i.enviadaEm)} dia(s)`} acao="Decidir →" />);
+    itens.push(<ItemAcao key="dem" href="/area/iniciativas" titulo={`Aprovar: ${i.titulo}`} sub={`${pessoa(d, i.solicitanteId)?.nome ?? ''} · enviada há ${espera(i.enviadaEm)} dia(s)`} acao="Decidir →" />);
   } else if (demais.length > 1) {
-    itens.push(<ItemAcao key="dem" href="/area#aprovacoes" titulo={`Aprovar ${urgentes.length ? 'mais ' : ''}${demais.length} iniciativas do time`}
+    itens.push(<ItemAcao key="dem" href="/area/iniciativas" titulo={`Aprovar ${urgentes.length ? 'mais ' : ''}${demais.length} iniciativas do time`}
       sub={demais.map((i) => `${i.titulo} (${primeiroNome(pessoa(d, i.solicitanteId)?.nome ?? '')})`).join(' · ')} acao="Decidir →" />);
   }
   for (const p of pedidos) {
     const proj = d.iniciativas.find((i) => i.id === p.iniciativaId);
-    itens.push(<ItemAcao key={p.id} href="/area#capacidade" titulo="Pedido de alocação" sub={`${proj?.titulo ?? ''} pede +${p.deltaPct}% de ${pessoa(d, p.pessoaId)?.nome ?? ''}${p.aPartirDe ? ` a partir de ${p.aPartirDe}` : ''}`} acao="Responder →" />);
+    itens.push(<ItemAcao key={p.id} href="/area/time" titulo="Pedido de alocação" sub={`${proj?.titulo ?? ''} pede +${p.deltaPct}% de ${pessoa(d, p.pessoaId)?.nome ?? ''}${p.aPartirDe ? ` a partir de ${p.aPartirDe}` : ''}`} acao="Responder →" />);
   }
   for (const x of acima) {
-    itens.push(<ItemAcao key={x.p.id} href="/area#capacidade" titulo={`${x.p.nome} está acima do que você cedeu`} sub={`${x.aloc}% em projetos, limite de ${x.p.cedeAte}%`} acao="Ajustar →" />);
+    itens.push(<ItemAcao key={x.p.id} href="/area/time" titulo={`${x.p.nome} está acima do que você cedeu`} sub={`${x.aloc}% em projetos, limite de ${x.p.cedeAte}%`} acao="Ajustar →" />);
   }
 
   const minhas = new Set(areasSobGestao(eu.id, d.areas));
@@ -66,7 +66,7 @@ export function InicioGestor({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao;
         {itens.length ? itens : <Vazio>Tudo em dia. Nenhuma decisão esperando você.</Vazio>}
       </section>
       <div style={s('display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px')}>
-        <Link href="/area" style={sCard}>
+        <Link href="/area/projetos" style={sCard}>
           <h2 style={s('margin: 0; font-size: 15px; font-weight: 700')}>Projetos da área</h2>
           {projetos.length === 0 && <span style={s('font-size: 13px; color: #5E5770')}>Nenhum projeto em execução.</span>}
           {projetos.map((p) => (
@@ -75,13 +75,13 @@ export function InicioGestor({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao;
           {(nPre > 0 || nBkl > 0) && <span style={s('font-size: 12px; color: #5E5770')}>+ {nPre} em pré-projeto e {nBkl} no backlog</span>}
         </Link>
         {ciclo && (
-          <Link href="/area" style={{ ...sCard, gap: 10 }}>
+          <Link href="/area/iniciativas" style={{ ...sCard, gap: 10 }}>
             <span style={s('font-size: 12px; font-weight: 700; color: #4B2FD1; letter-spacing: 0.3px')}>CICLO {ciclo.nome.toUpperCase()}</span>
             <span style={s('font-size: 15px; font-weight: 700')}>Sua área enviou {doCiclo.length} {doCiclo.length === 1 ? 'iniciativa' : 'iniciativas'}</span>
             <span style={s('font-size: 13px; color: #4A4458')}>{aprovadasPorMim} já {aprovadasPorMim === 1 ? 'aprovada' : 'aprovadas'} por você · {aguardando} aguardando{ciclo.etapa === 'inscricoes' ? ` · inscrições até ${br(ciclo.fechamento).slice(0, 5)}` : ''}</span>
           </Link>
         )}
-        <Link href="/area#capacidade" style={{ ...sCard, gap: 10 }}>
+        <Link href="/area/time" style={{ ...sCard, gap: 10 }}>
           <h2 style={s('margin: 0; font-size: 15px; font-weight: 700')}>Time em projetos</h2>
           <span style={s('font-size: 26px; font-weight: 700')}>{alocados} de {time.length}</span>
           <span style={s('font-size: 13px; color: #4A4458')}>pessoas alocadas · média de {media}% do tempo</span>
