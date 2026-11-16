@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { s } from '@/lib/css';
 import { addDias, br } from '@/lib/regras/datas';
-import { desvio as calcDesvio, farolSugerido, fimDoPlano, FAROL, mesesDaLinha, rotuloDesvioCurto, type Fase, type Farol } from '@/lib/regras/projeto';
+import { desvio as calcDesvio, farolSugerido, fimDoPlano, FAROL, mesesDaLinha, reordenar, rotuloDesvioCurto, type Fase, type Farol } from '@/lib/regras/projeto';
 import * as A from '@/app/acoes/projeto';
 
 type FaseVM = Fase & { criterio: string; confirmada: string | null };
@@ -22,6 +22,8 @@ type Props = {
 };
 
 const W = 30; // px por semana
+const ROW = 53; // altura de uma linha de fase (52px + borda)
+const COL = 280; // largura da coluna com o nome da fase
 
 function msEstilo(status: string) {
   const c = status === 'Atingido' ? ['#E3F5EA', '#17723D'] : status === 'Em risco' ? ['#FEF3DC', '#9A5B05'] : ['#EDEAE3', '#4A4458'];
@@ -43,7 +45,9 @@ export function TelaProjeto({ p }: { p: Props }) {
   const [farol, setFarol] = useState<Farol>(p.farol);
   const [aviso, setAviso] = useState('');
   const [pend, start] = useTransition();
-  useEffect(() => { if (!drag) setFases(p.fases); }, [p.fases]); // eslint-disable-line react-hooks/exhaustive-deps
+  // reordenar (arrastar a fase para cima/baixo): guarda a ordem do começo do arraste
+  const [vdrag, setVdrag] = useState<{ id: string; y0: number; ordem0: string[] } | null>(null);
+  useEffect(() => { if (!drag && !vdrag) setFases(p.fases); }, [p.fases]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => setFarol(p.farol), [p.farol]);
   const moveu = useRef(false);
 
@@ -66,7 +70,25 @@ export function TelaProjeto({ p }: { p: Props }) {
   const sug = farolSugerido(dv, acimaIds.length);
   const feitas = p.tarefas.filter((t) => t.concluida).length;
 
+  function salvarOrdem(ids: string[]) {
+    rodar(() => A.reordenarFases(p.id, ids));
+  }
+  function moverNaLista(id: string, delta: number) {
+    const ids = fases.map((f) => f.id);
+    const de = ids.indexOf(id);
+    const nova = reordenar(fases, de, de + delta);
+    if (nova.map((f) => f.id).join() === ids.join()) return;
+    setFases(nova);
+    salvarOrdem(nova.map((f) => f.id));
+  }
   function onMove(e: React.PointerEvent) {
+    if (vdrag) {
+      const de = vdrag.ordem0.indexOf(vdrag.id);
+      const para = de + Math.round((e.clientY - vdrag.y0) / ROW);
+      const ordem = reordenar(vdrag.ordem0, de, para);
+      setFases((fs) => ordem.map((id) => fs.find((f) => f.id === id)!).filter(Boolean));
+      return;
+    }
     if (!drag) return;
     const dw = Math.round((e.clientX - drag.x0) / W);
     setFases((fs) => fs.map((f) => {
@@ -76,6 +98,12 @@ export function TelaProjeto({ p }: { p: Props }) {
     }));
   }
   function onUp() {
+    if (vdrag) {
+      const ids = fases.map((f) => f.id);
+      setVdrag(null);
+      if (ids.join() !== vdrag.ordem0.join()) salvarOrdem(ids);
+      return;
+    }
     if (!drag) return;
     const f = fases.find((x) => x.id === drag.id);
     setDrag(null);
@@ -136,32 +164,38 @@ export function TelaProjeto({ p }: { p: Props }) {
 
       <section aria-label="Linha do tempo" style={s('background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px')}>
         <div style={s('display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center')}>
-          <div style={s('display: flex; flex-direction: column; gap: 2px')}><h2 style={s('margin: 0; font-size: 18px; font-weight: 700')}>Linha do tempo</h2><span style={s('font-size: 12px; color: #5E5770')}>{p.base ? 'Linha de base congelada. Mudanças agora geram desvio.' : 'Gerada a partir do modelo e das datas da iniciativa. Arraste as barras e congele a linha de base.'}</span></div>
+          <div style={s('display: flex; flex-direction: column; gap: 2px')}><h2 style={s('margin: 0; font-size: 18px; font-weight: 700')}>Linha do tempo</h2><span style={s('font-size: 12px; color: #5E5770')}>{p.base ? 'Linha de base congelada. Mudanças agora geram desvio.' : 'Gerada a partir do modelo e das datas da iniciativa. Arraste as barras e congele a linha de base.'} Use ⠿ ou as setas para reordenar as fases.</span></div>
           <div style={s('display: flex; flex-wrap: wrap; gap: 8px')}>
             <button type="button" disabled={pend} onClick={() => rodar(() => A.recriarDoModelo(p.id))} style={s('height: 38px; padding: 0 14px; border-radius: 10px; border: 1px solid #E2DCD0; background: #FFFFFF; color: #26213A; font-size: 13px')}>Recriar a partir do modelo</button>
             <button type="button" disabled={pend} onClick={() => rodar(() => A.congelarLinhaBase(p.id), true)} style={s('height: 38px; padding: 0 14px; border-radius: 10px; border: 0; background: #6D4AFF; color: #FFFFFF; font-weight: 600; font-size: 13px')}>{p.base ? 'Atualizar linha de base' : 'Congelar linha de base'}</button>
           </div>
         </div>
         <div style={s('overflow-x: auto; border: 1px solid #EFEBE3; border-radius: 12px')}>
-          <div onPointerMove={onMove} onPointerUp={onUp} onPointerLeave={onUp} style={{ ...s('user-select: none'), minWidth: 240 + semanas * W }}>
+          <div onPointerMove={onMove} onPointerUp={onUp} onPointerLeave={onUp} style={{ ...s('user-select: none'), minWidth: COL + semanas * W }}>
             <div style={s('display: flex; border-bottom: 1px solid #EFEBE3; background: #FAF8F4')}>
-              <div style={s('flex: 0 0 240px; padding: 8px 12px; font-size: 12px; color: #5E5770; font-weight: 600')}>Fase · clique para detalhar</div>
+              <div style={{ ...s('padding: 8px 12px; font-size: 12px; color: #5E5770; font-weight: 600'), flex: `0 0 ${COL}px` }}>Fase · clique para detalhar</div>
               <div style={{ display: 'flex', flex: `0 0 ${semanas * W}px` }}>
                 {meses.map(([r, n], i) => <div key={i} style={{ ...s('padding: 8px; box-sizing: border-box; font-size: 12px; font-weight: 600; color: #4A4458; border-left: 1px solid #EFEBE3; white-space: nowrap; overflow: hidden'), flex: `0 0 ${n * W}px` }}>{r}</div>)}
               </div>
             </div>
-            {fases.map((f) => {
+            {fases.map((f, idx) => {
               const st = statusFase(f);
+              const subindo = vdrag?.id === f.id;
               const base = p.base?.find((b) => b.id === f.id);
               const on = sel === f.id;
               const arrastando = drag?.id === f.id;
               return (
-                <div key={f.id} style={{ ...s('display: flex; border-bottom: 1px solid #F3F0EA'), background: on ? '#F6F3FF' : '#FFFFFF' }}>
-                  <div style={s('flex: 0 0 240px; padding: 6px 8px 6px 12px; display: flex; align-items: center; gap: 6px; box-sizing: border-box')}>
+                <div key={f.id} style={{ ...s('display: flex; border-bottom: 1px solid #F3F0EA'), background: subindo ? '#EFEAFE' : on ? '#F6F3FF' : '#FFFFFF', boxShadow: subindo ? '0 2px 10px rgba(38, 33, 58, 0.15)' : 'none', position: 'relative', zIndex: subindo ? 1 : 0 }}>
+                  <div style={{ ...s('padding: 6px 4px 6px 6px; display: flex; align-items: center; gap: 4px; box-sizing: border-box'), flex: `0 0 ${COL}px` }}>
+                    <span role="img" aria-label={`Arrastar ${f.nome} para cima ou para baixo`} title="Arraste para reordenar"
+                      onPointerDown={(e) => { e.preventDefault(); setVdrag({ id: f.id, y0: e.clientY, ordem0: fases.map((x) => x.id) }); }}
+                      style={{ ...s('width: 20px; height: 32px; display: flex; align-items: center; justify-content: center; color: #8A8296; font-size: 14px; touch-action: none; flex: 0 0 20px'), cursor: subindo ? 'grabbing' : 'grab' }}>⠿</span>
                     <button type="button" aria-pressed={on} onClick={() => setSel(on ? '' : f.id)} style={s('flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; border: 0; background: transparent; padding: 4px 0; text-align: left; color: #26213A')}>
-                      <span style={s('font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px')}>{f.nome}</span>
+                      <span style={s('font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px')}>{f.nome}</span>
                       <span style={{ fontSize: 11, color: st === 'Em andamento' ? '#4B2FD1' : '#6E6780' }}>{st}{f.confirmada ? ' · confirmada' : ''}</span>
                     </button>
+                    <button type="button" aria-label={`Subir fase ${f.nome}`} disabled={pend || idx === 0} onClick={() => moverNaLista(f.id, -1)} style={{ ...s('width: 24px; height: 32px; border-radius: 6px; border: 0; background: transparent; font-size: 12px; padding: 0'), color: idx === 0 ? '#D6CFC2' : '#6E6780' }}>↑</button>
+                    <button type="button" aria-label={`Descer fase ${f.nome}`} disabled={pend || idx === fases.length - 1} onClick={() => moverNaLista(f.id, 1)} style={{ ...s('width: 24px; height: 32px; border-radius: 6px; border: 0; background: transparent; font-size: 12px; padding: 0'), color: idx === fases.length - 1 ? '#D6CFC2' : '#6E6780' }}>↓</button>
                     <button type="button" aria-label={`Remover fase ${f.nome}`} onClick={() => { if (confirm(`Remover a fase "${f.nome}"? As tarefas, alocações, marcos e riscos dela também serão apagados.`)) rodar(() => A.removerFase(f.id)); }} style={s('width: 32px; height: 32px; border-radius: 8px; border: 0; background: transparent; color: #8A8296; font-size: 16px')}>×</button>
                   </div>
                   <div style={{ ...s('position: relative; height: 52px'), flex: `0 0 ${semanas * W}px`, backgroundImage: 'linear-gradient(to right, #F3F0EA 1px, transparent 1px)', backgroundSize: `${W}px 52px` }}>

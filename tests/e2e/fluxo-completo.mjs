@@ -158,6 +158,26 @@ try {
   await p.getByRole('button', { name: 'Aprovar mudança' }).click();
   await p.getByText('Mudança aprovada. A nova linha de base vale a partir de agora.').waitFor();
   ok('PMO vê o pedido na tela inicial e aprova a mudança');
+
+  // 7b. PMO reordena as fases da linha do tempo (seta e arraste); a ordem fica gravada
+  const ordemFases = async () => (await p.getByRole('button', { name: /^Subir fase / }).evaluateAll((bs) => bs.map((b) => b.getAttribute('aria-label').replace('Subir fase ', ''))));
+  const antes = await ordemFases();
+  await p.getByRole('button', { name: `Descer fase ${antes[0]}` }).click();
+  await p.waitForTimeout(1200);
+  await p.reload({ waitUntil: 'networkidle' });
+  let depois = await ordemFases();
+  if (depois[0] !== antes[1] || depois[1] !== antes[0]) throw new Error(`Seta não reordenou: ${depois.join(', ')}`);
+  const alca = p.getByRole('img', { name: `Arrastar ${antes[0]} para cima ou para baixo` });
+  const bx = await alca.boundingBox();
+  await p.mouse.move(bx.x + bx.width / 2, bx.y + bx.height / 2);
+  await p.mouse.down();
+  await p.mouse.move(bx.x + bx.width / 2, bx.y + bx.height / 2 - 53, { steps: 8 });
+  await p.mouse.up();
+  await p.waitForTimeout(1200);
+  await p.reload({ waitUntil: 'networkidle' });
+  depois = await ordemFases();
+  if (depois.join() !== antes.join()) throw new Error(`Arraste não reordenou: ${depois.join(', ')}`);
+  ok('PMO reordena as fases da linha do tempo pela seta e pelo arraste');
   await p.context().close();
 
   // 8. Fernanda responde o pedido de alocação do Diego

@@ -101,6 +101,7 @@ Raias padrão, na ordem: Solicitações → Backlog → Pré-projeto → Em exec
 ## 7. Projeto (visão do GP e do PMO)
 
 - **[Protótipo]** Linha do tempo em semanas. As barras de fase podem ser arrastadas (mover) e redimensionadas (duração). Fases podem ser adicionadas pela biblioteca e removidas.
+- **[Decisão V1]** As fases podem ser **reordenadas** na linha do tempo: arrastando a alça ⠿ para cima ou para baixo, ou pelas setas ↑/↓. Muda só a ordem das linhas (a sequência em que aparecem); as datas e durações continuam as mesmas, porque quem define as datas é o arraste horizontal da barra. Por isso reordenar não gera desvio nem pedido de mudança da linha de base. Quem pode: o PMO e o GP do projeto (as mesmas pessoas que já editam a linha do tempo). "Recriar a partir do modelo" volta à ordem do modelo.
 - **[Protótipo]** "Congelar linha de base" grava as fases. Daí em diante, o desvio é o fim atual menos o fim da linha de base.
 - **[Protótipo]** Farol sugerido: desvio > 2 semanas → Crítico; desvio > 0 → Atenção; sem linha de base → Atenção; pessoa acima do cedido → Atenção; caso contrário, OK. O GP escolhe o farol (o sugerido é só referência).
 - **[Protótipo]** Status da fase pela data: Concluída (fim ≤ hoje), Em andamento, Planejada.
