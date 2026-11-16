@@ -12,16 +12,18 @@ Guia curto para quem desenvolve com o Claude Code, sem precisar saber programar.
 ## O dia a dia
 
 ```
-ClickUp (task com responsável) → sessão do Claude → branch → Pull Request → link de preview → merge → no ar
+ClickUp (task com responsável) → sessão do Claude → branch → Pull Request → merge → no ar → validar em produção
 ```
 
 1. **Escolha uma task** no ClickUp (lista Task List do TARS DEV) e coloque você como responsável. Assim ninguém pega a mesma task. Tasks em **to do** são pegas automaticamente pela verificação periódica; para trabalhar numa task com a sua sessão, deixe-a no backlog e peça diretamente.
 2. **Peça ao Claude**, por exemplo:
    > "Pega a task *Nome da task* no ClickUp, discute comigo e implementa."
-3. O Claude explica o plano, implementa e roda os testes. Depois **abre um Pull Request** (o pedido para juntar a mudança ao sistema principal).
-4. **Teste no preview**: no Pull Request, a Vercel comenta um link de teste com só essa mudança. Navegue por ele como usuária.
-5. Tudo certo? Peça ao Claude: *"pode fazer o merge"*. Em 1 a 2 minutos a mudança está no ar.
-6. Mova a task para **complete** no ClickUp.
+3. O Claude explica o plano, implementa e roda os testes, inclusive o teste ponta a ponta (e2e). Depois **abre um Pull Request** (o pedido para juntar a mudança ao sistema principal) e deixa na task o comentário de entrega.
+4. Leia o comentário de entrega e peça ao Claude: *"pode fazer o merge"*. Em 1 a 2 minutos a mudança está no ar, e a branch do PR é apagada sozinha.
+5. **Teste em produção**, seguindo o roteiro "Como testar" do comentário de entrega.
+6. Tudo certo? Mova a task para **complete** no ClickUp. Algo errado? Comente na task e peça o ajuste.
+
+> **Por ora não usamos o link de preview da Vercel.** O banco (Neon) não cria mais uma cópia por PR, então o preview usaria o banco de produção: o que for feito nele grava dados reais. Enquanto o sistema está em construção, validamos direto em produção, depois do merge. Se um PR mexer na estrutura do banco (migração), o Claude avisa antes de enviar.
 
 ## Status no ClickUp
 
@@ -30,8 +32,8 @@ ClickUp (task com responsável) → sessão do Claude → branch → Pull Reques
 | backlog | quem cria | Toda task nova nasce aqui: ideias e pedidos ainda não liberados |
 | to do | sócios | Liberada: o Claude implementa sozinho na próxima verificação automática |
 | em desenvolvimento | Claude | Sendo implementada |
-| em teste | Claude | Pronta, com Pull Request e preview; a task traz o comentário de entrega |
-| complete | sócios | Validado (e com merge feito) |
+| em teste | Claude | Pronta, com Pull Request (e, depois do merge, no ar); a task traz o comentário de entrega |
+| complete | sócios | Validado em produção |
 | cancelled | sócios | Descartado |
 
 Use o campo **prioridade** (urgent, high, normal, low): é ele que define a ordem de implementação. Só mova para **to do** o que estiver claro: o Claude implementa sem perguntar. Se algo estiver ambíguo, ele comenta as dúvidas e devolve para o backlog.

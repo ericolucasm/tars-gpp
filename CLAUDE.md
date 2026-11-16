@@ -24,6 +24,8 @@ npm run db:generate              # gera migração depois de mudar src/db/schema
 ```
 
 O Playwright já vem instalado no container (`require('playwright')`); não rode `playwright install`.
+Como o e2e é um módulo ES, ele não acha esse Playwright sozinho: antes de `npm run test:e2e`, rode `ln -sfn /opt/node-tools/node_modules/playwright node_modules/playwright`.
+Nas sessões na nuvem, `gh pr create` não funciona (GraphQL bloqueado): abra o PR com `gh api repos/ericolucasm/tars-gpp/pulls -f base=main -f head=<branch> -f title=... -F body=@arquivo.md`.
 
 ## Arquitetura (onde mexer)
 
@@ -49,12 +51,16 @@ O Playwright já vem instalado no container (`require('playwright')`); não rode
    - **Entendimento:** o que foi pedido e o diagnóstico (ex.: por que a pessoa não encontrava a função).
    - **O que mudou:** por tela/perfil, em linguagem de usuário.
    - **Decisões tomadas e por quê:** cada regra decidida, a justificativa e a alternativa descartada. Peça validação.
-   - **Como testar:** roteiro curto com as pessoas da demo (dropdown "Admin · ver como").
+   - **Como testar:** roteiro curto com as pessoas da demo (dropdown "Admin · ver como"), a ser feito **em produção, depois do merge** (veja "Sem preview, por ora").
    - **Validação feita:** testes e e2e que rodaram e o resultado; o que não foi possível validar.
    - **Impacto técnico e riscos:** banco (migrações), segurança, o que pode quebrar.
-   - **Links:** Pull Request e preview.
-3. **Branch por task** → Pull Request para a `main`. A Vercel gera um link de preview por PR. Merge na `main` = produção.
-4. Antes de abrir o PR: `npm run typecheck && npm test`. Se mexeu em fluxo de tela, rode também o e2e e inclua um passo novo quando o fluxo for novo.
+   - **Links:** Pull Request. Preview: "não há; validar em produção após o merge".
+3. **Branch por task** → Pull Request para a `main` → merge **quando um sócio pedir** → produção. Merge na `main` = produção.
+   - Use squash merge (um commit por PR). O GitHub apaga a branch do PR sozinho no merge.
+   - Depois do merge, confirme que o deploy de produção da Vercel terminou com sucesso (status do commit na `main`) e avise. A task fica em `em teste` até o sócio validar em produção e mover para `complete`.
+   - **Sem preview, por ora:** o Neon não cria mais uma cópia do banco por PR (o plano atingiu o limite), então o preview da Vercel usaria o **banco de produção**. Não use nem divulgue o link de preview para testar: tudo que for feito nele grava dados reais. A validação é em produção, depois do merge.
+   - **PR com migração de banco** (mudou `src/db/schema.ts` / `drizzle/`): enquanto o preview estiver ligado na Vercel, o build dele aplica a migração no banco de produção já no push, antes do merge. Avise na task e no PR antes de enviar, e só envie com o sócio ciente.
+4. Antes de abrir o PR: `npm run typecheck && npm test`. Se mexeu em fluxo de tela, rode também o e2e e inclua um passo novo quando o fluxo for novo. Sem preview, o e2e é a principal garantia antes de produção: não pule.
 5. Dois devs trabalham em paralelo: cada task tem um responsável no ClickUp; prefira PRs pequenos para evitar conflito.
 6. **Verificação automática:** uma tarefa agendada abre uma sessão periodicamente para implementar o que estiver em `to do`, seguindo exatamente este fluxo.
 
