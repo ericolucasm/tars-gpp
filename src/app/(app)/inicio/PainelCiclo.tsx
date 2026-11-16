@@ -32,11 +32,13 @@ export function PainelCiclo({ ciclos }: { ciclos: CicloVM[] }) {
         ))}
       </div>
       <div style={s('display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px')}>
-        {c.numeros.map((n) => (
-          <div key={n.rotulo} style={s('background: #F7F5F0; border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px')}>
-            <span style={s('font-size: 11px; color: #5E5770')}>{n.rotulo}</span><span style={s('font-size: 20px; font-weight: 700')}>{n.valor}</span>
-          </div>
-        ))}
+        {c.numeros.map((n) => {
+          const st = s('background: #F7F5F0; border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; color: #26213A');
+          const corpo = <><span style={s('font-size: 11px; color: #5E5770')}>{n.rotulo}</span><span style={s('font-size: 20px; font-weight: 700')}>{n.valor}</span></>;
+          return n.href
+            ? <Link key={n.rotulo} href={n.href} aria-label={`${n.rotulo}: ${n.valor}. Ver na avaliação`} style={st}>{corpo}</Link>
+            : <div key={n.rotulo} style={st}>{corpo}</div>;
+        })}
       </div>
       <div style={s('display: flex; flex-direction: column; gap: 6px; border-top: 1px solid #EFEBE3; padding-top: 12px')}>
         <span style={s('font-size: 12px; font-weight: 700')}>Orçamento</span>

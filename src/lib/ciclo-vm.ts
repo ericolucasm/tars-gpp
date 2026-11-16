@@ -1,6 +1,6 @@
 import type { Ciclo, DadosOrg } from './dados';
 import { br, diffDias, dinheiro } from './regras/datas';
-import { chaveDaRaia, custoDe, listaAvaliacao, noRaia, pessoa, nomeArea } from './visoes';
+import { chaveDaRaia, custoDe, iniciativasDoFiltro, linkAvaliacao, noRaia, pessoa, nomeArea } from './visoes';
 import { subarvore } from './regras/pessoas';
 
 // Números de um ciclo: ao vivo para o ciclo em andamento, foto congelada para os encerrados.
@@ -23,7 +23,7 @@ export type Snapshot = {
 
 /** Números ao vivo de um ciclo (também usados para gerar a foto no encerramento). */
 export function numerosAoVivo(d: DadosOrg, c: Ciclo) {
-  const doCiclo = d.iniciativas.filter((i) => i.cicloId === c.id && i.solStatus !== 'rascunho' && i.enviadaEm);
+  const doCiclo = iniciativasDoFiltro(d, c, 'recebidas');
   const avs = d.avaliacoes.filter((a) => a.cicloId === c.id);
   const preAprov = avs.filter((a) => a.decisao === 'pre');
   const comprometido = preAprov.reduce((s, a) => {
@@ -34,7 +34,7 @@ export function numerosAoVivo(d: DadosOrg, c: Ciclo) {
   for (const a of avs) if (a.decisao === 'rec' && a.motivoRecusa) motivos.set(a.motivoRecusa, (motivos.get(a.motivoRecusa) ?? 0) + 1);
   return {
     recebidas: doCiclo.length,
-    aguardandoGestor: doCiclo.filter((i) => noRaia(d, i, 'sol') && i.solStatus === 'aguardando_gestor').length,
+    aguardandoGestor: iniciativasDoFiltro(d, c, 'gestor').length,
     preAprovadas: preAprov.length,
     viraramProjeto: doCiclo.filter((i) => noRaia(d, i, 'exe', 'pau', 'con')).length,
     backlog: avs.filter((a) => a.decisao === 'bkl').length,
@@ -47,7 +47,7 @@ export function numerosAoVivo(d: DadosOrg, c: Ciclo) {
 export type CicloVM = {
   id: string; nome: string; ano: number; atual: boolean;
   headline: string; status: string; on: boolean; janela: string; etapa: number;
-  numeros: { rotulo: string; valor: string }[];
+  numeros: { rotulo: string; valor: string; href?: string }[];
   orcamentoPct: number; orcamento: string;
   blocos: { titulo: string; linhas: { k: string; v: string }[] }[];
   link: string; cta: string;
@@ -60,9 +60,9 @@ export function cicloVM(d: DadosOrg, c: Ciclo, hoje: string): CicloVM {
 
   if (ativo || c.etapa === 'planejado') {
     const n = numerosAoVivo(d, c);
-    const { itens } = listaAvaliacao(d);
-    const prontas = itens.filter((x) => !x.comunicado && x.ini.solStatus === 'aguardando_pmo').length;
-    const fora = d.iniciativas.filter((i) => !i.cicloId && i.enviadaEm && i.enviadaEm.toISOString().slice(0, 10) >= c.abertura && !noRaia(d, i, 'can')).length;
+    const prontas = iniciativasDoFiltro(d, c, 'prontas').length;
+    const fora = iniciativasDoFiltro(d, c, 'fora').length;
+    const link = (f: Parameters<typeof linkAvaliacao>[1]) => (c.etapa === 'planejado' ? undefined : linkAvaliacao(c.id, f));
     const faltam = Math.max(0, diffDias(c.fechamento, hoje));
     const headline = c.etapa === 'inscricoes' ? `Inscrições abertas · faltam ${faltam} ${faltam === 1 ? 'dia' : 'dias'}`
       : c.etapa === 'avaliacao' ? 'Inscrições encerradas · em avaliação'
@@ -88,8 +88,8 @@ export function cicloVM(d: DadosOrg, c: Ciclo, hoje: string): CicloVM {
       ...base, headline, status: c.etapa === 'planejado' ? 'Planejado' : 'Em andamento', on: true,
       janela: `Inscrições ${curta(c.abertura)} a ${br(c.fechamento)} · avaliação até ${curta(c.avaliacaoAte)} · decisões até ${curta(c.comunicarAte)}`,
       numeros: [
-        { rotulo: 'Recebidas', valor: String(n.recebidas) }, { rotulo: 'Aguardando gestor', valor: String(n.aguardandoGestor) },
-        { rotulo: 'Prontas para avaliar', valor: String(prontas) }, { rotulo: 'Fora do ciclo', valor: String(fora) },
+        { rotulo: 'Recebidas', valor: String(n.recebidas), href: link('recebidas') }, { rotulo: 'Aguardando gestor', valor: String(n.aguardandoGestor), href: link('gestor') },
+        { rotulo: 'Prontas para avaliar', valor: String(prontas), href: link('prontas') }, { rotulo: 'Fora do ciclo', valor: String(fora), href: link('fora') },
       ],
       orcamentoPct: Math.min(100, pct),
       orcamento: n.comprometido ? `${dinheiro(n.comprometido)} pré-aprovados de ${dinheiro(c.orcamentoRef)} (${pct}%)` : `Referência de ${dinheiro(c.orcamentoRef)} · pré-aprovações começam após o fechamento`,

@@ -97,6 +97,9 @@ Raias padrão, na ordem: Solicitações → Backlog → Pré-projeto → Em exec
 - **[Decisão V1]** Iniciativa ainda sem nota aparece no fim da lista com nota "—".
 - **[Decisão V1]** Custo usado no orçamento = custo estimado, se houver; senão, o teto da faixa escolhida no formulário ("Não sei" conta R$ 0).
 - **[Implícita]** O alerta de **concorrência de recursos** aparece quando uma iniciativa sem decisão impacta uma área que já tem pessoa acima do cedido.
+- **[Decisão V1]** **Filtros de status e ciclo** no topo da Avaliação. Os status são os mesmos recortes dos números do painel do ciclo (Início e Ciclos): *Na mesa do PMO* (padrão, a lista de sempre), *Recebidas*, *Aguardando gestor*, *Prontas para avaliar* e *Fora do ciclo*. Os números e a lista vêm da mesma conta (`iniciativasDoFiltro`), então sempre batem.
+- **[Decisão V1]** Só a **mesa do PMO do ciclo em andamento** é editável (notas e decisão). As demais iniciativas de um filtro (ex.: aguardando gestor, ciclos anteriores) aparecem **só para consulta**, com a situação atual e a avaliação que tiveram naquele ciclo. Orçamento, contadores e "Comunicar decisões" consideram só a mesa e só aparecem no ciclo em andamento.
+- **[Decisão V1]** Ao clicar numa linha da Avaliação, abre logo abaixo o **detalhe da iniciativa** (problema, resultado esperado, situação, solicitante, gestor, urgência, áreas impactadas, datas desejadas, custo, fornecedor, esforço e nota de devolução).
 
 ## 7. Projeto (visão do GP e do PMO)
 
@@ -129,6 +132,7 @@ Itens que o protótipo sugeria mas não desenhava. Todos usam o mesmo visual:
 
 - **Lista de Projetos** (menu PMO › Projetos): o protótipo apontava para um projeto só.
 - **Filtro "Todas as áreas"** do portfólio passou a funcionar.
+- **Números clicáveis do ciclo** (painel da direita na Início do PMO e tela Ciclos): Recebidas, Aguardando gestor, Prontas para avaliar e Fora do ciclo levam à Avaliação já filtrada por aquele status e ciclo. Só nos ciclos em andamento: nos encerrados os números são a foto do fechamento e não viram lista.
 - **Faixa de decisão da mudança de linha de base** na página do projeto (PMO aprova ou recusa).
 - **Confirmar fim de fase**, no detalhe da fase, com o critério de conclusão da biblioteca.
 - **Status do marco**: clicar na etiqueta alterna Previsto → Em risco → Atingido.
