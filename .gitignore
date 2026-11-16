@@ -6,3 +6,6 @@ out
 *.tsbuildinfo
 next-env.d.ts
 .vercel
+
+# print que o e2e salva quando falha
+falha.png

@@ -4,6 +4,7 @@ import { iniciais, rotuloAdministrador, rotuloGestorCurto } from '@/lib/regras/p
 import type { Sessao, Perfil } from '@/lib/sessao';
 import type { DadosOrg } from '@/lib/dados';
 import { VerComo } from './VerComo';
+import { BarraDeNavegacao, ItemMenu } from './Navegacao';
 
 // Moldura comum: barra "ver como" (admin ou quem tem mais de um perfil), menu lateral por perfil e conteúdo.
 
@@ -74,6 +75,7 @@ export function Shell({ sessao, dados, atual, children, mainStyle }: { sessao: S
 
   return (
     <div style={s("font-family: 'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif; color: #26213A; background: #FBFAF7; min-height: 100vh; display: flex; flex-direction: column")}>
+      <BarraDeNavegacao />
       {mostrarBarra && (
         <VerComo
           perfis={sessao.perfis.map((x) => ({ id: x, rotulo: ROTULO_PERFIL[x] }))}
@@ -93,7 +95,7 @@ export function Shell({ sessao, dados, atual, children, mainStyle }: { sessao: S
           <div key={i} style={s('display: contents')}>
             {sec.titulo && <span style={sSecao}>{sec.titulo}</span>}
             {sec.itens.map((x) => (
-              <Link key={x.href} href={x.href} aria-current={x.ativo ? 'page' : undefined} style={x.ativo ? sItemAtivo : sItem}>{x.rotulo}</Link>
+              <ItemMenu key={x.href} href={x.href} rotulo={x.rotulo} ativo={x.ativo} estilo={sItem} estiloAtivo={sItemAtivo} />
             ))}
           </div>
         ))}

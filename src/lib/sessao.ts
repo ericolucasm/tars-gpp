@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 import { eq } from 'drizzle-orm';
 import { db, schema as t } from '@/db';
 import { auth } from './auth';
-import type { Pessoa } from './dados';
+import { carregarOrg, type Pessoa } from './dados';
 
 export type Perfil = 'colaborador' | 'gestor' | 'gp' | 'pmo';
 export const PERFIS: Perfil[] = ['colaborador', 'gestor', 'gp', 'pmo'];
@@ -73,10 +73,8 @@ export const getSessao = cache(async (): Promise<Sessao | null> => {
   let personas: Persona[] = [];
   if (real.admin) {
     // Admin pode "ser" qualquer pessoa cadastrada (inclusive quem ainda não fez o 1º acesso) para validar o fluxo.
-    const [todas, areas] = await Promise.all([
-      db.select().from(t.pessoas).where(eq(t.pessoas.orgId, real.orgId)).orderBy(t.pessoas.seq),
-      db.select({ id: t.areas.id, nome: t.areas.nome }).from(t.areas).where(eq(t.areas.orgId, real.orgId)),
-    ]);
+    // Reaproveita a foto da empresa (a página vai usá-la de qualquer jeito; cache() faz carregar uma vez só por requisição).
+    const { pessoas: todas, areas } = await carregarOrg(real.orgId);
     const internas = todas.filter((p) => !p.externo);
     pessoa = internas.find((p) => p.id === personaCookie) ?? real;
     const nomeArea = (id: string | null) => areas.find((a) => a.id === id)?.nome ?? '';

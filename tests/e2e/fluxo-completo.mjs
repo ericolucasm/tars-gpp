@@ -225,6 +225,15 @@ try {
   ok('Admin escolhe a Fernanda no "ver como" e vê o app como ela');
   await verComo.selectOption({ label: 'Mariana · PMO (você)' });
   await p.getByRole('heading', { name: /Mariana/ }).waitFor();
+
+  // Ao clicar num menu, a barra de carregamento aparece na hora e some quando a tela nova chega
+  await p.route('**/portfolio*', async (r) => { await new Promise((ok) => setTimeout(ok, 1500)); await r.continue(); });
+  await p.getByRole('link', { name: 'Portfólio' }).click();
+  await p.getByRole('progressbar', { name: 'Carregando' }).waitFor({ timeout: 1000 });
+  await p.waitForURL(/\/portfolio$/);
+  await p.getByRole('progressbar', { name: 'Carregando' }).waitFor({ state: 'detached' });
+  await p.unroute('**/portfolio*');
+  ok('Ao clicar num menu, a barra de carregamento aparece na hora e some quando a tela chega');
   await ir(p, '/cadastros?aba=criterios');
   await p.getByLabel('Peso de Impacto').fill('40');
   await p.getByText('Total 105% · precisa somar 100%').waitFor();

@@ -16,8 +16,9 @@ const g = globalThis as unknown as { __tarsDb?: DBReal };
 
 function conectar(): DBReal {
   if (!g.__tarsDb) {
-    // prepare: false é exigido pelos poolers (Supabase/Neon em modo transação)
-    g.__tarsDb = drizzle(postgres(databaseUrl(), { prepare: false, max: 5 }), { schema });
+    // prepare: false é exigido pelos poolers (Supabase/Neon em modo transação).
+    // max: 20 deixa as ~18 consultas de carregarOrg irem ao banco ao mesmo tempo (com 5, iam em levas e a página esperava várias idas e voltas).
+    g.__tarsDb = drizzle(postgres(databaseUrl(), { prepare: false, max: 20 }), { schema });
   }
   return g.__tarsDb;
 }

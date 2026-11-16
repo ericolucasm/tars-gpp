@@ -1,10 +1,12 @@
 import 'server-only';
 import { cache } from 'react';
-import { eq, inArray } from 'drizzle-orm';
+import { eq, inArray, sql } from 'drizzle-orm';
 import { db, schema as t } from '@/db';
 import type { Raia } from './regras/esteira';
 
-// Carrega a "foto" da empresa numa ida ao banco (consultas em paralelo).
+// Carrega a "foto" da empresa numa ida ao banco: todas as consultas saem juntas, em paralelo.
+// As tabelas dos projetos (fases, tarefas, alocações...) são filtradas pela empresa com uma subconsulta,
+// em vez de esperar a lista de iniciativas chegar para só então pedi-las (eram 3 levas em sequência).
 // Para o porte de um portfólio de PME (centenas de iniciativas) isso é simples e rápido,
 // e deixa todas as telas calculando a partir da mesma base. cache() = uma vez por requisição.
 
@@ -29,7 +31,12 @@ export type Modelo = typeof t.modelos.$inferSelect;
 export type DadosOrg = Awaited<ReturnType<typeof carregar>>;
 
 async function carregar(orgId: string) {
-  const [org, areas, pessoas, ciclos, raias, iniciativas, fasesBiblioteca, modelos, pedidos, avaliacoes] = await Promise.all([
+  const iniciativasDoOrg = sql`(select id from iniciativas where org_id = ${orgId})`;
+  const fasesDoOrg = sql`(select f.id from projeto_fases f join iniciativas i on i.id = f.iniciativa_id where i.org_id = ${orgId})`;
+  const [
+    org, areas, pessoas, ciclos, raias, iniciativas, fasesBiblioteca, modelos, pedidos, avaliacoes,
+    fases, alocacoes, tarefas, marcos, riscos, reports, linhasBase, mudancas,
+  ] = await Promise.all([
     db.query.orgs.findFirst({ where: eq(t.orgs.id, orgId) }),
     db.select().from(t.areas).where(eq(t.areas.orgId, orgId)).orderBy(t.areas.ordem),
     db.select().from(t.pessoas).where(eq(t.pessoas.orgId, orgId)).orderBy(t.pessoas.seq),
@@ -40,21 +47,20 @@ async function carregar(orgId: string) {
     db.select().from(t.modelos).where(eq(t.modelos.orgId, orgId)),
     db.select().from(t.pedidosAlocacao).where(eq(t.pedidosAlocacao.orgId, orgId)).orderBy(t.pedidosAlocacao.createdAt),
     db.select().from(t.avaliacoes).where(eq(t.avaliacoes.orgId, orgId)),
+    db.select().from(t.projetoFases).where(inArray(t.projetoFases.iniciativaId, iniciativasDoOrg)).orderBy(t.projetoFases.ordem),
+    db.select().from(t.alocacoes).where(inArray(t.alocacoes.faseId, fasesDoOrg)),
+    db.select().from(t.tarefas).where(inArray(t.tarefas.iniciativaId, iniciativasDoOrg)).orderBy(t.tarefas.prazo, t.tarefas.createdAt),
+    db.select().from(t.marcos).where(inArray(t.marcos.faseId, fasesDoOrg)).orderBy(t.marcos.data),
+    db.select().from(t.riscos).where(inArray(t.riscos.faseId, fasesDoOrg)),
+    db.select().from(t.statusReports).where(inArray(t.statusReports.iniciativaId, iniciativasDoOrg)),
+    db.select().from(t.linhasBase).where(inArray(t.linhasBase.iniciativaId, iniciativasDoOrg)),
+    db.select().from(t.mudancasBase).where(inArray(t.mudancasBase.iniciativaId, iniciativasDoOrg)),
   ]);
   if (!org) throw new Error('Empresa não encontrada');
 
-  const iniIds = iniciativas.map((i) => i.id);
-  const fases = iniIds.length ? await db.select().from(t.projetoFases).where(inArray(t.projetoFases.iniciativaId, iniIds)).orderBy(t.projetoFases.ordem) : [];
-  const faseIds = fases.map((f) => f.id);
-  const [alocacoes, tarefas, marcos, riscos, reports, linhasBase, mudancas] = await Promise.all([
-    faseIds.length ? db.select().from(t.alocacoes).where(inArray(t.alocacoes.faseId, faseIds)) : [],
-    iniIds.length ? db.select().from(t.tarefas).where(inArray(t.tarefas.iniciativaId, iniIds)).orderBy(t.tarefas.prazo, t.tarefas.createdAt) : [],
-    faseIds.length ? db.select().from(t.marcos).where(inArray(t.marcos.faseId, faseIds)).orderBy(t.marcos.data) : [],
-    faseIds.length ? db.select().from(t.riscos).where(inArray(t.riscos.faseId, faseIds)) : [],
-    iniIds.length ? db.select().from(t.statusReports).where(inArray(t.statusReports.iniciativaId, iniIds)) : [],
-    iniIds.length ? db.select().from(t.linhasBase).where(inArray(t.linhasBase.iniciativaId, iniIds)) : [],
-    iniIds.length ? db.select().from(t.mudancasBase).where(inArray(t.mudancasBase.iniciativaId, iniIds)) : [],
-  ]);
+  // Ordem estável das alocações (antes dependia de como o banco devolvia as linhas): pela ordem do cadastro de pessoas.
+  const posicao = new Map(pessoas.map((p, i) => [p.id, i]));
+  alocacoes.sort((a, b) => (posicao.get(a.pessoaId) ?? 1e9) - (posicao.get(b.pessoaId) ?? 1e9));
 
   return {
     org, areas, pessoas, ciclos, raias: raias as unknown as (Raia & typeof raias[number])[], iniciativas, fasesBiblioteca, modelos,
