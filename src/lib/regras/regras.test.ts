@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { notaFinal, custoReferencia, ordenarPorNota, podeComunicar } from './avaliacao';
 import { acoesDoCard, validarGate, podeConfirmar, type Raia } from './esteira';
-import { desvio, farolSugerido, statusDaFase, fasesDoModelo, mesesDaLinha, descreverMudanca, progresso } from './projeto';
+import { desvio, farolSugerido, statusDaFase, fasesDoModelo, mesesDaLinha, descreverMudanca, progresso, reordenar, ordemValida } from './projeto';
 import { gestorDe, timeDireto, areasSobGestao, nomeCurto, acimaDoCedido } from './pessoas';
 import { addDias, diffDias, dataPorExtenso, haQuanto, proximaSexta } from './datas';
 
@@ -117,6 +117,25 @@ describe('projeto', () => {
   it('progresso por tarefas', () => {
     expect(progresso([{ concluida: true }, { concluida: false }])).toBe(50);
     expect(progresso([])).toBe(0);
+  });
+});
+
+describe('reordenar fases', () => {
+  it('move uma fase para cima e para baixo sem mexer nas outras', () => {
+    expect(reordenar(['a', 'b', 'c', 'd'], 2, 0)).toEqual(['c', 'a', 'b', 'd']);
+    expect(reordenar(['a', 'b', 'c', 'd'], 0, 3)).toEqual(['b', 'c', 'd', 'a']);
+    expect(reordenar(['a', 'b', 'c'], 1, 1)).toEqual(['a', 'b', 'c']);
+  });
+  it('limita o destino às pontas e ignora origem inválida', () => {
+    expect(reordenar(['a', 'b', 'c'], 0, 99)).toEqual(['b', 'c', 'a']);
+    expect(reordenar(['a', 'b', 'c'], 2, -5)).toEqual(['c', 'a', 'b']);
+    expect(reordenar(['a', 'b'], 7, 0)).toEqual(['a', 'b']);
+  });
+  it('só aceita a nova ordem com exatamente as fases do projeto', () => {
+    expect(ordemValida(['a', 'b', 'c'], ['c', 'a', 'b'])).toBe(true);
+    expect(ordemValida(['a', 'b', 'c'], ['a', 'b'])).toBe(false);
+    expect(ordemValida(['a', 'b', 'c'], ['a', 'a', 'b'])).toBe(false);
+    expect(ordemValida(['a', 'b', 'c'], ['a', 'b', 'x'])).toBe(false);
   });
 });
 

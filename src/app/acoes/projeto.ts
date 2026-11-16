@@ -2,7 +2,7 @@
 
 import { and, eq, inArray } from 'drizzle-orm';
 import { db, schema as t } from '@/db';
-import { dataDaSemana, descreverMudanca, desvio, fasesDoModelo, rotuloDesvio, type Fase } from '@/lib/regras/projeto';
+import { dataDaSemana, descreverMudanca, desvio, fasesDoModelo, ordemValida, rotuloDesvio, type Fase } from '@/lib/regras/projeto';
 import { gestorDe } from '@/lib/regras/pessoas';
 import { nomeMes } from '@/lib/regras/datas';
 import { fasesDo, linhaBaseDo, pessoa } from '@/lib/visoes';
@@ -53,6 +53,18 @@ export async function moverFase(faseId: string, inicioSemana: number, duracao: n
     await ctxFase(faseId);
     exigir(inicioSemana >= 0 && duracao >= 1 && duracao <= 104, 'Datas inválidas.');
     await db.update(t.projetoFases).set({ inicioSemana, duracao }).where(eq(t.projetoFases.id, faseId));
+  });
+}
+
+/** Reordena as linhas da linha do tempo (as datas não mudam). Recebe os ids das fases na nova ordem. */
+export async function reordenarFases(iniciativaId: string, idsEmOrdem: string[]) {
+  return executar(async () => {
+    const { dados, ini } = await ctxProjeto(iniciativaId);
+    const atuais = fasesDo(dados, ini.id).map((f) => f.id);
+    exigir(ordemValida(atuais, idsEmOrdem), 'A lista de fases mudou. Recarregue a página e tente de novo.');
+    await db.transaction(async (tx) => {
+      for (const [ordem, id] of idsEmOrdem.entries()) await tx.update(t.projetoFases).set({ ordem }).where(and(eq(t.projetoFases.id, id), eq(t.projetoFases.iniciativaId, ini.id)));
+    });
   });
 }
 

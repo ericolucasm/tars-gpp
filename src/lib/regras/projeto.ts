@@ -114,3 +114,18 @@ export function descreverMudanca(base: Fase[], nova: Fase[]): string {
   for (const b of base) if (!nova.find((x) => x.id === b.id)) partes.push(`remove ${b.nome}`);
   return partes.length ? partes.join(', ') : 'ajuste de datas sem mudança no fim';
 }
+
+/** Reordena a lista de fases: tira a da posição `de` e coloca na posição `para`. Só muda a ordem das linhas; as datas ficam iguais. */
+export function reordenar<T>(lista: T[], de: number, para: number): T[] {
+  if (de < 0 || de >= lista.length) return lista.slice();
+  const alvo = Math.max(0, Math.min(lista.length - 1, para));
+  const nova = lista.slice();
+  const [item] = nova.splice(de, 1);
+  nova.splice(alvo, 0, item);
+  return nova;
+}
+
+/** A nova ordem só vale se tiver exatamente as mesmas fases do projeto, sem repetir nem faltar. */
+export function ordemValida(atuais: string[], nova: string[]) {
+  return nova.length === atuais.length && new Set(nova).size === nova.length && nova.every((id) => atuais.includes(id));
+}
