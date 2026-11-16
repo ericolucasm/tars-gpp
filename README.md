@@ -49,6 +49,14 @@ npm run db:reset && npm run db:migrate   # zera e recarrega a demo
 3. **Vercel → Settings → Environment Variables**: `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` (`https://SEU-DOMINIO`), `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `SEED_DEMO=true`, `TARS_ADMIN_EMAIL` e `TARS_ADMIN_NOME`.
 4. Deploy. O `vercel-build` aplica as migrações (e cria você como PMO + Admin) e depois compila.
 
+### Previews (um link por branch)
+
+Cada branch ganha um endereço fixo: `tars-gpp-git-<branch>-ericolucasms-projects.vercel.app`. O Google só aceita o endereço de produção, então o preview manda o login para a produção, que confere com o Google e devolve a pessoa para o preview (plugin `oAuthProxy` do Better Auth). Para funcionar, na Vercel:
+
+- `BETTER_AUTH_SECRET`, `GOOGLE_CLIENT_ID` e `GOOGLE_CLIENT_SECRET` marcados também para **Preview**, com o **mesmo valor** da produção.
+- `DATABASE_URL` no Preview. Recomendado: na integração Neon, ligar a criação de um **branch de banco por preview**, para os testes não mexerem nos dados de produção.
+- Use o link da branch (o que a Vercel comenta no Pull Request).
+
 Para dar acesso a alguém: **Cadastros → Pessoas → Liberar acesso** com o e-mail Google da pessoa. Ela entra com "Entrar com Google". E-mails não cadastrados veem "Este e-mail ainda não tem acesso".
 
 > ⚠️ `AUTH_MODE=dev` deixa qualquer pessoa entrar sem senha. Use só localmente.
