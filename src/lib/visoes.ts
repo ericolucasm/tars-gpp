@@ -4,6 +4,8 @@ import { dataDaSemana, desvio, fimDoPlano, progresso, statusDaFase, tarefaAtrasa
 import { acimaDoCedido, gestorDe, nomeCurto } from './regras/pessoas';
 import { custoReferencia, notaFinal } from './regras/avaliacao';
 import { resumoFinanceiro } from './regras/financeiro';
+import { dimCusto, dimEscopo, dimPrazo, dimRiscos, type Dimensao } from './regras/farol';
+import { pontoAtrasado } from './regras/pontos';
 
 // Cálculos derivados usados por várias telas. Tudo a partir de DadosOrg (a "foto" da empresa).
 
@@ -157,6 +159,29 @@ export function financeiroDo(d: DadosOrg, i: Iniciativa) {
   const realizado = d.lancamentos.filter((l) => l.iniciativaId === i.id).reduce((s, l) => s + l.valor, 0);
   const tarefas = d.tarefas.filter((t) => t.iniciativaId === i.id);
   return resumoFinanceiro(orcamentoDoProjeto(i), realizado, i.previsaoCusto, progresso(tarefas));
+}
+
+/** Custo, escopo e riscos do projeto (o prazo é calculado à parte: na tela ele muda ao vivo quando o GP arrasta as fases). */
+export function dimensoesSemPrazo(d: DadosOrg, i: Iniciativa, hoje: string): Dimensao[] {
+  const f = financeiroDo(d, i);
+  const mud = d.pedidosMudanca.filter((m) => m.iniciativaId === i.id && m.tipo === 'escopo');
+  const faseIds = new Set(d.fases.filter((x) => x.iniciativaId === i.id).map((x) => x.id));
+  const altos = d.riscos.filter((r) => faseIds.has(r.faseId) && r.nivel === 'Alto').length;
+  const imp = d.pontos.filter((p) => p.iniciativaId === i.id && p.tipo === 'impedimento' && p.status === 'aberto');
+  return [
+    dimCusto(f.situacao, f.orcado, f.desvioPct),
+    dimEscopo(mud.filter((m) => m.status === 'pendente').length, mud.filter((m) => m.status === 'aprovada').length),
+    dimRiscos(altos, imp.length, imp.filter((p) => pontoAtrasado(p, hoje)).length),
+  ];
+}
+
+/** As quatro dimensões do projeto (prazo pela linha de base e pelas pessoas do projeto acima do cedido). */
+export function dimensoesDo(d: DadosOrg, i: Iniciativa, hoje: string): Dimensao[] {
+  const info = infoProjeto(d, i, hoje);
+  const faseIds = new Set(info.fases.map((f) => f.id));
+  const doProjeto = new Set(d.alocacoes.filter((a) => faseIds.has(a.faseId)).map((a) => a.pessoaId));
+  const acima = d.pessoas.filter((p) => doProjeto.has(p.id) && acimaDoCedido(alocacaoDe(d, p.id, hoje), p.cedeAte, p.externo)).length;
+  return [dimPrazo(info.desvio, acima), ...dimensoesSemPrazo(d, i, hoje)];
 }
 
 /** Linha de contexto dos cards do portfólio. */

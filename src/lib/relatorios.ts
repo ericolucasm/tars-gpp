@@ -5,7 +5,7 @@ import { acimaDoCedido, areasSobGestao, subarvore, timeDireto } from './regras/p
 import { rotuloDesvioCurto, FAROL, type Farol } from './regras/projeto';
 import { numerosAoVivo, rotuloEtapa, type Snapshot } from './ciclo-vm';
 import {
-  alocacaoDe, chaveDaRaia, custoDe, financeiroDo, infoProjeto, nomeArea, noRaia, pessoa, projetosDaPessoa, rotuloCiclo, situacaoDoCard, TIPOS,
+  alocacaoDe, chaveDaRaia, custoDe, dimensoesDo, financeiroDo, infoProjeto, nomeArea, noRaia, pessoa, projetosDaPessoa, rotuloCiclo, situacaoDoCard, TIPOS,
 } from './visoes';
 
 // Relatórios de cada perfil. Tudo calculado a partir da mesma foto da empresa (carregarOrg),
@@ -100,9 +100,17 @@ function saudeProjetos(d: DadosOrg, projetos: Iniciativa[], hoje: string, comAre
       `${info.progresso}%`,
       br(info.fimPrevisto),
       info.ultimoStatus ? br(info.ultimoStatus.data) : { texto: 'Sem status', tom: 'aten' },
+      celAlertas(dimensoesDo(d, i, hoje)),
     ]);
 }
-const COLUNAS_SAUDE = (comArea: boolean) => ['Projeto', ...(comArea ? ['Área'] : []), 'GP', 'Etapa', 'Farol', 'Desvio', 'Concluído', 'Fim previsto', 'Último status'];
+const COLUNAS_SAUDE = (comArea: boolean) => ['Projeto', ...(comArea ? ['Área'] : []), 'GP', 'Etapa', 'Farol', 'Desvio', 'Concluído', 'Fim previsto', 'Último status', 'Alertas (sugestão do TARS)'];
+
+/** Dimensões fora do OK (prazo, custo, escopo, riscos), com a cor da pior. */
+function celAlertas(dims: { nome: string; farol: string }[]): Celula {
+  const ruins = dims.filter((x) => x.farol !== 'ok');
+  if (!ruins.length) return { texto: 'Nenhum', tom: 'ok' };
+  return { texto: ruins.map((x) => x.nome).join(', '), tom: ruins.some((x) => x.farol === 'crit') ? 'crit' : 'aten' };
+}
 
 function resumoFarol(projetos: Iniciativa[]) {
   const n = (f: string) => projetos.filter((i) => i.farol === f).length;

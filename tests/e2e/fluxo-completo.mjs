@@ -212,10 +212,11 @@ try {
   await p.getByRole('region', { name: 'Mudanças de escopo e custo' }).getByText('R$ 95.000', { exact: true }).waitFor();
   ok('PMO aprova a mudança de custo e o orçamento aprovado do projeto muda');
   await p.getByRole('region', { name: 'Financeiro' }).getByText('Estouro de orçamento').waitFor(); // previsão 120 mil > 110% de 95 mil
+  await p.getByRole('listitem', { name: /^Custo: Crítico · previsão 26% acima do orçado/ }).waitFor(); // farol por dimensão
   await ir(p, '/inicio');
   await p.getByText('Projeto estourando o orçamento').waitFor();
   await p.goto(urlProjeto, { waitUntil: 'networkidle' });
-  ok('Com a previsão acima do orçamento, o projeto aparece como estouro no financeiro e na Início do PMO');
+  ok('Previsão acima do orçamento: estouro no financeiro, farol de custo crítico e aviso na Início do PMO');
 
   // 7b. PMO reordena as fases da linha do tempo (seta e arraste); a ordem fica gravada
   const ordemFases = async () => (await p.getByRole('button', { name: /^Subir fase / }).evaluateAll((bs) => bs.map((b) => b.getAttribute('aria-label').replace('Subir fase ', ''))));

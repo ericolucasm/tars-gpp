@@ -5,6 +5,7 @@ import { desvio, farolSugerido, statusDaFase, fasesDoModelo, mesesDaLinha, descr
 import { podeResolverPonto, pontoEsperaPor, pontoAtrasado } from './pontos';
 import { validarPedidoMudanca, variacaoCusto } from './mudancas';
 import { resumoFinanceiro, situacaoCusto } from './financeiro';
+import { dimCusto, dimEscopo, dimPrazo, dimRiscos, farolGeral } from './farol';
 import { gestorDe, timeDireto, areasSobGestao, nomeCurto, acimaDoCedido } from './pessoas';
 import { addDias, diffDias, dataPorExtenso, haQuanto, proximaSexta } from './datas';
 
@@ -189,6 +190,28 @@ describe('financeiro do projeto', () => {
     expect(resumoFinanceiro(200, 50, null, 40)).toMatchObject({ previsao: 200, consumoPct: 25, desvioPct: 0, situacao: 'ok' });
     expect(resumoFinanceiro(200, 230, 180, 90)).toMatchObject({ previsao: 230, consumoPct: 115, desvioPct: 15, situacao: 'crit' });
     expect(resumoFinanceiro(200, 100, 210, 50)).toMatchObject({ desvioPct: 5, situacao: 'aten' });
+  });
+});
+
+describe('farol por dimensão', () => {
+  it('cada dimensão segue sua regra', () => {
+    expect(dimPrazo(3, 0).farol).toBe('crit');
+    expect(dimPrazo(0, 1).farol).toBe('aten');
+    expect(dimCusto('ok', 0, 0)).toMatchObject({ farol: 'aten', porque: 'orçamento não definido' });
+    expect(dimCusto('crit', 100, 26).porque).toBe('previsão 26% acima do orçado');
+    expect(dimEscopo(1, 0).farol).toBe('aten');
+    expect(dimEscopo(0, 2).farol).toBe('aten');
+    expect(dimEscopo(0, 1).farol).toBe('ok');
+    expect(dimRiscos(2, 0, 0).farol).toBe('crit');
+    expect(dimRiscos(0, 1, 1).farol).toBe('crit');
+    expect(dimRiscos(1, 0, 0).farol).toBe('aten');
+    expect(dimRiscos(0, 0, 0).farol).toBe('ok');
+  });
+  it('o geral é o pior e explica quem puxou', () => {
+    const g = farolGeral([dimPrazo(0, 0), dimCusto('crit', 100, 26), dimEscopo(0, 0), dimRiscos(2, 0, 0)]);
+    expect(g.farol).toBe('crit');
+    expect(g.porque).toBe('custo: previsão 26% acima do orçado · riscos: 2 risco(s) alto(s)');
+    expect(farolGeral([dimPrazo(0, 0), dimCusto('ok', 1, 0), dimEscopo(0, 0), dimRiscos(0, 0, 0)]).farol).toBe('ok');
   });
 });
 
