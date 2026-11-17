@@ -3,7 +3,7 @@ import { carregarOrg } from '@/lib/dados';
 import { dinheiro, hojeISO } from '@/lib/regras/datas';
 import { CRITERIOS_AVALIACAO } from '@/lib/regras/avaliacao';
 import { detalheIniciativa } from '@/lib/detalhe';
-import { custoDe, ehFiltroAvaliacao, FILTROS_AVALIACAO, iniciativasDoFiltro, listaAvaliacao, nomeArea, pessoasAcimaDoCedido, projetosDaPessoa, situacaoDoCard, TIPOS } from '@/lib/visoes';
+import { capacidadeDaArea, proximosMeses, custoDe, ehFiltroAvaliacao, FILTROS_AVALIACAO, iniciativasDoFiltro, listaAvaliacao, nomeArea, pessoasAcimaDoCedido, projetosDaPessoa, situacaoDoCard, TIPOS } from '@/lib/visoes';
 import { Shell } from '@/components/Shell';
 import { TelaAvaliacao } from './TelaAvaliacao';
 
@@ -52,12 +52,21 @@ export default async function Avaliacao({ searchParams }: { searchParams: Promis
         status={status}
         ehAtual={ehAtual}
         visiveis={visiveis.map((i) => i.id)}
+        capacidade={(() => {
+          // folga das áreas nos próximos 3 meses: o menor (cedido − alocado) entre os meses, com as subáreas
+          const meses = proximosMeses(hoje, 3);
+          const impactadas = new Set(itens.flatMap((x) => x.ini.areasImpactadas));
+          return d.areas.filter((a) => impactadas.has(a.id)).map((a) => {
+            const c = capacidadeDaArea(d, a.id, meses, hoje);
+            return { id: a.id, nome: a.nome, cedido: c.cedido, folga: Math.min(...c.meses.map((m) => c.cedido - m)) };
+          });
+        })()}
         linhas={[
           // a mesa do PMO (editável) sempre vai inteira: é dela que saem orçamento, contadores e o "Comunicar"
           ...itens.map((x) => ({
             id: x.ini.id, titulo: x.ini.titulo, area: nomeArea(d, x.ini.areaId), tipo: TIPOS[x.ini.tipo]?.rotulo ?? '', custo: custoDe(x.ini), custoLabel: dinheiro(custoDe(x.ini)),
             obrigatoria: x.ini.tipo === 'obr', notas: x.notas, decisao: x.decisao, motivoRecusa: x.motivoRecusa, comunicado: x.comunicado,
-            editavel: true, situacao: '', det: detalheIniciativa(d, x.ini, hoje),
+            editavel: true, situacao: '', det: detalheIniciativa(d, x.ini, hoje), areasImpactadas: x.ini.areasImpactadas,
           })),
           // as demais do filtro aparecem só para consulta, com a avaliação que tiveram no ciclo escolhido
           ...visiveis.filter((i) => !naMesa.has(i.id)).map((i) => {
@@ -65,7 +74,7 @@ export default async function Avaliacao({ searchParams }: { searchParams: Promis
             return {
               id: i.id, titulo: i.titulo, area: nomeArea(d, i.areaId), tipo: TIPOS[i.tipo]?.rotulo ?? '', custo: custoDe(i), custoLabel: dinheiro(custoDe(i)),
               obrigatoria: i.tipo === 'obr', notas: av?.notas ?? [0, 0, 0, 0], decisao: (av?.decisao ?? null) as 'pre' | 'bkl' | 'rec' | null, motivoRecusa: av?.motivoRecusa ?? null,
-              comunicado: !!av?.comunicado, editavel: false,
+              comunicado: !!av?.comunicado, editavel: false, areasImpactadas: i.areasImpactadas,
               situacao: [d.raias.find((r) => r.id === i.raiaId)?.nome, situacaoDoCard(d, i)].filter(Boolean).join(' · '), det: detalheIniciativa(d, i, hoje),
             };
           }),

@@ -12,9 +12,10 @@ import { comunicarDecisoes, darNota, decidir, definirMotivoRecusa } from '@/app/
 type Dec = 'pre' | 'bkl' | 'rec' | null;
 type Linha = {
   id: string; titulo: string; area: string; tipo: string; custo: number; custoLabel: string; obrigatoria: boolean; notas: number[]; decisao: Dec; motivoRecusa: string | null; comunicado: boolean;
-  editavel: boolean; situacao: string; det: Detalhe;
+  editavel: boolean; situacao: string; det: Detalhe; areasImpactadas: string[];
 };
 type Props = {
+  capacidade: { id: string; nome: string; cedido: number; folga: number }[];
   ciclos: { id: string; nome: string; atual: boolean }[]; filtros: { chave: string; rotulo: string }[]; cicloSel: string; status: string; ehAtual: boolean; visiveis: string[];
   cicloNome: string | null; orcamento: number; pesos: { nome: string; peso: number }[]; podeAjustarPesos: boolean;
   alerta: { titulo: string; area: string; pessoa: string; projeto: string } | null; motivos: string[]; linhas: Linha[];
@@ -107,6 +108,30 @@ export function TelaAvaliacao(p: Props) {
         {p.pesos.map((x) => <span key={x.nome} style={s('padding: 4px 10px; border-radius: 10px; background: #EDEAE3')}>{x.nome} {x.peso}%</span>)}
         {p.podeAjustarPesos && <Link href="/cadastros?aba=criterios" style={s('font-size: 12px; font-weight: 600')}>Ajustar em Cadastros</Link>}
       </div>
+
+      {p.ehAtual && (() => {
+        // Capacidade das áreas impactadas pelas pré-aprovadas (muda na hora, junto com as decisões)
+        const usos = p.capacidade.map((a) => ({ a, n: pre.filter((l) => l.areasImpactadas.includes(a.id)).length })).filter((x) => x.n > 0)
+          .sort((x, y) => x.a.folga - y.a.folga);
+        if (!usos.length) return null;
+        const eq = (v: number) => (v / 100).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+        return (
+          <section aria-label="Capacidade das áreas impactadas" style={s('background: #FFFFFF; border: 1px solid #E8E3D9; border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px')}>
+            <span style={s('font-size: 13px; font-weight: 700')}>Capacidade das áreas impactadas pelas pré-aprovadas · próximos 3 meses</span>
+            <span style={s('font-size: 12px; color: #5E5770')}>Folga = o que a área cede para projetos menos o que já está alocado, no mês mais apertado (em pessoas-equivalentes).</span>
+            <div style={s('display: flex; flex-wrap: wrap; gap: 8px')}>
+              {usos.map(({ a, n }) => {
+                const tom = a.folga <= 0 ? ['#FDE8E8', '#B42318'] : a.folga < 50 * n ? ['#FEF3DC', '#9A5B05'] : ['#E3F5EA', '#17723D'];
+                return (
+                  <span key={a.id} role="note" aria-label={`Capacidade de ${a.nome}`} style={{ ...s('font-size: 12px; padding: 6px 10px; border-radius: 10px'), background: tom[0], color: tom[1] }}>
+                    <strong>{a.nome}</strong>: {n} pré-aprovada{n > 1 ? 's' : ''} · folga de {eq(Math.max(0, a.folga))} de {eq(a.cedido)}{a.folga <= 0 ? ' (sem folga)' : ''}
+                  </span>
+                );
+              })}
+            </div>
+          </section>
+        );
+      })()}
 
       {p.alerta && (
         <div style={s('padding: 12px 14px; border-radius: 12px; background: #FEF3DC; color: #6B3F03; font-size: 13px; line-height: 1.5')}>

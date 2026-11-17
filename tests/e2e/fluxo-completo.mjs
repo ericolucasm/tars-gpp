@@ -107,9 +107,10 @@ try {
     await p.waitForTimeout(500);
   }
   await p.waitForTimeout(1200);
+  await p.getByRole('region', { name: 'Capacidade das áreas impactadas' }).getByRole('note', { name: 'Capacidade de TI' }).waitFor(); // Migração do ERP pré-aprovada impacta TI
   await p.getByRole('button', { name: 'Comunicar decisões às áreas' }).click();
   await p.getByText(/Decisões enviadas: \d+ pré-aprovadas/).waitFor();
-  ok('PMO dá notas, decide (pré-aprovar, backlog, recusar) e comunica');
+  ok('PMO dá notas, decide (pré-aprovar, backlog, recusar), vê a capacidade das áreas impactadas e comunica');
 
   // 5. Play no portfólio
   await ir(p, '/portfolio');
@@ -310,8 +311,8 @@ try {
 
   // Relatórios: cada perfil chega pelo menu e vê os relatórios dele
   const relatoriosPorPerfil = [
-    ['mariana@acme.com.br', 'pmo', ['Portfólio por etapa', 'Saúde dos projetos', 'Financeiro dos projetos', 'Matriz de riscos', 'Riscos do portfólio', 'Ciclos de planejamento', 'Demanda por área', 'Capacidade das pessoas']],
-    ['fernanda.oliveira@acme.com.br', null, ['Iniciativas da área', 'Projetos da área', 'Alocação do time']],
+    ['mariana@acme.com.br', 'pmo', ['Portfólio por etapa', 'Saúde dos projetos', 'Financeiro dos projetos', 'Matriz de riscos', 'Riscos do portfólio', 'Ciclos de planejamento', 'Demanda por área', 'Capacidade por área e mês', 'Capacidade das pessoas']],
+    ['fernanda.oliveira@acme.com.br', null, ['Iniciativas da área', 'Projetos da área', 'Capacidade por área e mês', 'Alocação do time']],
     ['carlos.andrade@acme.com.br', null, ['Meus projetos', 'Financeiro dos projetos', 'Riscos dos meus projetos', 'Tarefas em aberto', 'Equipe dos meus projetos']],
     ['joao.silva@acme.com.br', null, ['Minhas iniciativas', 'Minhas tarefas']],
   ];

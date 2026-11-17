@@ -7,6 +7,7 @@ import { validarPedidoMudanca, variacaoCusto } from './mudancas';
 import { resumoFinanceiro, situacaoCusto } from './financeiro';
 import { dimCusto, dimEscopo, dimPrazo, dimRiscos, farolGeral } from './farol';
 import { nivelDoRisco, riscoAtivo, validarRisco } from './riscos';
+import { picoNoPeriodo, situacaoCapacidade, pessoasEq } from './capacidade';
 import { gestorDe, timeDireto, areasSobGestao, nomeCurto, acimaDoCedido } from './pessoas';
 import { addDias, diffDias, dataPorExtenso, haQuanto, proximaSexta } from './datas';
 
@@ -232,6 +233,23 @@ describe('riscos', () => {
     expect(validarRisco({ nome: 'ab', probabilidade: 2, impacto: 3 })).toMatch(/Descreva/);
     expect(validarRisco({ nome: 'Atraso', probabilidade: 4, impacto: 3 })).toMatch(/probabilidade/);
     expect(validarRisco({ nome: 'Atraso', probabilidade: 2, impacto: 3, status: 'xpto' })).toMatch(/Status/);
+  });
+});
+
+describe('capacidade por período', () => {
+  const iv = [{ ini: '2026-11-01', fim: '2026-12-15', pct: 30 }, { ini: '2026-12-01', fim: '2027-01-31', pct: 40 }];
+  it('pico no período considera só o que se sobrepõe', () => {
+    expect(picoNoPeriodo(iv, '2026-11-01', '2026-12-01')).toBe(30);
+    expect(picoNoPeriodo(iv, '2026-12-01', '2027-01-01')).toBe(70);
+    expect(picoNoPeriodo(iv, '2027-01-01', '2027-02-01')).toBe(40);
+    expect(picoNoPeriodo(iv, '2027-02-01', '2027-03-01')).toBe(0);
+  });
+  it('situação e pessoas-equivalentes', () => {
+    expect(situacaoCapacidade(160, 150)).toBe('crit');
+    expect(situacaoCapacidade(140, 150)).toBe('aten');
+    expect(situacaoCapacidade(50, 150)).toBe('ok');
+    expect(situacaoCapacidade(10, 0)).toBe('crit');
+    expect(pessoasEq(120)).toBe('1,2');
   });
 });
 
