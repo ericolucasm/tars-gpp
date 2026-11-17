@@ -25,6 +25,7 @@ export type PedidoAlocacao = typeof t.pedidosAlocacao.$inferSelect;
 export type Avaliacao = typeof t.avaliacoes.$inferSelect;
 export type LinhaBase = typeof t.linhasBase.$inferSelect;
 export type MudancaBase = typeof t.mudancasBase.$inferSelect;
+export type PontoAtencao = typeof t.pontosAtencao.$inferSelect;
 export type FaseBiblioteca = typeof t.fasesBiblioteca.$inferSelect;
 export type Modelo = typeof t.modelos.$inferSelect;
 
@@ -35,7 +36,7 @@ async function carregar(orgId: string) {
   const fasesDoOrg = sql`(select f.id from projeto_fases f join iniciativas i on i.id = f.iniciativa_id where i.org_id = ${orgId})`;
   const [
     org, areas, pessoas, ciclos, raias, iniciativas, fasesBiblioteca, modelos, pedidos, avaliacoes,
-    fases, alocacoes, tarefas, marcos, riscos, reports, linhasBase, mudancas,
+    fases, alocacoes, tarefas, marcos, riscos, reports, linhasBase, mudancas, pontos,
   ] = await Promise.all([
     db.query.orgs.findFirst({ where: eq(t.orgs.id, orgId) }),
     db.select().from(t.areas).where(eq(t.areas.orgId, orgId)).orderBy(t.areas.ordem),
@@ -55,6 +56,7 @@ async function carregar(orgId: string) {
     db.select().from(t.statusReports).where(inArray(t.statusReports.iniciativaId, iniciativasDoOrg)),
     db.select().from(t.linhasBase).where(inArray(t.linhasBase.iniciativaId, iniciativasDoOrg)),
     db.select().from(t.mudancasBase).where(inArray(t.mudancasBase.iniciativaId, iniciativasDoOrg)),
+    db.select().from(t.pontosAtencao).where(eq(t.pontosAtencao.orgId, orgId)).orderBy(t.pontosAtencao.createdAt),
   ]);
   if (!org) throw new Error('Empresa não encontrada');
 
@@ -64,7 +66,7 @@ async function carregar(orgId: string) {
 
   return {
     org, areas, pessoas, ciclos, raias: raias as unknown as (Raia & typeof raias[number])[], iniciativas, fasesBiblioteca, modelos,
-    pedidos, avaliacoes, fases, alocacoes, tarefas, marcos, riscos, reports, linhasBase, mudancas,
+    pedidos, avaliacoes, fases, alocacoes, tarefas, marcos, riscos, reports, linhasBase, mudancas, pontos,
   };
 }
 

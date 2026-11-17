@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { notaFinal, custoReferencia, ordenarPorNota, podeComunicar } from './avaliacao';
 import { acoesDoCard, validarGate, podeConfirmar, type Raia } from './esteira';
 import { desvio, farolSugerido, statusDaFase, fasesDoModelo, mesesDaLinha, descreverMudanca, progresso, reordenar, ordemValida } from './projeto';
+import { podeResolverPonto, pontoEsperaPor, pontoAtrasado } from './pontos';
 import { gestorDe, timeDireto, areasSobGestao, nomeCurto, acimaDoCedido } from './pessoas';
 import { addDias, diffDias, dataPorExtenso, haQuanto, proximaSexta } from './datas';
 
@@ -136,6 +137,25 @@ describe('reordenar fases', () => {
     expect(ordemValida(['a', 'b', 'c'], ['a', 'b'])).toBe(false);
     expect(ordemValida(['a', 'b', 'c'], ['a', 'a', 'b'])).toBe(false);
     expect(ordemValida(['a', 'b', 'c'], ['a', 'b', 'x'])).toBe(false);
+  });
+});
+
+describe('pontos de atenção', () => {
+  const ponto = (x: Partial<Parameters<typeof podeResolverPonto>[0]> = {}) => ({ status: 'aberto', destino: 'gestor', destinatarioId: 'g', abertoPor: 'gp', prazo: '2026-11-20', ...x });
+  it('quem decide: o PMO, o gestor escolhido ou quem abriu (para retirar)', () => {
+    expect(podeResolverPonto(ponto(), 'g', false)).toBe(true);
+    expect(podeResolverPonto(ponto(), 'pmo', true)).toBe(true);
+    expect(podeResolverPonto(ponto(), 'gp', false)).toBe(true);
+    expect(podeResolverPonto(ponto(), 'outro', false)).toBe(false);
+    expect(podeResolverPonto(ponto({ status: 'resolvido' }), 'g', false)).toBe(false);
+  });
+  it('espera pelo destino certo e fica atrasado depois do prazo', () => {
+    expect(pontoEsperaPor(ponto({ destino: 'pmo' }), 'qualquer', true)).toBe(true);
+    expect(pontoEsperaPor(ponto({ destino: 'pmo' }), 'g', false)).toBe(false);
+    expect(pontoEsperaPor(ponto(), 'g', false)).toBe(true);
+    expect(pontoAtrasado(ponto(), '2026-11-21')).toBe(true);
+    expect(pontoAtrasado(ponto(), '2026-11-20')).toBe(false);
+    expect(pontoAtrasado(ponto({ prazo: null }), '2030-01-01')).toBe(false);
   });
 });
 

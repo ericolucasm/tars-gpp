@@ -6,6 +6,7 @@ import { br, diffDias } from '@/lib/regras/datas';
 import { areasSobGestao, gestorDe, primeiroNome, timeDireto } from '@/lib/regras/pessoas';
 import { alocacaoDe, cicloAtual, noRaia, pessoa } from '@/lib/visoes';
 import { ItemAcao, PillFarol, Vazio } from '@/components/ui';
+import { pontoAtrasado, pontoEsperaPor } from '@/lib/regras/pontos';
 import { Saudacao } from './Saudacao';
 
 export function InicioGestor({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao; hoje: string }) {
@@ -36,6 +37,13 @@ export function InicioGestor({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao;
   } else if (demais.length > 1) {
     itens.push(<ItemAcao key="dem" href="/area/iniciativas" titulo={`Aprovar ${urgentes.length ? 'mais ' : ''}${demais.length} iniciativas do time`}
       sub={demais.map((i) => `${i.titulo} (${primeiroNome(pessoa(d, i.solicitanteId)?.nome ?? '')})`).join(' · ')} acao="Decidir →" />);
+  }
+  const pontos = d.pontos.filter((x) => pontoEsperaPor(x, eu.id, false));
+  if (pontos.length) {
+    const atrasados = pontos.filter((x) => pontoAtrasado(x, hoje)).length;
+    itens.push(<ItemAcao key="pontos" href="/pontos" numero={pontos.length} tom={atrasados ? 'vermelho' : 'roxo'}
+      titulo={pontos.length === 1 ? 'Ponto de atenção esperando por você' : 'Pontos de atenção esperando por você'}
+      sub={pontos.map((x) => `${x.titulo} (${d.iniciativas.find((i) => i.id === x.iniciativaId)?.titulo.split(' para ')[0] ?? ''})`).join(' · ') + (atrasados ? ` · ${atrasados} com prazo vencido` : '')} acao="Resolver →" />);
   }
   for (const p of pedidos) {
     const proj = d.iniciativas.find((i) => i.id === p.iniciativaId);

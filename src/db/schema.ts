@@ -280,6 +280,26 @@ export const notificacoes = pgTable('notificacoes', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
+// Pontos de atenção: impedimento ou decisão que alguém do projeto escala ao PMO ou a um gestor.
+export const pontosAtencao = pgTable('pontos_atencao', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  orgId: uuid('org_id').notNull(),
+  iniciativaId: uuid('iniciativa_id').notNull().references(() => iniciativas.id, { onDelete: 'cascade' }),
+  faseId: uuid('fase_id').references(() => projetoFases.id, { onDelete: 'set null' }),
+  tipo: text('tipo').notNull(), // impedimento | decisao
+  titulo: text('titulo').notNull(),
+  descricao: text('descricao').notNull().default(''),
+  destino: text('destino').notNull(), // pmo | gestor
+  destinatarioId: uuid('destinatario_id'), // gestor escolhido (destino = gestor)
+  prazo: date('prazo'), // até quando precisa da resposta
+  status: text('status').notNull().default('aberto'), // aberto | resolvido
+  resolucao: text('resolucao'),
+  abertoPor: uuid('aberto_por'),
+  resolvidoPor: uuid('resolvido_por'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  resolvidoEm: timestamp('resolvido_em', { withTimezone: true }),
+}, (t) => [index('pontos_atencao_org').on(t.orgId, t.status)]);
+
 // ---------- Login (Better Auth) ----------
 // Tabelas mantidas pela biblioteca de login. As chaves JS seguem os nomes de campo que ela espera.
 

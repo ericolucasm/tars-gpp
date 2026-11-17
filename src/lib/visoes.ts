@@ -79,6 +79,15 @@ export function infoProjeto(d: DadosOrg, ini: Iniciativa, hoje: string) {
   };
 }
 
+/** Quem participa do projeto: o GP, quem está alocado em alguma fase e quem é responsável por alguma tarefa. */
+export function participaDoProjeto(d: DadosOrg, iniId: string, pessoaId: string) {
+  const ini = d.iniciativas.find((i) => i.id === iniId);
+  if (!ini) return false;
+  if (ini.gpId === pessoaId) return true;
+  const faseIds = new Set(d.fases.filter((f) => f.iniciativaId === iniId).map((f) => f.id));
+  return d.alocacoes.some((a) => a.pessoaId === pessoaId && faseIds.has(a.faseId)) || d.tarefas.some((t) => t.iniciativaId === iniId && t.responsavelId === pessoaId);
+}
+
 // ---------- Capacidade ----------
 
 type Intervalo = { ini: string; fim: string; pct: number; projeto: Iniciativa };

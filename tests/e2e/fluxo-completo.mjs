@@ -165,6 +165,13 @@ try {
   await p.getByRole('button', { name: 'Publicar status' }).click();
   await p.getByText('Status publicado e enviado ao patrocinador e ao PMO.').waitFor();
   ok('GP publica o status do projeto');
+  // GP escala um impedimento ao PMO
+  await p.getByRole('button', { name: 'Abrir ponto de atenção' }).click();
+  await p.getByLabel('Em poucas palavras').fill('Fornecedor não liberou o ambiente de testes');
+  await p.getByLabel('Detalhes e o que você precisa').fill('Precisamos que o PMO acione o contrato.');
+  await p.getByRole('button', { name: 'Enviar' }).click();
+  await p.getByText('Ponto de atenção enviado ao PMO.').waitFor();
+  ok('GP abre um ponto de atenção (impedimento) para o PMO');
   await p.context().close();
 
   // 7. PMO aprova a mudança de linha de base
@@ -174,6 +181,16 @@ try {
   await p.getByRole('button', { name: 'Aprovar mudança' }).click();
   await p.getByText('Mudança aprovada. A nova linha de base vale a partir de agora.').waitFor();
   ok('PMO vê o pedido na tela inicial e aprova a mudança');
+  const urlProjeto = p.url();
+  await ir(p, '/inicio');
+  await p.getByText('Ponto de atenção esperando por você').click();
+  await p.waitForURL(/\/pontos$/);
+  const ponto = p.getByRole('article', { name: 'Fornecedor não liberou o ambiente de testes' });
+  await ponto.getByLabel('O que foi decidido ou feito?').fill('Contrato acionado; ambiente liberado até quarta.');
+  await ponto.getByRole('button', { name: 'Registrar resolução' }).click();
+  await p.getByRole('region', { name: 'Resolvidos recentemente' }).getByText('Contrato acionado; ambiente liberado até quarta.').waitFor();
+  ok('PMO vê o ponto de atenção na Início e registra a resolução');
+  await p.goto(urlProjeto, { waitUntil: 'networkidle' });
 
   // 7b. PMO reordena as fases da linha do tempo (seta e arraste); a ordem fica gravada
   const ordemFases = async () => (await p.getByRole('button', { name: /^Subir fase / }).evaluateAll((bs) => bs.map((b) => b.getAttribute('aria-label').replace('Subir fase ', ''))));

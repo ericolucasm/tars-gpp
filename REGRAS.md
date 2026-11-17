@@ -166,3 +166,12 @@ Itens que o protótipo sugeria mas não desenhava. Todos usam o mesmo visual:
 ## 10. Fora do escopo da V1 (fase 2)
 
 Envio de e-mails e avisos agendados · anexos · importar planilha de pessoas · integração com Microsoft Entra (AD) · abas cinzas de Configurações (Empresa, Modo de captação, Notificações, Plano e cobrança) · multiempresa com cobrança.
+
+## 11. Acompanhamento dos projetos pelo PMO (V2)
+
+Funcionalidades que nasceram da análise da mecânica do PMO (17/11), para o acompanhamento depois do play.
+
+### Pontos de atenção
+- **[Decisão V2]** Quem participa do projeto (GP, pessoas alocadas, responsáveis de tarefa) ou o PMO pode abrir um **ponto de atenção**, do tipo **impedimento** ou **decisão necessária**. Ele vai para o **PMO** ou para **um gestor de área** escolhido, com data opcional para a resposta e fase opcional.
+- **[Decisão V2]** Quem decide vê o ponto no "Precisa de você" da Início e na página **Pontos de atenção** (`/pontos`), e registra a **resolução**. Quem abriu e o GP são avisados. O PMO sempre pode resolver. Quem abriu pode retirar o ponto, registrando o motivo.
+- **[Decisão V2]** Ponto aberto com a data de resposta vencida fica **atrasado** (destaque em vermelho).
