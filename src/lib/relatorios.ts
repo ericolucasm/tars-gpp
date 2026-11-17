@@ -5,7 +5,7 @@ import { acimaDoCedido, areasSobGestao, subarvore, timeDireto } from './regras/p
 import { rotuloDesvioCurto, FAROL, type Farol } from './regras/projeto';
 import { numerosAoVivo, rotuloEtapa, type Snapshot } from './ciclo-vm';
 import {
-  alocacaoDe, chaveDaRaia, custoDe, infoProjeto, nomeArea, noRaia, pessoa, projetosDaPessoa, rotuloCiclo, situacaoDoCard, TIPOS,
+  alocacaoDe, chaveDaRaia, custoDe, financeiroDo, infoProjeto, nomeArea, noRaia, pessoa, projetosDaPessoa, rotuloCiclo, situacaoDoCard, TIPOS,
 } from './visoes';
 
 // Relatórios de cada perfil. Tudo calculado a partir da mesma foto da empresa (carregarOrg),
@@ -143,6 +143,36 @@ function resumoAlocacao(lista: ComAloc[]) {
   return [{ rotulo: 'Pessoas', valor: String(lista.length) }, { rotulo: 'Acima do cedido', valor: String(acima), tom: (acima ? 'crit' : 'ok') as Tom }];
 }
 
+// ---------- Financeiro (PMO e GP) ----------
+
+const OPC_SIT_CUSTO = com('Todas as situações', [{ valor: 'crit', rotulo: 'Estouro de orçamento' }, { valor: 'aten', rotulo: 'Previsão acima do orçado' }, { valor: 'ok', rotulo: 'Dentro do orçamento' }]);
+const ROT_CUSTO: Record<string, string> = { ok: 'Dentro', aten: 'Acima do orçado', crit: 'Estouro' };
+
+function relatorioFinanceiro(d: DadosOrg, projetos: Iniciativa[], busca: Busca, comArea: boolean, filtrosExtra: Filtro[]): Relatorio {
+  const fSit = filtro(busca, 'financeiro', 'situacao', 'Situação do custo', OPC_SIT_CUSTO);
+  const linhas = projetos.map((i) => ({ i, f: financeiroDo(d, i) }))
+    .filter((x) => fSit.valor === TODOS || x.f.situacao === fSit.valor)
+    .sort((a, b) => b.f.desvioPct - a.f.desvioPct);
+  const soma = (k: 'orcado' | 'realizado' | 'previsao') => linhas.reduce((s, x) => s + x.f[k], 0);
+  const orcado = soma('orcado'), previsao = soma('previsao');
+  return {
+    id: 'financeiro', titulo: 'Financeiro dos projetos', descricao: 'Orçado, realizado e previsão de custo no fim de cada projeto em execução ou pausado, dos maiores desvios para os menores.',
+    filtros: [...filtrosExtra, fSit],
+    resumo: [
+      { rotulo: 'Orçado', valor: dinheiro(orcado) },
+      { rotulo: 'Realizado', valor: dinheiro(soma('realizado')) },
+      { rotulo: 'Previsto no fim', valor: dinheiro(previsao), tom: previsao > orcado * 1.1 ? 'crit' : previsao > orcado ? 'aten' : 'ok' },
+      { rotulo: 'Projetos estourando', valor: String(linhas.filter((x) => x.f.situacao === 'crit').length), tom: linhas.some((x) => x.f.situacao === 'crit') ? 'crit' : 'ok' },
+    ],
+    colunas: ['Projeto', ...(comArea ? ['Área'] : []), 'Orçado', 'Realizado', 'Consumo × concluído', 'Previsto no fim', 'Desvio', 'Situação'],
+    linhas: linhas.map(({ i, f }): Celula[] => [
+      i.titulo, ...(comArea ? [nomeArea(d, i.areaId)] : []), dinheiro(f.orcado), dinheiro(f.realizado), `${f.consumoPct}% × ${f.concluidoPct}%`, dinheiro(f.previsao),
+      { texto: f.desvioPct > 0 ? `+${f.desvioPct}%` : `${f.desvioPct}%`, tom: f.situacao }, { texto: ROT_CUSTO[f.situacao], tom: f.situacao },
+    ]),
+    vazio: 'Nenhum projeto com esses filtros.',
+  };
+}
+
 // ---------- PMO ----------
 
 function relatoriosPmo(d: DadosOrg, hoje: string, busca: Busca): Relatorio[] {
@@ -219,6 +249,10 @@ function relatoriosPmo(d: DadosOrg, hoje: string, busca: Busca): Relatorio[] {
       filtros: [fArea2, fFarol2, fEtapa2],
       resumo: resumoFarol(projetos), colunas: COLUNAS_SAUDE(true), linhas: saudeProjetos(d, projetos, hoje, true), vazio: 'Nenhum projeto com esses filtros.',
     },
+    (() => {
+      const fArea = filtro(busca, 'financeiro', 'area', 'Área', opcoesArea(d, areasComIni));
+      return relatorioFinanceiro(d, d.iniciativas.filter((i) => noRaia(d, i, 'exe', 'pau') && naArea(d, i.areaId, fArea)), busca, true, [fArea]);
+    })(),
     {
       id: 'ciclos', titulo: 'Ciclos de planejamento', descricao: 'Resultado de cada ciclo. O ciclo em andamento é calculado ao vivo; os encerrados mostram a foto do fechamento.',
       filtros: [fSit3],
@@ -361,6 +395,7 @@ function relatoriosGp(d: DadosOrg, eu: Pessoa, hoje: string, busca: Busca): Rela
       colunas: ['Projeto', 'Etapa', 'Farol', 'Desvio', 'Concluído', 'Fim previsto', 'Próximo marco', 'Último status'], linhas: projetos,
       vazio: 'Nenhum projeto com esse filtro.',
     },
+    relatorioFinanceiro(d, meus, busca, false, []),
     {
       id: 'tarefas', titulo: 'Tarefas em aberto', descricao: 'Tarefas não concluídas dos seus projetos, pela ordem do prazo.',
       filtros: [fProj2, fSit2, fResp2],

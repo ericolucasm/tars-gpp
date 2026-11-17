@@ -3,6 +3,7 @@ import { addDias, br, brCurto, diffDias, haQuanto, nomeMes } from './regras/data
 import { dataDaSemana, desvio, fimDoPlano, progresso, statusDaFase, tarefaAtrasada, type Fase } from './regras/projeto';
 import { acimaDoCedido, gestorDe, nomeCurto } from './regras/pessoas';
 import { custoReferencia, notaFinal } from './regras/avaliacao';
+import { resumoFinanceiro } from './regras/financeiro';
 
 // Cálculos derivados usados por várias telas. Tudo a partir de DadosOrg (a "foto" da empresa).
 
@@ -149,6 +150,13 @@ export function custoDe(i: Iniciativa) {
 /** Orçamento do projeto: o aprovado (play ou mudança de custo aprovada) ou, se ainda não houver, o custo estimado da iniciativa. */
 export function orcamentoDoProjeto(i: Iniciativa) {
   return i.orcamentoAprovado ?? custoDe(i);
+}
+
+/** Financeiro do projeto: orçado, realizado (lançamentos), previsão no fim e situação. */
+export function financeiroDo(d: DadosOrg, i: Iniciativa) {
+  const realizado = d.lancamentos.filter((l) => l.iniciativaId === i.id).reduce((s, l) => s + l.valor, 0);
+  const tarefas = d.tarefas.filter((t) => t.iniciativaId === i.id);
+  return resumoFinanceiro(orcamentoDoProjeto(i), realizado, i.previsaoCusto, progresso(tarefas));
 }
 
 /** Linha de contexto dos cards do portfólio. */
