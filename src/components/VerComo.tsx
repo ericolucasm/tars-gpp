@@ -17,7 +17,7 @@ export function VerComo({ perfis, ativo, grupos, persona }: {
 }) {
   const [pend, start] = useTransition();
   return (
-    <div style={s('flex: 0 0 auto; width: 100%; box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 16px; background: #26213A; color: #E7E0FF; font-size: 12px')}>
+    <div data-sem-impressao style={s('flex: 0 0 auto; width: 100%; box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 16px; background: #26213A; color: #E7E0FF; font-size: 12px')}>
       {grupos.length > 0 && (
         <label style={s('display: flex; align-items: center; gap: 6px; margin-right: 8px')}>
           <span style={s('font-weight: 600')}>Admin · ver como</span>

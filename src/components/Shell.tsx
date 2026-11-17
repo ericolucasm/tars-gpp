@@ -11,7 +11,7 @@ import { BarraDeNavegacao, ItemMenu } from './Navegacao';
 type Item = { href: string; rotulo: string; ativo?: boolean };
 
 export type Atual =
-  | 'inicio' | 'nova' | 'area-iniciativas' | 'area-projetos' | 'area-time' | 'portfolio' | 'ciclos' | 'avaliacao' | 'projetos' | 'cadastros' | 'configuracoes' | `projeto:${string}`;
+  | 'inicio' | 'nova' | 'area-iniciativas' | 'area-projetos' | 'area-time' | 'portfolio' | 'ciclos' | 'avaliacao' | 'projetos' | 'cadastros' | 'configuracoes' | 'relatorios' | `projeto:${string}`;
 
 const ROTULO_PERFIL: Record<Perfil, string> = { colaborador: 'Colaborador', gestor: 'Gestor de área', gp: 'Gerente de projeto', pmo: 'PMO' };
 
@@ -72,6 +72,11 @@ export function Shell({ sessao, dados, atual, children, mainStyle }: { sessao: S
     topo = it('/iniciativas/nova', '+ Nova iniciativa', 'nova');
     secoes.push({ itens: [it('/inicio', 'Início', 'inicio')] });
   }
+
+  // Relatórios: em todos os perfis, numa seção própria logo depois da área de trabalho do perfil
+  const relatorios = { titulo: 'RELATÓRIOS', itens: [it('/relatorios', 'Relatórios', 'relatorios')] };
+  if (sessao.perfil === 'pmo' && p.admin) secoes.splice(secoes.length - 1, 0, relatorios);
+  else secoes.push(relatorios);
 
   const mostrarBarra = sessao.admin || sessao.perfis.length > 1;
 
