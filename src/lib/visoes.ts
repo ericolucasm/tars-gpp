@@ -1,7 +1,8 @@
 import type { Ciclo, DadosOrg, Iniciativa, Pessoa, ProjetoFase } from './dados';
 import { addDias, br, brCurto, diffDias, haQuanto, nomeMes } from './regras/datas';
 import { dataDaSemana, desvio, fimDoPlano, progresso, statusDaFase, tarefaAtrasada, type Fase } from './regras/projeto';
-import { acimaDoCedido, gestorDe, nomeCurto } from './regras/pessoas';
+import { acimaDoCedido, gestorDe, nomeCurto, subarvore } from './regras/pessoas';
+import { picoNoPeriodo } from './regras/capacidade';
 import { custoReferencia, notaFinal } from './regras/avaliacao';
 import { resumoFinanceiro } from './regras/financeiro';
 import { dimCusto, dimEscopo, dimPrazo, dimRiscos, type Dimensao } from './regras/farol';
@@ -123,6 +124,29 @@ export function alocacaoDe(d: DadosOrg, pessoaId: string, hoje: string): number 
     pico = Math.max(pico, soma);
   }
   return pico;
+}
+
+/** Capacidade de uma área por mês: soma do que as pessoas cedem × soma do pico de alocação de cada uma no mês (com ou sem as subáreas). */
+export function capacidadeDaArea(d: DadosOrg, areaId: string, meses: { de: string; ate: string }[], hoje: string, comSubareas = true) {
+  const ids = new Set(comSubareas ? subarvore(areaId, d.areas) : [areaId]);
+  const pessoas = d.pessoas.filter((p) => !p.externo && p.areaId && ids.has(p.areaId));
+  const cedido = pessoas.reduce((s, p) => s + (p.cedeAte ?? 0), 0);
+  const ivs = pessoas.map((p) => intervalosDaPessoa(d, p.id, hoje));
+  return {
+    cedido, pessoas: pessoas.length,
+    meses: meses.map((m) => ivs.reduce((s, iv) => s + picoNoPeriodo(iv, m.de, m.ate), 0)),
+  };
+}
+
+/** Os próximos N meses a partir do mês de hoje, como intervalos [1º dia, 1º dia do mês seguinte). */
+export function proximosMeses(hoje: string, n: number) {
+  const [a, m] = hoje.slice(0, 7).split('-').map(Number);
+  return Array.from({ length: n }, (_, k) => {
+    const t = a * 12 + (m - 1) + k;
+    const de = `${Math.floor(t / 12)}-${String((t % 12) + 1).padStart(2, '0')}-01`;
+    const ate = `${Math.floor((t + 1) / 12)}-${String(((t + 1) % 12) + 1).padStart(2, '0')}-01`;
+    return { de, ate };
+  });
 }
 
 /** Projetos em que a pessoa está alocada, com o % da fase atual (ou da próxima): "Roteirização (20%)". */

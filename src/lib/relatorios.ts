@@ -4,9 +4,10 @@ import { br, dinheiro } from './regras/datas';
 import { acimaDoCedido, areasSobGestao, subarvore, timeDireto } from './regras/pessoas';
 import { rotuloDesvioCurto, FAROL, type Farol } from './regras/projeto';
 import { numerosAoVivo, rotuloEtapa, type Snapshot } from './ciclo-vm';
+import { pessoasEq, situacaoCapacidade } from './regras/capacidade';
 import { ESCALA, ESCALA_IMPACTO, STATUS_RISCO, nivelDoRisco, riscoAtivo } from './regras/riscos';
 import {
-  alocacaoDe, chaveDaRaia, custoDe, dimensoesDo, financeiroDo, infoProjeto, nomeArea, noRaia, pessoa, projetosDaPessoa, rotuloCiclo, situacaoDoCard, TIPOS,
+  alocacaoDe, capacidadeDaArea, chaveDaRaia, custoDe, dimensoesDo, financeiroDo, infoProjeto, proximosMeses, nomeArea, noRaia, pessoa, projetosDaPessoa, rotuloCiclo, situacaoDoCard, TIPOS,
 } from './visoes';
 
 // Relatórios de cada perfil. Tudo calculado a partir da mesma foto da empresa (carregarOrg),
@@ -235,6 +236,30 @@ function relatorioRiscos(d: DadosOrg, projetos: Iniciativa[], busca: Busca, titu
   };
 }
 
+// ---------- Capacidade por área e mês ----------
+
+const MES_CURTO = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+
+function relatorioCapacidadeMes(d: DadosOrg, hoje: string, busca: Busca, areasPermitidas?: Set<string>): Relatorio {
+  const fArea = filtro(busca, 'capmes', 'area', 'Área', opcoesArea(d, areasPermitidas));
+  const fHor = filtro(busca, 'capmes', 'horizonte', 'Horizonte', [{ valor: '6', rotulo: 'Próximos 6 meses' }, { valor: '3', rotulo: 'Próximos 3 meses' }, { valor: '12', rotulo: 'Próximos 12 meses' }]);
+  const meses = proximosMeses(hoje, Number(fHor.valor));
+  // uma linha por área com gente cedendo para projetos (só as pessoas da própria área, para não contar duas vezes)
+  const linhas = d.areas
+    .filter((a) => (!areasPermitidas || areasPermitidas.has(a.id)) && naArea(d, a.id, fArea))
+    .map((a) => ({ a, c: capacidadeDaArea(d, a.id, meses, hoje, false) }))
+    .filter((x) => x.c.cedido > 0 || x.c.meses.some((m) => m > 0));
+  const estouradas = linhas.filter((x) => x.c.meses.some((m) => situacaoCapacidade(m, x.c.cedido) === 'crit')).length;
+  return {
+    id: 'capmes', titulo: 'Capacidade por área e mês', descricao: 'Pessoas-equivalentes alocadas em projetos × o que a área cede (100% = uma pessoa em tempo integral). Vermelho: acima do cedido; âmbar: acima de 85%.',
+    filtros: [fArea, fHor],
+    resumo: [{ rotulo: 'Áreas', valor: String(linhas.length) }, { rotulo: 'Acima do cedido em algum mês', valor: String(estouradas), tom: estouradas ? 'crit' : 'ok' }],
+    colunas: ['Área', 'Pode ceder', ...meses.map((m) => `${MES_CURTO[Number(m.de.slice(5, 7)) - 1]} ${m.de.slice(2, 4)}`)],
+    linhas: linhas.map(({ a, c }): Celula[] => [a.nome, `${pessoasEq(c.cedido)} (${c.pessoas} ${c.pessoas === 1 ? "pessoa" : "pessoas"})`, ...c.meses.map((m): Celula => ({ texto: pessoasEq(m), tom: m === 0 ? 'neutro' : situacaoCapacidade(m, c.cedido) }))]),
+    vazio: 'Nenhuma área com capacidade cedida.',
+  };
+}
+
 // ---------- PMO ----------
 
 function relatoriosPmo(d: DadosOrg, hoje: string, busca: Busca): Relatorio[] {
@@ -336,6 +361,7 @@ function relatoriosPmo(d: DadosOrg, hoje: string, busca: Busca): Relatorio[] {
       colunas: ['Área', 'Iniciativas', 'Em avaliação', 'Pré-projeto', 'Em projeto', 'Concluídas', 'Recusadas ou canceladas'],
       linhas: porArea, vazio: 'Nenhuma iniciativa com esses filtros.',
     },
+    relatorioCapacidadeMes(d, hoje, busca),
     {
       id: 'capacidade', titulo: 'Capacidade das pessoas', descricao: 'Quanto cada pessoa pode ceder para projetos e quanto está alocada (pico nas fases que ainda vão acontecer).',
       filtros: [fArea5, fSit5],
@@ -403,6 +429,7 @@ function relatoriosGestor(d: DadosOrg, eu: Pessoa, hoje: string, busca: Busca): 
       filtros: temSub ? [fFarol2, fArea2] : [fFarol2],
       resumo: resumoFarol(projetos), colunas: COLUNAS_SAUDE(false), linhas: saudeProjetos(d, projetos, hoje, false), vazio: 'Nenhum projeto com esses filtros.',
     },
+    relatorioCapacidadeMes(d, hoje, busca, minhas),
     {
       id: 'time', titulo: 'Alocação do time', descricao: 'Quanto cada pessoa do seu time pode ceder para projetos e quanto está alocada.',
       filtros: [fSit3],
