@@ -43,6 +43,13 @@
       "when": 1794954283215,
       "tag": "0005_financeiro",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794955340684,
+      "tag": "0006_riscos_completos",
+      "breakpoints": true
     }
   ]
 }

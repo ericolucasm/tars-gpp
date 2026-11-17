@@ -195,3 +195,8 @@ Funcionalidades que nasceram da análise da mecânica do PMO (17/11), para o aco
   - **Escopo:** mudança de escopo aguardando o PMO, ou escopo que já mudou 2 vezes ou mais → atenção.
   - **Riscos:** 2 ou mais riscos altos, ou impedimento com prazo vencido → crítico; 1 risco alto ou impedimento aberto → atenção.
 - **[Decisão V2]** No relatório Saúde dos projetos, a coluna "Alertas" lista as dimensões fora do OK.
+
+### Riscos
+- **[Decisão V2]** Cada risco tem **probabilidade** (baixa, média, alta) × **impacto** (baixo, médio, alto), **responsável**, **plano de resposta** e **status**: em acompanhamento, ocorreu (virou problema), mitigado, encerrado. O **nível** é calculado: pontuação 6 ou mais → Alto; 3 a 5 → Médio; até 2 → Baixo. Os riscos que já existiam foram convertidos para manter o mesmo nível.
+- **[Decisão V2]** Contam como **ativos** (farol de riscos, "riscos abertos", relatórios) só os riscos em acompanhamento ou que ocorreram. Mitigados e encerrados saem das contas, mas continuam no histórico da fase.
+- **[Decisão V2]** PMO: relatórios **Matriz de riscos** (probabilidade × impacto) e **Riscos do portfólio**, com filtros de área, nível, status e plano. GP: **Riscos dos meus projetos**. Na Início do PMO aparece o aviso **Riscos altos sem plano de resposta**.

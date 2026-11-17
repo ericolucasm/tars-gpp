@@ -59,7 +59,7 @@ export default async function Projeto({ params, searchParams }: { params: Promis
             id: p.id, nome: p.nome, ini: iniciais(p.nome), papel: [p.cargo, p.externo ? null : nomeArea(d, p.areaId)].filter(Boolean).join(' · '), cap: p.externo ? null : p.cedeAte, noProjeto: alocIds.has(p.id) || p.id === ini.gpId,
           })),
           marcos: d.marcos.filter((m) => faseIds.has(m.faseId)).map((m) => ({ id: m.id, faseId: m.faseId, nome: m.nome, data: m.data, status: m.status })),
-          riscos: d.riscos.filter((r) => faseIds.has(r.faseId)).map((r) => ({ id: r.id, faseId: r.faseId, nome: r.nome, nivel: r.nivel })),
+          riscos: d.riscos.filter((r) => faseIds.has(r.faseId)).map((r) => ({ id: r.id, faseId: r.faseId, nome: r.nome, nivel: r.nivel, probabilidade: r.probabilidade, impacto: r.impacto, responsavelId: r.responsavelId, plano: r.plano, status: r.status })),
           reports: d.reports.filter((r) => r.iniciativaId === ini.id).sort((a, b) => b.data.localeCompare(a.data)).map((r) => ({ id: r.id, data: r.data, farol: r.farol, desvio: r.desvio, a: r.avancou, b: r.aSeguir, c: r.atencao })),
           mudanca: mud ? { id: mud.id, descricao: mud.descricao, solicitante: pessoa(d, mud.solicitanteId)?.nome ?? '' } : null,
           ehPmo, gpId: ini.gpId ?? '', dimensoes: dimensoesSemPrazo(d, ini, hoje),

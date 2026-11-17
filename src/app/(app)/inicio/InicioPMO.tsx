@@ -6,6 +6,7 @@ import { cicloVM } from '@/lib/ciclo-vm';
 import { cicloAberto, financeiroDo, infoProjeto, listaAvaliacao, nomeArea, noRaia, pessoa, pessoasAcimaDoCedido, raiaChave } from '@/lib/visoes';
 import { ItemAcao, Kpi, GradeKpi, Painel, Vazio } from '@/components/ui';
 import { pontoAtrasado, pontoEsperaPor } from '@/lib/regras/pontos';
+import { riscoAtivo } from '@/lib/regras/riscos';
 import { Saudacao } from './Saudacao';
 import { PainelCiclo } from './PainelCiclo';
 import { BotaoCobrar } from './BotaoCobrar';
@@ -44,6 +45,13 @@ export function InicioPMO({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao; ho
     itens.push(<ItemAcao key="custo" href="/relatorios?r.financeiro.situacao=crit#financeiro" numero={estourando.length} tom="vermelho"
       titulo={estourando.length === 1 ? 'Projeto estourando o orçamento' : 'Projetos estourando o orçamento'}
       sub={estourando.map((x) => `${x.i.titulo.split(' para ')[0]} (+${x.f.desvioPct}%)`).join(' · ')} acao="Ver →" />);
+  }
+  const fasesExe = new Set(d.fases.filter((f) => exe.some((i) => i.id === f.iniciativaId) || pau.some((i) => i.id === f.iniciativaId)).map((f) => f.id));
+  const altosSemPlano = d.riscos.filter((r) => fasesExe.has(r.faseId) && r.nivel === 'Alto' && riscoAtivo(r.status) && !r.plano);
+  if (altosSemPlano.length) {
+    itens.push(<ItemAcao key="riscos" href="/relatorios?r.riscos.nivel=Alto&r.riscos.plano=sem#riscos" numero={altosSemPlano.length} tom="ambar" badgeTom="ambar"
+      titulo={altosSemPlano.length === 1 ? 'Risco alto sem plano de resposta' : 'Riscos altos sem plano de resposta'}
+      sub={altosSemPlano.slice(0, 3).map((r) => r.nome).join(' · ') + (altosSemPlano.length > 3 ? ` +${altosSemPlano.length - 3}` : '')} acao="Ver →" />);
   }
   for (const m of d.pedidosMudanca.filter((x) => x.status === 'pendente')) {
     const proj = d.iniciativas.find((i) => i.id === m.iniciativaId);

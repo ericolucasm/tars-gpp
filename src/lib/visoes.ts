@@ -6,6 +6,7 @@ import { custoReferencia, notaFinal } from './regras/avaliacao';
 import { resumoFinanceiro } from './regras/financeiro';
 import { dimCusto, dimEscopo, dimPrazo, dimRiscos, type Dimensao } from './regras/farol';
 import { pontoAtrasado } from './regras/pontos';
+import { riscoAtivo } from './regras/riscos';
 
 // Cálculos derivados usados por várias telas. Tudo a partir de DadosOrg (a "foto" da empresa).
 
@@ -63,7 +64,7 @@ export function infoProjeto(d: DadosOrg, ini: Iniciativa, hoje: string) {
   const tarefas = d.tarefas.filter((t) => t.iniciativaId === ini.id);
   const faseIds = new Set(fases.map((f) => f.id));
   const marcos = d.marcos.filter((m) => faseIds.has(m.faseId)).sort((a, b) => (a.data ?? '').localeCompare(b.data ?? ''));
-  const riscos = d.riscos.filter((r) => faseIds.has(r.faseId));
+  const riscos = d.riscos.filter((r) => faseIds.has(r.faseId) && riscoAtivo(r.status)); // só os que ainda pedem atenção
   const base = linhaBaseDo(d, ini.id);
   const dv = desvio(fases, base);
   const atual = fases.find((f) => statusDaFase(f, inicio, hoje) === 'Em andamento') ?? fases.find((f) => statusDaFase(f, inicio, hoje) === 'Planejada') ?? fases[fases.length - 1];
@@ -166,7 +167,7 @@ export function dimensoesSemPrazo(d: DadosOrg, i: Iniciativa, hoje: string): Dim
   const f = financeiroDo(d, i);
   const mud = d.pedidosMudanca.filter((m) => m.iniciativaId === i.id && m.tipo === 'escopo');
   const faseIds = new Set(d.fases.filter((x) => x.iniciativaId === i.id).map((x) => x.id));
-  const altos = d.riscos.filter((r) => faseIds.has(r.faseId) && r.nivel === 'Alto').length;
+  const altos = d.riscos.filter((r) => faseIds.has(r.faseId) && r.nivel === 'Alto' && riscoAtivo(r.status)).length;
   const imp = d.pontos.filter((p) => p.iniciativaId === i.id && p.tipo === 'impedimento' && p.status === 'aberto');
   return [
     dimCusto(f.situacao, f.orcado, f.desvioPct),

@@ -242,7 +242,13 @@ export const riscos = pgTable('riscos', {
   id: uuid('id').primaryKey().defaultRandom(),
   faseId: uuid('fase_id').notNull().references(() => projetoFases.id, { onDelete: 'cascade' }),
   nome: text('nome').notNull(),
-  nivel: text('nivel').notNull().default('Alto'), // Alto | Médio | Baixo
+  nivel: text('nivel').notNull().default('Alto'), // Alto | Médio | Baixo (calculado de probabilidade × impacto)
+  probabilidade: integer('probabilidade').notNull().default(2), // 1 baixa · 2 média · 3 alta
+  impacto: integer('impacto').notNull().default(2), // 1 baixo · 2 médio · 3 alto
+  responsavelId: uuid('responsavel_id'),
+  plano: text('plano').notNull().default(''), // plano de resposta
+  status: text('status').notNull().default('aberto'), // aberto | ocorreu | mitigado | encerrado
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
 export const statusReports = pgTable('status_reports', {
