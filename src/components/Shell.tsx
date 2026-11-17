@@ -11,7 +11,7 @@ import { BarraDeNavegacao, ItemMenu } from './Navegacao';
 type Item = { href: string; rotulo: string; ativo?: boolean };
 
 export type Atual =
-  | 'inicio' | 'nova' | 'area-iniciativas' | 'area-projetos' | 'area-time' | 'portfolio' | 'ciclos' | 'avaliacao' | 'projetos' | 'cadastros' | 'configuracoes' | 'relatorios' | 'pontos' | `projeto:${string}`;
+  | 'inicio' | 'nova' | 'area-iniciativas' | 'area-projetos' | 'area-time' | 'portfolio' | 'ciclos' | 'avaliacao' | 'projetos' | 'cadastros' | 'configuracoes' | 'relatorios' | 'pontos' | 'roadmap' | `projeto:${string}`;
 
 const ROTULO_PERFIL: Record<Perfil, string> = { colaborador: 'Colaborador', gestor: 'Gestor de área', gp: 'Gerente de projeto', pmo: 'PMO' };
 
@@ -57,7 +57,7 @@ export function Shell({ sessao, dados, atual, children, mainStyle }: { sessao: S
   if (sessao.perfil === 'pmo') {
     topo = it('/iniciativas/nova', '+ Nova iniciativa', 'nova');
     secoes.push({ itens: [it('/inicio', 'Início', 'inicio')] });
-    secoes.push({ titulo: 'GESTÃO', itens: [it('/portfolio', 'Portfólio', 'portfolio'), it('/ciclos', 'Ciclos de planejamento', 'ciclos'), it('/avaliacao', 'Avaliação e priorização', 'avaliacao'), { href: '/projetos', rotulo: 'Projetos', ativo: atual === 'projetos' || atual.startsWith('projeto:') }] });
+    secoes.push({ titulo: 'GESTÃO', itens: [it('/portfolio', 'Portfólio', 'portfolio'), it('/roadmap', 'Roadmap', 'roadmap'), it('/ciclos', 'Ciclos de planejamento', 'ciclos'), it('/avaliacao', 'Avaliação e priorização', 'avaliacao'), { href: '/projetos', rotulo: 'Projetos', ativo: atual === 'projetos' || atual.startsWith('projeto:') }] });
     if (p.admin) secoes.push({ titulo: 'CONFIGURAÇÃO', itens: [it('/cadastros', 'Cadastros', 'cadastros'), it('/configuracoes', 'Configurações', 'configuracoes')] });
   } else if (sessao.perfil === 'gestor') {
     topo = it('/iniciativas/nova', '+ Nova iniciativa', 'nova');

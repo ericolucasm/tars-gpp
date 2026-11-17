@@ -30,33 +30,33 @@ export type Relatorio = {
 };
 export type Busca = Record<string, string | string[] | undefined>;
 
-const TODOS = 'todos';
+export const TODOS = 'todos';
 const nomeCurtoProjeto = (t: string) => { const k = t.indexOf(' para '); return k > 0 ? t.slice(0, k) : t; };
 const dia = (x: Date | null) => (x ? br(x.toISOString().slice(0, 10)) : '—');
 const ORDEM_FAROL: Record<string, number> = { crit: 0, aten: 1, ok: 2 };
 
 /** Lê um filtro do endereço; valor desconhecido volta para a primeira opção ("todos"). */
-function filtro(busca: Busca, rel: string, chave: string, rotulo: string, opcoes: Opcao[]): Filtro {
+export function filtro(busca: Busca, rel: string, chave: string, rotulo: string, opcoes: Opcao[]): Filtro {
   const param = `r.${rel}.${chave}`;
   const bruto = busca[param];
   const v = Array.isArray(bruto) ? bruto[0] : bruto;
   const valor = v && opcoes.some((o) => o.valor === v) ? v : opcoes[0].valor;
   return { param, rotulo, valor, opcoes };
 }
-const com = (rotuloTodos: string, opcoes: Opcao[]): Opcao[] => [{ valor: TODOS, rotulo: rotuloTodos }, ...opcoes];
+export const com = (rotuloTodos: string, opcoes: Opcao[]): Opcao[] => [{ valor: TODOS, rotulo: rotuloTodos }, ...opcoes];
 
 // ---------- Opções de filtro reutilizadas ----------
 
-const OPC_FAROL = com('Todos os faróis', [{ valor: 'crit', rotulo: 'Crítico' }, { valor: 'aten', rotulo: 'Atenção' }, { valor: 'ok', rotulo: 'OK' }]);
+export const OPC_FAROL = com('Todos os faróis', [{ valor: 'crit', rotulo: 'Crítico' }, { valor: 'aten', rotulo: 'Atenção' }, { valor: 'ok', rotulo: 'OK' }]);
 const OPC_SITUACAO_PESSOA = com('Todas as situações', [
   { valor: 'acima', rotulo: 'Acima do cedido' }, { valor: 'dentro', rotulo: 'Dentro do limite' }, { valor: 'sem', rotulo: 'Sem projetos' },
 ]);
 
 /** Áreas na ordem do cadastro; ao escolher uma área, entram também as subáreas dela. */
-function opcoesArea(d: DadosOrg, ids?: Set<string>): Opcao[] {
+export function opcoesArea(d: DadosOrg, ids?: Set<string>): Opcao[] {
   return com('Todas as áreas', d.areas.filter((a) => !ids || ids.has(a.id)).map((a) => ({ valor: a.id, rotulo: a.nome })));
 }
-function naArea(d: DadosOrg, areaId: string | null, f: Filtro) {
+export function naArea(d: DadosOrg, areaId: string | null, f: Filtro) {
   if (f.valor === TODOS) return true;
   return !!areaId && subarvore(f.valor, d.areas).includes(areaId);
 }

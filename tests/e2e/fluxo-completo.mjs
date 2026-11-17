@@ -249,6 +249,13 @@ try {
   depois = await ordemFases();
   if (depois.join() !== antes.join()) throw new Error(`Arraste não reordenou: ${depois.join(', ')}`);
   ok('PMO reordena as fases da linha do tempo pela seta e pelo arraste');
+  await p.getByRole('navigation', { name: 'Menu principal' }).getByRole('link', { name: 'Roadmap' }).click();
+  await p.waitForURL(/\/roadmap$/);
+  await p.getByRole('row', { name: TITULO }).waitFor();
+  await p.getByLabel('Etapa').selectOption({ label: 'Pré-projetos' });
+  await p.waitForURL(/r\.roadmap\.etapa=pre/);
+  if (await p.getByRole('row', { name: TITULO }).count()) throw new Error('Filtro de etapa do roadmap não aplicou');
+  ok('PMO abre o roadmap do portfólio e filtra por etapa');
   await p.context().close();
 
   // 8. Fernanda navega pelos três menus da área e responde o pedido de alocação do Diego

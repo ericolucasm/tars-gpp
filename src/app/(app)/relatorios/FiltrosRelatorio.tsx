@@ -8,7 +8,7 @@ const TODOS = 'todos';
 const sSelect = s('height: 36px; padding: 0 10px; border-radius: 9px; border: 1px solid #E2DCD0; background: #FFFFFF; color: #26213A; font-size: 13px; max-width: 240px');
 
 /** Filtros de um relatório. Cada escolha vai para o endereço da página, então o link já leva filtrado. */
-export function FiltrosRelatorio({ rel, filtros }: { rel: string; filtros: Filtro[] }) {
+export function FiltrosRelatorio({ rel, filtros, caminho = '/relatorios' }: { rel: string; filtros: Filtro[]; caminho?: string }) {
   const router = useRouter();
   if (!filtros.length) return null;
 
@@ -16,7 +16,7 @@ export function FiltrosRelatorio({ rel, filtros }: { rel: string; filtros: Filtr
     const p = new URLSearchParams(window.location.search);
     mudar(p);
     const q = p.toString();
-    router.replace(`/relatorios${q ? `?${q}` : ''}#${rel}`, { scroll: false });
+    router.replace(`${caminho}${q ? `?${q}` : ''}#${rel}`, { scroll: false });
   }
   const ativos = filtros.filter((f) => f.valor !== f.opcoes[0].valor);
 

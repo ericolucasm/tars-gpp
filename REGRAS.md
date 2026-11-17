@@ -200,3 +200,8 @@ Funcionalidades que nasceram da análise da mecânica do PMO (17/11), para o aco
 - **[Decisão V2]** Cada risco tem **probabilidade** (baixa, média, alta) × **impacto** (baixo, médio, alto), **responsável**, **plano de resposta** e **status**: em acompanhamento, ocorreu (virou problema), mitigado, encerrado. O **nível** é calculado: pontuação 6 ou mais → Alto; 3 a 5 → Médio; até 2 → Baixo. Os riscos que já existiam foram convertidos para manter o mesmo nível.
 - **[Decisão V2]** Contam como **ativos** (farol de riscos, "riscos abertos", relatórios) só os riscos em acompanhamento ou que ocorreram. Mitigados e encerrados saem das contas, mas continuam no histórico da fase.
 - **[Decisão V2]** PMO: relatórios **Matriz de riscos** (probabilidade × impacto) e **Riscos do portfólio**, com filtros de área, nível, status e plano. GP: **Riscos dos meus projetos**. Na Início do PMO aparece o aviso **Riscos altos sem plano de resposta**.
+
+### Roadmap do portfólio
+- **[Decisão V2]** Menu **Gestão › Roadmap** (PMO): uma linha por projeto, com a barra do início ao **fim previsto** na cor do farol. Pausados aparecem esmaecidos e concluídos em lilás. **◆** marca os marcos (verde se atingido, âmbar se em risco), um traço cinza marca o **fim da linha de base** quando ele é diferente do previsto, e uma linha vermelha marca **hoje**.
+- **[Decisão V2]** Pré-projetos aparecem com **borda tracejada**, usando o mês de início desejado e o de entrega desejada informados na iniciativa. Os que não têm essas datas são listados abaixo do roadmap.
+- **[Decisão V2]** Filtros: área (inclui subáreas), etapa (padrão: todos os ativos) e farol. Clicar no nome do projeto abre a página dele.
