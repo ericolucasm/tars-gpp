@@ -3,8 +3,9 @@
 import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { s } from '@/lib/css';
 import { addDias, br } from '@/lib/regras/datas';
-import { desvio as calcDesvio, farolSugerido, fimDoPlano, FAROL, mesesDaLinha, reordenar, rotuloDesvioCurto, type Fase, type Farol } from '@/lib/regras/projeto';
+import { desvio as calcDesvio, fimDoPlano, FAROL, mesesDaLinha, reordenar, rotuloDesvioCurto, type Fase, type Farol } from '@/lib/regras/projeto';
 import * as A from '@/app/acoes/projeto';
+import { dimPrazo, farolGeral, type Dimensao } from '@/lib/regras/farol';
 
 type FaseVM = Fase & { criterio: string; confirmada: string | null };
 type Props = {
@@ -19,6 +20,7 @@ type Props = {
   reports: { id: string; data: string; farol: string; desvio: string; a: string; b: string; c: string }[];
   mudanca: { id: string; descricao: string; solicitante: string } | null;
   ehPmo: boolean; gpId: string; faseInicial: string;
+  dimensoes: Dimensao[]; // custo, escopo e riscos (o prazo é calculado aqui, ao vivo)
 };
 
 const W = 30; // px por semana
@@ -67,7 +69,8 @@ export function TelaProjeto({ p }: { p: Props }) {
   const meses = useMemo(() => mesesDaLinha(p.inicio, semanas), [p.inicio, semanas]);
   const dv = calcDesvio(fases, p.base);
   const acimaIds = [...new Set(p.alocs.filter((a) => { const pe = pessoa(a.pessoaId); return pe && pe.cap != null && a.pct > pe.cap; }).map((a) => a.pessoaId))];
-  const sug = farolSugerido(dv, acimaIds.length);
+  const dims = [dimPrazo(dv, acimaIds.length), ...p.dimensoes];
+  const sug = farolGeral(dims);
   const feitas = p.tarefas.filter((t) => t.concluida).length;
 
   function salvarOrdem(ids: string[]) {
@@ -150,7 +153,15 @@ export function TelaProjeto({ p }: { p: Props }) {
               );
             })}
           </div>
-          <span style={s('font-size: 12px; color: #4A4458')}>Sugerido pelo TARS: <strong>{FAROL[sug.farol].rotulo}</strong> · {sug.porque}</span>
+          <span style={s('font-size: 12px; color: #4A4458; max-width: 520px; text-align: right')}>Sugerido pelo TARS: <strong>{FAROL[sug.farol].rotulo}</strong> · {sug.porque}</span>
+          <div role="list" aria-label="Farol por dimensão" style={s('display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end')}>
+            {dims.map((x) => (
+              <span key={x.chave} role="listitem" title={x.porque} aria-label={`${x.nome}: ${FAROL[x.farol].rotulo} · ${x.porque}`}
+                style={{ ...s('display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 10px'), background: FAROL[x.farol].bg, color: FAROL[x.farol].fg }}>
+                <span style={{ ...s('width: 7px; height: 7px; border-radius: 50%'), background: FAROL[x.farol].fg }} />{x.nome}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
 

@@ -12,7 +12,7 @@ import { Mudancas } from './Mudancas';
 import { Financeiro } from './Financeiro';
 import { TIPOS_MUDANCA } from '@/lib/regras/mudancas';
 import { dinheiro } from '@/lib/regras/datas';
-import { financeiroDo, orcamentoDoProjeto } from '@/lib/visoes';
+import { dimensoesSemPrazo, financeiroDo, orcamentoDoProjeto } from '@/lib/visoes';
 
 export const dynamic = 'force-dynamic';
 
@@ -62,7 +62,7 @@ export default async function Projeto({ params, searchParams }: { params: Promis
           riscos: d.riscos.filter((r) => faseIds.has(r.faseId)).map((r) => ({ id: r.id, faseId: r.faseId, nome: r.nome, nivel: r.nivel })),
           reports: d.reports.filter((r) => r.iniciativaId === ini.id).sort((a, b) => b.data.localeCompare(a.data)).map((r) => ({ id: r.id, data: r.data, farol: r.farol, desvio: r.desvio, a: r.avancou, b: r.aSeguir, c: r.atencao })),
           mudanca: mud ? { id: mud.id, descricao: mud.descricao, solicitante: pessoa(d, mud.solicitanteId)?.nome ?? '' } : null,
-          ehPmo, gpId: ini.gpId ?? '',
+          ehPmo, gpId: ini.gpId ?? '', dimensoes: dimensoesSemPrazo(d, ini, hoje),
           faseInicial: fase && faseIds.has(fase) ? fase : '',
         }}
       />
