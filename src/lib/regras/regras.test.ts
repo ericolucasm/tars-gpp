@@ -4,6 +4,7 @@ import { acoesDoCard, validarGate, podeConfirmar, type Raia } from './esteira';
 import { desvio, farolSugerido, statusDaFase, fasesDoModelo, mesesDaLinha, descreverMudanca, progresso, reordenar, ordemValida } from './projeto';
 import { podeResolverPonto, pontoEsperaPor, pontoAtrasado } from './pontos';
 import { validarPedidoMudanca, variacaoCusto } from './mudancas';
+import { resumoFinanceiro, situacaoCusto } from './financeiro';
 import { gestorDe, timeDireto, areasSobGestao, nomeCurto, acimaDoCedido } from './pessoas';
 import { addDias, diffDias, dataPorExtenso, haQuanto, proximaSexta } from './datas';
 
@@ -173,6 +174,21 @@ describe('pedidos de mudança de escopo e custo', () => {
     expect(variacaoCusto(100, 120)).toBe(20);
     expect(variacaoCusto(100, 90)).toBe(-10);
     expect(variacaoCusto(0, 90)).toBeNull();
+  });
+});
+
+describe('financeiro do projeto', () => {
+  it('situação do custo pela previsão e pelo realizado', () => {
+    expect(situacaoCusto(100, 50, 100)).toBe('ok');
+    expect(situacaoCusto(100, 50, 105)).toBe('aten');
+    expect(situacaoCusto(100, 50, 111)).toBe('crit');
+    expect(situacaoCusto(100, 101, 100)).toBe('crit');
+    expect(situacaoCusto(0, 10, 10)).toBe('ok');
+  });
+  it('previsão padrão é o orçado e nunca fica abaixo do realizado', () => {
+    expect(resumoFinanceiro(200, 50, null, 40)).toMatchObject({ previsao: 200, consumoPct: 25, desvioPct: 0, situacao: 'ok' });
+    expect(resumoFinanceiro(200, 230, 180, 90)).toMatchObject({ previsao: 230, consumoPct: 115, desvioPct: 15, situacao: 'crit' });
+    expect(resumoFinanceiro(200, 100, 210, 50)).toMatchObject({ desvioPct: 5, situacao: 'aten' });
   });
 });
 

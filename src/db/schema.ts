@@ -140,6 +140,7 @@ export const iniciativas = pgTable('iniciativas', {
   motivoSaida: text('motivo_saida'),
   retomadaPrevista: date('retomada_prevista'),
   orcamentoAprovado: numeric('orcamento_aprovado', { mode: 'number' }), // orçamento do projeto; vazio = custo estimado da iniciativa
+  previsaoCusto: numeric('previsao_custo', { mode: 'number' }), // quanto o GP prevê gastar até o fim; vazio = orçamento aprovado
   // carimbos de tempo do fluxo
   enviadaEm: timestamp('enviada_em', { withTimezone: true }),
   aprovadaGestorEm: timestamp('aprovada_gestor_em', { withTimezone: true }),
@@ -317,6 +318,18 @@ export const pedidosMudanca = pgTable('pedidos_mudanca', {
   decididoPor: uuid('decidido_por'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   decididoEm: timestamp('decidido_em', { withTimezone: true }),
+});
+
+// Custo realizado do projeto: lançamentos feitos pelo GP (ou PMO).
+export const lancamentosCusto = pgTable('lancamentos_custo', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  orgId: uuid('org_id').notNull(),
+  iniciativaId: uuid('iniciativa_id').notNull().references(() => iniciativas.id, { onDelete: 'cascade' }),
+  data: date('data').notNull(),
+  descricao: text('descricao').notNull(),
+  valor: numeric('valor', { mode: 'number' }).notNull(),
+  autorId: uuid('autor_id'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
 // ---------- Login (Better Auth) ----------

@@ -3,7 +3,7 @@ import type { DadosOrg } from '@/lib/dados';
 import type { Sessao } from '@/lib/sessao';
 import { br, diffDias } from '@/lib/regras/datas';
 import { cicloVM } from '@/lib/ciclo-vm';
-import { cicloAberto, infoProjeto, listaAvaliacao, nomeArea, noRaia, pessoa, pessoasAcimaDoCedido, raiaChave } from '@/lib/visoes';
+import { cicloAberto, financeiroDo, infoProjeto, listaAvaliacao, nomeArea, noRaia, pessoa, pessoasAcimaDoCedido, raiaChave } from '@/lib/visoes';
 import { ItemAcao, Kpi, GradeKpi, Painel, Vazio } from '@/components/ui';
 import { pontoAtrasado, pontoEsperaPor } from '@/lib/regras/pontos';
 import { Saudacao } from './Saudacao';
@@ -39,6 +39,12 @@ export function InicioPMO({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao; ho
     itens.push(<ItemAcao key="crit" href="/portfolio" numero={criticos.length} tom="vermelho" titulo={`${criticos.length} projetos críticos`} sub={criticos.map((c) => c.titulo).join(' · ')} acao="Ver →" />);
   }
 
+  const estourando = d.iniciativas.filter((i) => noRaia(d, i, 'exe', 'pau')).map((i) => ({ i, f: financeiroDo(d, i) })).filter((x) => x.f.situacao === 'crit');
+  if (estourando.length) {
+    itens.push(<ItemAcao key="custo" href="/relatorios?r.financeiro.situacao=crit#financeiro" numero={estourando.length} tom="vermelho"
+      titulo={estourando.length === 1 ? 'Projeto estourando o orçamento' : 'Projetos estourando o orçamento'}
+      sub={estourando.map((x) => `${x.i.titulo.split(' para ')[0]} (+${x.f.desvioPct}%)`).join(' · ')} acao="Ver →" />);
+  }
   for (const m of d.pedidosMudanca.filter((x) => x.status === 'pendente')) {
     const proj = d.iniciativas.find((i) => i.id === m.iniciativaId);
     itens.push(<ItemAcao key={m.id} href={`/projetos/${m.iniciativaId}#mudancas`} numero={1} titulo={`Pedido de mudança de ${m.tipo === 'custo' ? 'custo' : 'escopo'}`}

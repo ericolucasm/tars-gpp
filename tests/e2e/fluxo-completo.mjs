@@ -179,6 +179,15 @@ try {
   await p.getByRole('button', { name: 'Enviar ao PMO' }).click();
   await p.getByText('Pedido de mudança de custo enviado ao PMO.').waitFor();
   ok('GP pede mudança de custo ao PMO');
+  const fin = p.getByRole('region', { name: 'Financeiro' });
+  await fin.getByLabel('Descrição').fill('Fatura do fornecedor de BI');
+  await fin.getByLabel('Valor (R$)').fill('30000');
+  await fin.getByRole('button', { name: 'Lançar' }).click();
+  await fin.getByText('Custo lançado.').waitFor();
+  await fin.getByLabel('Previsão de custo total (R$)').fill('120000');
+  await fin.getByRole('button', { name: 'Atualizar previsão' }).click();
+  await fin.getByText('Previsão de custo atualizada.').waitFor();
+  ok('GP lança custo realizado e atualiza a previsão de custo');
   await p.context().close();
 
   // 7. PMO aprova a mudança de linha de base
@@ -202,6 +211,11 @@ try {
   await pedidoCusto.getByRole('button', { name: 'Aprovar pedido' }).click();
   await p.getByRole('region', { name: 'Mudanças de escopo e custo' }).getByText('R$ 95.000', { exact: true }).waitFor();
   ok('PMO aprova a mudança de custo e o orçamento aprovado do projeto muda');
+  await p.getByRole('region', { name: 'Financeiro' }).getByText('Estouro de orçamento').waitFor(); // previsão 120 mil > 110% de 95 mil
+  await ir(p, '/inicio');
+  await p.getByText('Projeto estourando o orçamento').waitFor();
+  await p.goto(urlProjeto, { waitUntil: 'networkidle' });
+  ok('Com a previsão acima do orçamento, o projeto aparece como estouro no financeiro e na Início do PMO');
 
   // 7b. PMO reordena as fases da linha do tempo (seta e arraste); a ordem fica gravada
   const ordemFases = async () => (await p.getByRole('button', { name: /^Subir fase / }).evaluateAll((bs) => bs.map((b) => b.getAttribute('aria-label').replace('Subir fase ', ''))));

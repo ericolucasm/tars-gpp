@@ -36,6 +36,13 @@
       "when": 1794953081754,
       "tag": "0004_mudanca_escopo_custo",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1794954283215,
+      "tag": "0005_financeiro",
+      "breakpoints": true
     }
   ]
 }

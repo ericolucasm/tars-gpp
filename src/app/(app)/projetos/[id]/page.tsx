@@ -9,9 +9,10 @@ import { Shell } from '@/components/Shell';
 import { TelaProjeto } from './TelaProjeto';
 import { SecaoPontos } from './SecaoPontos';
 import { Mudancas } from './Mudancas';
+import { Financeiro } from './Financeiro';
 import { TIPOS_MUDANCA } from '@/lib/regras/mudancas';
 import { dinheiro } from '@/lib/regras/datas';
-import { orcamentoDoProjeto } from '@/lib/visoes';
+import { financeiroDo, orcamentoDoProjeto } from '@/lib/visoes';
 
 export const dynamic = 'force-dynamic';
 
@@ -65,6 +66,14 @@ export default async function Projeto({ params, searchParams }: { params: Promis
           faseInicial: fase && faseIds.has(fase) ? fase : '',
         }}
       />
+      {(() => {
+        const f = financeiroDo(d, ini);
+        return (
+          <Financeiro iniciativaId={ini.id} hoje={hoje} ehPmo={ehPmo} orcado={dinheiro(f.orcado)} realizado={dinheiro(f.realizado)} previsao={dinheiro(f.previsao)}
+            consumoPct={f.consumoPct} concluidoPct={f.concluidoPct} desvioPct={f.desvioPct} situacao={f.situacao} previsaoValor={f.previsao} orcadoValor={f.orcado}
+            lancamentos={d.lancamentos.filter((l) => l.iniciativaId === ini.id).slice().reverse().map((l) => ({ id: l.id, data: br(l.data), descricao: l.descricao, valor: dinheiro(l.valor), autor: pessoa(d, l.autorId)?.nome ?? '' }))} />
+        );
+      })()}
       <Mudancas iniciativaId={ini.id} orcamento={dinheiro(orcamentoDoProjeto(ini))} ehPmo={ehPmo} podePedir={ehPmo || ehGp}
         pedidos={d.pedidosMudanca.filter((m) => m.iniciativaId === ini.id).reverse().map((m) => ({
           id: m.id, tipo: m.tipo, tipoRotulo: TIPOS_MUDANCA[m.tipo] ?? m.tipo, descricao: m.descricao, justificativa: m.justificativa,
