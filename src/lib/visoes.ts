@@ -146,6 +146,11 @@ export function custoDe(i: Iniciativa) {
   return custoReferencia(i.faixaCusto, i.custoEstimado);
 }
 
+/** Orçamento do projeto: o aprovado (play ou mudança de custo aprovada) ou, se ainda não houver, o custo estimado da iniciativa. */
+export function orcamentoDoProjeto(i: Iniciativa) {
+  return i.orcamentoAprovado ?? custoDe(i);
+}
+
 /** Linha de contexto dos cards do portfólio. */
 export function subDoCard(d: DadosOrg, i: Iniciativa, hoje: string): string {
   const c = chaveDaRaia(d, i.raiaId);

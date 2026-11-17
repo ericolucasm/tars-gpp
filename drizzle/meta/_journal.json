@@ -29,6 +29,13 @@
       "when": 1794952568759,
       "tag": "0003_pontos_atencao",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794953081754,
+      "tag": "0004_mudanca_escopo_custo",
+      "breakpoints": true
     }
   ]
 }

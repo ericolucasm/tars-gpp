@@ -39,6 +39,11 @@ export function InicioPMO({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao; ho
     itens.push(<ItemAcao key="crit" href="/portfolio" numero={criticos.length} tom="vermelho" titulo={`${criticos.length} projetos críticos`} sub={criticos.map((c) => c.titulo).join(' · ')} acao="Ver →" />);
   }
 
+  for (const m of d.pedidosMudanca.filter((x) => x.status === 'pendente')) {
+    const proj = d.iniciativas.find((i) => i.id === m.iniciativaId);
+    itens.push(<ItemAcao key={m.id} href={`/projetos/${m.iniciativaId}#mudancas`} numero={1} titulo={`Pedido de mudança de ${m.tipo === 'custo' ? 'custo' : 'escopo'}`}
+      sub={`${proj?.titulo ?? ''} · ${pessoa(d, m.solicitanteId)?.nome ?? ''}: ${m.descricao}`} acao="Decidir →" />);
+  }
   const pontos = d.pontos.filter((x) => pontoEsperaPor(x, sessao.pessoa.id, true));
   if (pontos.length) {
     const atrasados = pontos.filter((x) => pontoAtrasado(x, hoje)).length;

@@ -175,3 +175,8 @@ Funcionalidades que nasceram da análise da mecânica do PMO (17/11), para o aco
 - **[Decisão V2]** Quem participa do projeto (GP, pessoas alocadas, responsáveis de tarefa) ou o PMO pode abrir um **ponto de atenção**, do tipo **impedimento** ou **decisão necessária**. Ele vai para o **PMO** ou para **um gestor de área** escolhido, com data opcional para a resposta e fase opcional.
 - **[Decisão V2]** Quem decide vê o ponto no "Precisa de você" da Início e na página **Pontos de atenção** (`/pontos`), e registra a **resolução**. Quem abriu e o GP são avisados. O PMO sempre pode resolver. Quem abriu pode retirar o ponto, registrando o motivo.
 - **[Decisão V2]** Ponto aberto com a data de resposta vencida fica **atrasado** (destaque em vermelho).
+
+### Mudança de escopo e de custo
+- **[Decisão V2]** Além da mudança de prazo (linha de base, §7), o GP ou o PMO pode pedir **mudança de escopo** ou **mudança de custo** na página do projeto, dizendo o que muda e por quê. Só pode haver um pedido pendente de cada tipo por projeto.
+- **[Decisão V2]** O **PMO decide** (aprova ou recusa; para recusar, o comentário é obrigatório), na página do projeto ou pelo aviso na Início. O GP e quem pediu são avisados.
+- **[Decisão V2]** O projeto tem um **orçamento aprovado**. Enquanto ninguém o definir, ele é o custo estimado da iniciativa. Uma mudança de custo aprovada passa a ser o novo orçamento aprovado. Mudança de escopo aprovada fica registrada no histórico do projeto.
