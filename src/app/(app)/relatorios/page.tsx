@@ -1,10 +1,11 @@
 import { exigirSessao } from '@/lib/sessao';
 import { carregarOrg } from '@/lib/dados';
 import { hojeISO, br } from '@/lib/regras/datas';
-import { relatoriosDoPerfil, type Celula, type Relatorio, type Tom } from '@/lib/relatorios';
+import { relatoriosDoPerfil, type Busca, type Celula, type Relatorio, type Tom } from '@/lib/relatorios';
 import { s } from '@/lib/css';
 import { Shell } from '@/components/Shell';
 import { BotaoImprimir } from './BotaoImprimir';
+import { FiltrosRelatorio } from './FiltrosRelatorio';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,6 +35,7 @@ function SecaoRelatorio({ r }: { r: Relatorio }) {
         <h2 style={s('margin: 0; font-size: 18px; font-weight: 700')}>{r.titulo}</h2>
         <span style={s('font-size: 12px; color: #5E5770')}>{r.descricao}</span>
       </div>
+      <FiltrosRelatorio rel={r.id} filtros={r.filtros} />
       {r.resumo.length > 0 && (
         <div style={s('display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px')}>
           {r.resumo.map((x) => (
@@ -65,11 +67,11 @@ function SecaoRelatorio({ r }: { r: Relatorio }) {
   );
 }
 
-export default async function Relatorios() {
+export default async function Relatorios({ searchParams }: { searchParams: Promise<Busca> }) {
   const sessao = await exigirSessao();
   const d = await carregarOrg(sessao.orgId);
   const hoje = hojeISO();
-  const relatorios = relatoriosDoPerfil(d, sessao, hoje);
+  const relatorios = relatoriosDoPerfil(d, sessao, hoje, await searchParams);
 
   return (
     <Shell sessao={sessao} dados={d} atual="relatorios">
