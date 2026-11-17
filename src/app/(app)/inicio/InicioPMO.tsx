@@ -5,6 +5,7 @@ import { br, diffDias } from '@/lib/regras/datas';
 import { cicloVM } from '@/lib/ciclo-vm';
 import { cicloAberto, infoProjeto, listaAvaliacao, nomeArea, noRaia, pessoa, pessoasAcimaDoCedido, raiaChave } from '@/lib/visoes';
 import { ItemAcao, Kpi, GradeKpi, Painel, Vazio } from '@/components/ui';
+import { pontoAtrasado, pontoEsperaPor } from '@/lib/regras/pontos';
 import { Saudacao } from './Saudacao';
 import { PainelCiclo } from './PainelCiclo';
 import { BotaoCobrar } from './BotaoCobrar';
@@ -38,6 +39,13 @@ export function InicioPMO({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao; ho
     itens.push(<ItemAcao key="crit" href="/portfolio" numero={criticos.length} tom="vermelho" titulo={`${criticos.length} projetos críticos`} sub={criticos.map((c) => c.titulo).join(' · ')} acao="Ver →" />);
   }
 
+  const pontos = d.pontos.filter((x) => pontoEsperaPor(x, sessao.pessoa.id, true));
+  if (pontos.length) {
+    const atrasados = pontos.filter((x) => pontoAtrasado(x, hoje)).length;
+    itens.push(<ItemAcao key="pontos" href="/pontos" numero={pontos.length} tom={atrasados ? 'vermelho' : 'roxo'}
+      titulo={pontos.length === 1 ? 'Ponto de atenção esperando por você' : 'Pontos de atenção esperando por você'}
+      sub={pontos.map((x) => `${x.titulo} (${d.iniciativas.find((i) => i.id === x.iniciativaId)?.titulo.split(' para ')[0] ?? ''})`).join(' · ') + (atrasados ? ` · ${atrasados} com prazo vencido` : '')} acao="Resolver →" />);
+  }
   for (const m of d.mudancas.filter((x) => x.status === 'pendente')) {
     const proj = d.iniciativas.find((i) => i.id === m.iniciativaId);
     const quem = pessoa(d, m.solicitanteId);

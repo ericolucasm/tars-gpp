@@ -7,6 +7,7 @@ import { semanaHoje } from '@/lib/regras/projeto';
 import { fasesDo, linhaBaseDo, nomeArea, pessoa } from '@/lib/visoes';
 import { Shell } from '@/components/Shell';
 import { TelaProjeto } from './TelaProjeto';
+import { SecaoPontos } from './SecaoPontos';
 
 export const dynamic = 'force-dynamic';
 
@@ -60,6 +61,7 @@ export default async function Projeto({ params, searchParams }: { params: Promis
           faseInicial: fase && faseIds.has(fase) ? fase : '',
         }}
       />
+      <SecaoPontos d={d} sessao={sessao} iniId={ini.id} hoje={hoje} />
     </Shell>
   );
 }
