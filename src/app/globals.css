@@ -11,3 +11,9 @@ nav a[href^="#"]:not([aria-current]) span { opacity: .6; }
 /* Menu lateral: item clicável ganha fundo ao passar o mouse (o selecionado já tem fundo próprio) */
 .tars-menu-item:not([aria-current]):hover > span { background: #EAE4D8; }
 .tars-menu-item:focus-visible { outline: 2px solid #6D4AFF; outline-offset: 2px; }
+
+/* Impressão (relatórios): só o conteúdo, sem menu, barras e botões */
+@media print {
+  body { background: #FFFFFF; }
+  nav[aria-label="Menu principal"], [data-sem-impressao], [role="progressbar"] { display: none !important; }
+}

@@ -245,6 +245,23 @@ try {
   await p.getByText('Total 105% · precisa somar 100%').waitFor();
   ok('Cadastros: soma de pesos é validada');
   await p.context().close();
+
+  // Relatórios: cada perfil chega pelo menu e vê os relatórios dele
+  const relatoriosPorPerfil = [
+    ['mariana@acme.com.br', 'pmo', ['Portfólio por etapa', 'Saúde dos projetos', 'Ciclos de planejamento', 'Demanda por área', 'Capacidade das pessoas']],
+    ['fernanda.oliveira@acme.com.br', null, ['Iniciativas da área', 'Projetos da área', 'Alocação do time']],
+    ['carlos.andrade@acme.com.br', null, ['Meus projetos', 'Tarefas em aberto', 'Equipe dos meus projetos']],
+    ['joao.silva@acme.com.br', null, ['Minhas iniciativas', 'Minhas tarefas']],
+  ];
+  for (const [email, perfil, titulos] of relatoriosPorPerfil) {
+    p = await como(email, perfil);
+    await ir(p, '/inicio');
+    await p.getByRole('navigation', { name: 'Menu principal' }).getByRole('link', { name: 'Relatórios' }).click();
+    await p.waitForURL(/\/relatorios$/);
+    for (const t of titulos) await p.getByRole('heading', { name: t, level: 2, exact: true }).waitFor();
+    await p.context().close();
+  }
+  ok('Relatórios: PMO, gestora, GP e colaborador abrem pelo menu e veem os relatórios do seu perfil');
 } catch (e) {
   console.error('✗ FALHOU no passo', passo + 1, '\n', e.message.split('\n').slice(0, 6).join('\n'));
   process.exitCode = 1;

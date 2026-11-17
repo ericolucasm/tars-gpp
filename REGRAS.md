@@ -147,6 +147,13 @@ Itens que o protótipo sugeria mas não desenhava. Todos usam o mesmo visual:
 - **Editores em Cadastros**: convidar e editar pessoa, nova área, nova fase, novo modelo, adicionar e remover motivo, salvar pesos.
 - **Ciclo de vida do ciclo**: "Novo ciclo", "Abrir inscrições", "Encerrar ciclo".
 - **[Decisão V1] Alocação de uma pessoa** = pico de alocação simultânea nas fases ainda não concluídas dos projetos em execução. Isso enxerga a sobrecarga que vem pela frente, não só a de hoje.
+- **[Decisão V1] Relatórios** (menu RELATÓRIOS, em todos os perfis; pedido da Mariana). Uma página com os relatórios do perfil ativo (no "ver como", os da pessoa escolhida), calculados com as mesmas contas das outras telas:
+  - **PMO:** portfólio por etapa (quantidade e custo), saúde dos projetos (farol, desvio, % concluído, fim previsto, último status), ciclos de planejamento (ao vivo no ciclo em andamento, foto do fechamento nos encerrados), demanda por área e capacidade das pessoas.
+  - **Gestor de área:** iniciativas da área com a situação de cada uma, projetos da área e alocação do time.
+  - **Gerente de projeto:** meus projetos, tarefas em aberto (atrasadas destacadas) e equipe dos meus projetos.
+  - **Colaborador:** minhas iniciativas e minhas tarefas.
+  - Contam todas as iniciativas que não são rascunho. Projetos antigos podem não ter data de envio e aparecem com "—".
+  - "Imprimir ou salvar PDF" usa a impressão do navegador, sem menu e barras. Exportar para planilha fica na task "Exportar relatórios e filtrar portfólio/projetos".
 - **[Decisão V1] Menu lateral diferente do protótipo** (pedido da Mariana): os títulos de seção (GESTÃO, MINHA ÁREA, CONFIGURAÇÃO), que não são clicáveis, ficam menores, mais claros e com uma linha separadora acima. Os itens clicáveis têm texto escuro, uma seta › à direita e fundo ao passar o mouse. No protótipo os dois tinham aparência parecida e se confundiam.
 - **[Decisão V1] Rótulos com gênero** ("Gestora", "Ativa") só quando o cadastro informa o tratamento. Sem essa informação, o sistema usa a forma neutra ("Gestor(a)").
 
