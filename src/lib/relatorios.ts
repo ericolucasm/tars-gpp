@@ -4,6 +4,7 @@ import { br, dinheiro } from './regras/datas';
 import { acimaDoCedido, areasSobGestao, subarvore, timeDireto } from './regras/pessoas';
 import { rotuloDesvioCurto, FAROL, type Farol } from './regras/projeto';
 import { numerosAoVivo, rotuloEtapa, type Snapshot } from './ciclo-vm';
+import { ESCALA, ESCALA_IMPACTO, STATUS_RISCO, nivelDoRisco, riscoAtivo } from './regras/riscos';
 import {
   alocacaoDe, chaveDaRaia, custoDe, dimensoesDo, financeiroDo, infoProjeto, nomeArea, noRaia, pessoa, projetosDaPessoa, rotuloCiclo, situacaoDoCard, TIPOS,
 } from './visoes';
@@ -181,6 +182,59 @@ function relatorioFinanceiro(d: DadosOrg, projetos: Iniciativa[], busca: Busca, 
   };
 }
 
+// ---------- Riscos (PMO e GP) ----------
+
+const TOM_NIVEL: Record<string, Tom> = { Alto: 'crit', Médio: 'aten', Baixo: 'ok' };
+function riscosDosProjetos(d: DadosOrg, projetos: Iniciativa[]) {
+  const porFase = new Map(d.fases.map((f) => [f.id, f]));
+  const ids = new Set(projetos.map((i) => i.id));
+  return d.riscos.flatMap((r) => {
+    const f = porFase.get(r.faseId);
+    const ini = f && ids.has(f.iniciativaId) ? projetos.find((i) => i.id === f.iniciativaId) : undefined;
+    return f && ini ? [{ r, f, ini }] : [];
+  });
+}
+
+/** Matriz probabilidade × impacto com a quantidade de riscos ativos em cada célula. */
+function relatorioMatriz(d: DadosOrg, projetos: Iniciativa[], filtros: Filtro[]): Relatorio {
+  const ativos = riscosDosProjetos(d, projetos).filter((x) => riscoAtivo(x.r.status));
+  const linhas = [3, 2, 1].map((imp): Celula[] => [
+    `Impacto ${ESCALA_IMPACTO[imp].toLowerCase()}`,
+    ...[1, 2, 3].map((prob): Celula => ({ texto: String(ativos.filter((x) => x.r.impacto === imp && x.r.probabilidade === prob).length), tom: TOM_NIVEL[nivelDoRisco(prob, imp)] })),
+  ]);
+  const altos = ativos.filter((x) => x.r.nivel === 'Alto').length;
+  return {
+    id: 'matriz', titulo: 'Matriz de riscos', descricao: 'Riscos em acompanhamento ou que já ocorreram, por probabilidade e impacto. A cor da célula é a zona de nível (vermelho = alto).',
+    filtros, resumo: [{ rotulo: 'Riscos ativos', valor: String(ativos.length) }, { rotulo: 'Altos', valor: String(altos), tom: altos ? 'crit' : 'ok' },
+      { rotulo: 'Sem plano de resposta', valor: String(ativos.filter((x) => !x.r.plano).length), tom: ativos.some((x) => !x.r.plano) ? 'aten' : 'ok' }],
+    colunas: ['', 'Probabilidade baixa', 'Probabilidade média', 'Probabilidade alta'], linhas, vazio: '',
+  };
+}
+
+/** Lista de riscos, do maior para o menor. */
+function relatorioRiscos(d: DadosOrg, projetos: Iniciativa[], busca: Busca, titulo: string, filtrosExtra: Filtro[]): Relatorio {
+  const fNivel = filtro(busca, 'riscos', 'nivel', 'Nível', com('Todos os níveis', [{ valor: 'Alto', rotulo: 'Alto' }, { valor: 'Médio', rotulo: 'Médio' }, { valor: 'Baixo', rotulo: 'Baixo' }]));
+  const fStatus = filtro(busca, 'riscos', 'status', 'Status', [{ valor: 'ativos', rotulo: 'Ativos (em acompanhamento ou ocorreram)' }, { valor: TODOS, rotulo: 'Todos' }, ...Object.entries(STATUS_RISCO).map(([k, r]) => ({ valor: k, rotulo: r }))]);
+  const fPlano = filtro(busca, 'riscos', 'plano', 'Plano de resposta', com('Com ou sem plano', [{ valor: 'sem', rotulo: 'Sem plano' }, { valor: 'com', rotulo: 'Com plano' }]));
+  const lista = riscosDosProjetos(d, projetos)
+    .filter(({ r }) => (fNivel.valor === TODOS || r.nivel === fNivel.valor)
+      && (fStatus.valor === TODOS || (fStatus.valor === 'ativos' ? riscoAtivo(r.status) : r.status === fStatus.valor))
+      && (fPlano.valor === TODOS || (fPlano.valor === 'sem') === !r.plano))
+    .sort((a, b) => b.r.probabilidade * b.r.impacto - a.r.probabilidade * a.r.impacto);
+  return {
+    id: 'riscos', titulo, descricao: 'Riscos dos projetos em execução e pausados, do maior para o menor (probabilidade × impacto).',
+    filtros: [...filtrosExtra, fNivel, fStatus, fPlano],
+    resumo: [{ rotulo: 'Riscos', valor: String(lista.length) }, { rotulo: 'Sem responsável', valor: String(lista.filter((x) => !x.r.responsavelId).length), tom: lista.some((x) => !x.r.responsavelId) ? 'aten' : 'ok' }],
+    colunas: ['Risco', 'Projeto', 'Fase', 'Nível', 'Probabilidade × impacto', 'Responsável', 'Plano de resposta', 'Status'],
+    linhas: lista.map(({ r, f, ini }): Celula[] => [
+      r.nome, nomeCurtoProjeto(ini.titulo), f.nome, { texto: r.nivel, tom: TOM_NIVEL[r.nivel] ?? 'neutro' },
+      `${ESCALA[r.probabilidade]} × ${ESCALA_IMPACTO[r.impacto]}`, pessoa(d, r.responsavelId)?.nome ?? { texto: 'Sem responsável', tom: 'aten' },
+      r.plano || { texto: 'Sem plano', tom: 'aten' }, STATUS_RISCO[r.status] ?? r.status,
+    ]),
+    vazio: 'Nenhum risco com esses filtros.',
+  };
+}
+
 // ---------- PMO ----------
 
 function relatoriosPmo(d: DadosOrg, hoje: string, busca: Busca): Relatorio[] {
@@ -260,6 +314,14 @@ function relatoriosPmo(d: DadosOrg, hoje: string, busca: Busca): Relatorio[] {
     (() => {
       const fArea = filtro(busca, 'financeiro', 'area', 'Área', opcoesArea(d, areasComIni));
       return relatorioFinanceiro(d, d.iniciativas.filter((i) => noRaia(d, i, 'exe', 'pau') && naArea(d, i.areaId, fArea)), busca, true, [fArea]);
+    })(),
+    (() => {
+      const fArea = filtro(busca, 'matriz', 'area', 'Área', opcoesArea(d, areasComIni));
+      return relatorioMatriz(d, d.iniciativas.filter((i) => noRaia(d, i, 'exe', 'pau') && naArea(d, i.areaId, fArea)), [fArea]);
+    })(),
+    (() => {
+      const fArea = filtro(busca, 'riscos', 'area', 'Área', opcoesArea(d, areasComIni));
+      return relatorioRiscos(d, d.iniciativas.filter((i) => noRaia(d, i, 'exe', 'pau') && naArea(d, i.areaId, fArea)), busca, 'Riscos do portfólio', [fArea]);
     })(),
     {
       id: 'ciclos', titulo: 'Ciclos de planejamento', descricao: 'Resultado de cada ciclo. O ciclo em andamento é calculado ao vivo; os encerrados mostram a foto do fechamento.',
@@ -404,6 +466,7 @@ function relatoriosGp(d: DadosOrg, eu: Pessoa, hoje: string, busca: Busca): Rela
       vazio: 'Nenhum projeto com esse filtro.',
     },
     relatorioFinanceiro(d, meus, busca, false, []),
+    relatorioRiscos(d, meus, busca, 'Riscos dos meus projetos', []),
     {
       id: 'tarefas', titulo: 'Tarefas em aberto', descricao: 'Tarefas não concluídas dos seus projetos, pela ordem do prazo.',
       filtros: [fProj2, fSit2, fResp2],

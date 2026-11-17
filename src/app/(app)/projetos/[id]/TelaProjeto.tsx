@@ -6,6 +6,7 @@ import { addDias, br } from '@/lib/regras/datas';
 import { desvio as calcDesvio, fimDoPlano, FAROL, mesesDaLinha, reordenar, rotuloDesvioCurto, type Fase, type Farol } from '@/lib/regras/projeto';
 import * as A from '@/app/acoes/projeto';
 import { dimPrazo, farolGeral, type Dimensao } from '@/lib/regras/farol';
+import { RiscosFase, rkEstilo, type RiscoVM } from './RiscosFase';
 
 type FaseVM = Fase & { criterio: string; confirmada: string | null };
 type Props = {
@@ -16,7 +17,7 @@ type Props = {
   alocs: { faseId: string; pessoaId: string; pct: number }[];
   pessoas: { id: string; nome: string; ini: string; papel: string; cap: number | null; noProjeto: boolean }[];
   marcos: { id: string; faseId: string; nome: string; data: string | null; status: string }[];
-  riscos: { id: string; faseId: string; nome: string; nivel: string }[];
+  riscos: RiscoVM[];
   reports: { id: string; data: string; farol: string; desvio: string; a: string; b: string; c: string }[];
   mudanca: { id: string; descricao: string; solicitante: string } | null;
   ehPmo: boolean; gpId: string; faseInicial: string;
@@ -34,10 +35,6 @@ function msEstilo(status: string) {
     chip: { ...s('display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 10px'), background: c[0], color: c[1] },
     diamante: { ...s('width: 12px; height: 12px; transform: rotate(45deg); border-radius: 2px; flex: 0 0 12px; border: 2px solid #6D4AFF'), background: status === 'Previsto' ? '#FFFFFF' : '#6D4AFF' },
   };
-}
-function rkEstilo(nivel: string) {
-  const c = nivel === 'Alto' ? ['#FDE8E8', '#B42318'] : nivel === 'Médio' ? ['#FEF3DC', '#9A5B05'] : ['#EDEAE3', '#4A4458'];
-  return { ...s('font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 10px; flex: 0 0 auto'), background: c[0], color: c[1] };
 }
 
 export function TelaProjeto({ p }: { p: Props }) {
@@ -269,7 +266,7 @@ function Grupos({ p, fases, statusFase, datasDe, setSel, rodar }: { p: Props; fa
         const ppl = p.alocs.filter((a) => a.faseId === f.id);
         const tks = p.tarefas.filter((t) => t.faseId === f.id);
         const ms = p.marcos.filter((m) => m.faseId === f.id);
-        const rk = p.riscos.filter((r) => r.faseId === f.id);
+        const rk = p.riscos.filter((r) => r.faseId === f.id && (r.status === 'aberto' || r.status === 'ocorreu'));
         return (
           <div key={f.id} style={s('border: 1px solid #EFEBE3; border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 10px')}>
             <div style={s('display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; align-items: center')}>
@@ -307,7 +304,6 @@ function DetalheFase({ p, f, status, datas, rodar, pend }: { p: Props; f: FaseVM
   const equipe = p.pessoas.filter((x) => x.noProjeto);
   const [novo, setNovo] = useState({ titulo: '', quem: p.gpId || equipe[0]?.id || '', prazo: '' });
   const [ms, setMs] = useState({ nome: '', data: '' });
-  const [rk, setRk] = useState({ nome: '', nivel: 'Alto' });
   const naFase = p.alocs.filter((a) => a.faseId === f.id);
   const livres = p.pessoas.filter((x) => !naFase.some((a) => a.pessoaId === x.id)).sort((a, b) => Number(b.noProjeto) - Number(a.noProjeto) || a.nome.localeCompare(b.nome));
   const [quemAlocar, setQuemAlocar] = useState('');
@@ -373,19 +369,7 @@ function DetalheFase({ p, f, status, datas, rodar, pend }: { p: Props; f: FaseVM
           <button type="button" disabled={pend || !ms.nome.trim()} onClick={() => { rodar(() => A.adicionarMarco(f.id, ms.nome, ms.data)); setMs({ nome: '', data: '' }); }} style={sAdd}>Adicionar</button>
         </div>
 
-        <span style={s('font-size: 15px; font-weight: 700; margin-top: 6px')}>Riscos da fase</span>
-        {p.riscos.filter((r) => r.faseId === f.id).map((r) => (
-          <div key={r.id} style={s('display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px; border: 1px solid #EFEBE3')}>
-            <span style={rkEstilo(r.nivel)}>{r.nivel}</span><span style={s('flex: 1; font-size: 13px; font-weight: 600')}>{r.nome}</span>
-            <button type="button" aria-label={`Remover risco ${r.nome}`} onClick={() => rodar(() => A.removerRisco(r.id))} style={s('width: 30px; height: 30px; border-radius: 8px; border: 0; background: transparent; color: #8A8296; font-size: 16px')}>×</button>
-          </div>
-        ))}
-        {p.riscos.filter((r) => r.faseId === f.id).length === 0 && <span style={s('font-size: 12px; color: #5E5770')}>Nenhum risco nesta fase.</span>}
-        <div style={sForm}>
-          <label style={{ ...sMiniLab, flex: '2 1 140px' }}>Novo risco<input type="text" value={rk.nome} onChange={(e) => setRk({ ...rk, nome: e.target.value })} placeholder="O que pode dar errado?" style={sMini} /></label>
-          <label style={{ ...sMiniLab, flex: '1 1 100px' }}>Nível<select value={rk.nivel} onChange={(e) => setRk({ ...rk, nivel: e.target.value })} style={sMini}><option>Alto</option><option>Médio</option><option>Baixo</option></select></label>
-          <button type="button" disabled={pend || !rk.nome.trim()} onClick={() => { rodar(() => A.adicionarRisco(f.id, rk.nome, rk.nivel)); setRk({ ...rk, nome: '' }); }} style={sAdd}>Adicionar</button>
-        </div>
+        <RiscosFase faseId={f.id} riscos={p.riscos} equipe={equipe.map((x) => ({ id: x.id, nome: x.nome }))} rodar={rodar} pend={pend} />
       </div>
     </div>
   );

@@ -4,6 +4,7 @@ import { and, eq, inArray } from 'drizzle-orm';
 import { db, schema as t } from '@/db';
 import { dataDaSemana, descreverMudanca, desvio, fasesDoModelo, ordemValida, rotuloDesvio, type Fase } from '@/lib/regras/projeto';
 import { gestorDe } from '@/lib/regras/pessoas';
+import { nivelDoRisco, validarRisco } from '@/lib/regras/riscos';
 import { nomeMes } from '@/lib/regras/datas';
 import { fasesDo, linhaBaseDo, pessoa } from '@/lib/visoes';
 import { contexto, executar, exigir, exigirPmo, notificar } from './_ctx';
@@ -263,12 +264,29 @@ export async function removerMarco(marcoId: string) {
   });
 }
 
-export async function adicionarRisco(faseId: string, nome: string, nivel: string) {
+export type DadosRisco = { nome: string; probabilidade: number; impacto: number; responsavelId: string | null; plano: string };
+
+export async function adicionarRisco(faseId: string, r: DadosRisco) {
   return executar(async () => {
-    await ctxFase(faseId);
-    exigir(nome.trim(), 'Descreva o risco.');
-    exigir(['Alto', 'Médio', 'Baixo'].includes(nivel), 'Nível inválido.');
-    await db.insert(t.riscos).values({ faseId, nome: nome.trim(), nivel });
+    const { dados } = await ctxFase(faseId);
+    const erro = validarRisco(r);
+    exigir(!erro, erro ?? '');
+    exigir(!r.responsavelId || dados.pessoas.some((p) => p.id === r.responsavelId), 'Responsável inválido.');
+    await db.insert(t.riscos).values({ faseId, nome: r.nome.trim(), probabilidade: r.probabilidade, impacto: r.impacto, nivel: nivelDoRisco(r.probabilidade, r.impacto), responsavelId: r.responsavelId || null, plano: r.plano.trim() });
+  });
+}
+
+/** Atualiza o risco (avaliação, responsável, plano ou status). */
+export async function atualizarRisco(riscoId: string, r: DadosRisco & { status: string }) {
+  return executar(async () => {
+    const ctx0 = await contexto();
+    const atual = ctx0.dados.riscos.find((x) => x.id === riscoId);
+    exigir(atual, 'Risco não encontrado.');
+    const { dados } = await ctxFase(atual.faseId);
+    const erro = validarRisco(r);
+    exigir(!erro, erro ?? '');
+    exigir(!r.responsavelId || dados.pessoas.some((p) => p.id === r.responsavelId), 'Responsável inválido.');
+    await db.update(t.riscos).set({ nome: r.nome.trim(), probabilidade: r.probabilidade, impacto: r.impacto, nivel: nivelDoRisco(r.probabilidade, r.impacto), responsavelId: r.responsavelId || null, plano: r.plano.trim(), status: r.status }).where(eq(t.riscos.id, riscoId));
   });
 }
 

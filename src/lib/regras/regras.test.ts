@@ -6,6 +6,7 @@ import { podeResolverPonto, pontoEsperaPor, pontoAtrasado } from './pontos';
 import { validarPedidoMudanca, variacaoCusto } from './mudancas';
 import { resumoFinanceiro, situacaoCusto } from './financeiro';
 import { dimCusto, dimEscopo, dimPrazo, dimRiscos, farolGeral } from './farol';
+import { nivelDoRisco, riscoAtivo, validarRisco } from './riscos';
 import { gestorDe, timeDireto, areasSobGestao, nomeCurto, acimaDoCedido } from './pessoas';
 import { addDias, diffDias, dataPorExtenso, haQuanto, proximaSexta } from './datas';
 
@@ -212,6 +213,25 @@ describe('farol por dimensão', () => {
     expect(g.farol).toBe('crit');
     expect(g.porque).toBe('custo: previsão 26% acima do orçado · riscos: 2 risco(s) alto(s)');
     expect(farolGeral([dimPrazo(0, 0), dimCusto('ok', 1, 0), dimEscopo(0, 0), dimRiscos(0, 0, 0)]).farol).toBe('ok');
+  });
+});
+
+describe('riscos', () => {
+  it('nível por probabilidade × impacto', () => {
+    expect(nivelDoRisco(3, 3)).toBe('Alto');
+    expect(nivelDoRisco(3, 2)).toBe('Alto');
+    expect(nivelDoRisco(2, 2)).toBe('Médio');
+    expect(nivelDoRisco(1, 3)).toBe('Médio');
+    expect(nivelDoRisco(1, 2)).toBe('Baixo');
+  });
+  it('ativos e validação', () => {
+    expect(riscoAtivo('aberto')).toBe(true);
+    expect(riscoAtivo('ocorreu')).toBe(true);
+    expect(riscoAtivo('mitigado')).toBe(false);
+    expect(validarRisco({ nome: 'Atraso do fornecedor', probabilidade: 2, impacto: 3 })).toBeNull();
+    expect(validarRisco({ nome: 'ab', probabilidade: 2, impacto: 3 })).toMatch(/Descreva/);
+    expect(validarRisco({ nome: 'Atraso', probabilidade: 4, impacto: 3 })).toMatch(/probabilidade/);
+    expect(validarRisco({ nome: 'Atraso', probabilidade: 2, impacto: 3, status: 'xpto' })).toMatch(/Status/);
   });
 });
 

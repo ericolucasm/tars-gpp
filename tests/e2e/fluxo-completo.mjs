@@ -161,6 +161,18 @@ try {
   await p.getByRole('button', { name: 'Alocar 20%' }).click();
   await p.getByText(/Acima do cedido \(10%\)/).waitFor();
   ok('GP cadastra tarefa e alocação acima do cedido gera pedido ao gestor');
+  await p.getByLabel('Novo risco').fill('Dados da expedição incompletos');
+  await p.getByLabel('Probabilidade').last().selectOption({ label: 'Alta' });
+  await p.getByLabel('Impacto').last().selectOption({ label: 'Alto' });
+  await p.getByLabel('Plano de resposta').last().fill('Validar a base com o time da expedição na 1ª semana');
+  await p.getByRole('button', { name: 'Adicionar risco' }).click();
+  const risco = p.getByRole('group', { name: 'Risco Dados da expedição incompletos' });
+  await risco.getByText('Alto', { exact: true }).waitFor();
+  await risco.getByText('Probabilidade alta · impacto alto').waitFor();
+  await risco.getByLabel('Status do risco Dados da expedição incompletos').selectOption({ label: 'Mitigado' });
+  await p.waitForTimeout(800);
+  if ((await risco.getByLabel('Status do risco Dados da expedição incompletos').inputValue()) !== 'mitigado') throw new Error('Status do risco não mudou');
+  ok('GP cadastra risco com probabilidade, impacto e plano, e marca como mitigado');
   await p.getByLabel('O que avançou?').fill('Projeto iniciado e linha de base congelada.');
   await p.getByRole('button', { name: 'Publicar status' }).click();
   await p.getByText('Status publicado e enviado ao patrocinador e ao PMO.').waitFor();
@@ -291,9 +303,9 @@ try {
 
   // Relatórios: cada perfil chega pelo menu e vê os relatórios dele
   const relatoriosPorPerfil = [
-    ['mariana@acme.com.br', 'pmo', ['Portfólio por etapa', 'Saúde dos projetos', 'Ciclos de planejamento', 'Demanda por área', 'Capacidade das pessoas']],
+    ['mariana@acme.com.br', 'pmo', ['Portfólio por etapa', 'Saúde dos projetos', 'Financeiro dos projetos', 'Matriz de riscos', 'Riscos do portfólio', 'Ciclos de planejamento', 'Demanda por área', 'Capacidade das pessoas']],
     ['fernanda.oliveira@acme.com.br', null, ['Iniciativas da área', 'Projetos da área', 'Alocação do time']],
-    ['carlos.andrade@acme.com.br', null, ['Meus projetos', 'Tarefas em aberto', 'Equipe dos meus projetos']],
+    ['carlos.andrade@acme.com.br', null, ['Meus projetos', 'Financeiro dos projetos', 'Riscos dos meus projetos', 'Tarefas em aberto', 'Equipe dos meus projetos']],
     ['joao.silva@acme.com.br', null, ['Minhas iniciativas', 'Minhas tarefas']],
   ];
   for (const [email, perfil, titulos] of relatoriosPorPerfil) {

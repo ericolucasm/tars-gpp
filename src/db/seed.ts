@@ -318,7 +318,7 @@ export async function seedDemo(db: DB, hoje: string) {
     }
     for (const [f, nome, nivel] of [['Desenvolvimento', 'Fornecedor atrasar a entrega da API', 'Alto'], ['Desenvolvimento', 'Desenvolvedor dividido com a Implantação do CRM', 'Alto'],
       ['Testes', 'Representantes sem tempo para testar', 'Médio'], ['Implantação', 'Resistência dos representantes ao app', 'Médio']]) {
-      await tx.insert(t.riscos).values({ faseId: fApp[f], nome, nivel });
+      await tx.insert(t.riscos).values({ faseId: fApp[f], nome, nivel, ...({ Alto: { probabilidade: 3, impacto: 2 }, Médio: { probabilidade: 2, impacto: 2 }, Baixo: { probabilidade: 1, impacto: 2 } } as Record<string, { probabilidade: number; impacto: number }>)[nivel] });
     }
     await reports(app, [
       ['2026-10-10', 'aten', 'Linha de base não congelada', 'Contrato com a DevHouse assinado e protótipo aprovado pelos representantes.', 'Início do desenvolvimento do catálogo e da integração com o ERP.', 'Pedro Lima está alocado acima do cedido pelo gestor de TI.'],
@@ -366,7 +366,7 @@ export async function seedDemo(db: DB, hoje: string) {
     await tarefas(iso, fIso, [['Iniciação', 'Termo de abertura aprovado', 'Júlia Tavares', '2026-07-31', true], ['Planejamento', 'Plano de auditoria interna', 'Júlia Tavares', '2026-08-21', true],
       ['Execução', 'Mapear processos da produção', 'Júlia Tavares', '2026-10-30', false], ['Execução', 'Auditoria interna', 'Júlia Tavares', '2026-12-11', false],
       ['Execução', 'Auditoria de certificação', 'Júlia Tavares', '2027-02-19', false], ['Encerramento', 'Lições aprendidas registradas', 'Júlia Tavares', '2027-02-26', false]]);
-    await tx.insert(t.riscos).values({ faseId: fIso['Execução'], nome: 'Processos sem dono definido', nivel: 'Alto' });
+    await tx.insert(t.riscos).values({ faseId: fIso['Execução'], nome: 'Processos sem dono definido', nivel: 'Alto', probabilidade: 3, impacto: 2 });
     await reports(iso, [['2026-10-06', 'aten', 'Linha de base não congelada', 'Plano de auditoria aprovado.', 'Mapear processos da produção.', 'Processos sem dono definido.']]);
 
     const fEmb = await plano(emb, [['Iniciação', 0, 2], ['Planejamento', 2, 3], ['Contratação de fornecedor', 5, 4], ['Execução', 9, 12], ['Encerramento', 21, 1]], '2026-06-15');
@@ -380,7 +380,7 @@ export async function seedDemo(db: DB, hoje: string) {
       ['Execução', 'Entrega do equipamento', 'Marcos Rocha', '2026-10-09', true], ['Execução', 'Montagem da linha', 'Marcos Rocha', '2026-10-30', true],
       ['Execução', 'Comissionamento', 'Marcos Rocha', '2026-11-13', false], ['Encerramento', 'Lições aprendidas registradas', 'Marcos Rocha', '2026-11-20', false],
       ['Execução', 'Treinamento dos operadores', 'Marcos Rocha', '2026-10-09', false], ['Execução', 'Laudo de segurança', 'Marcos Rocha', '2026-10-02', true]]);
-    await tx.insert(t.riscos).values({ faseId: fEmb['Execução'], nome: 'Fornecedor atrasar peças da esteira', nivel: 'Alto' });
+    await tx.insert(t.riscos).values({ faseId: fEmb['Execução'], nome: 'Fornecedor atrasar peças da esteira', nivel: 'Alto', probabilidade: 3, impacto: 2 });
     await reports(emb, [['2026-10-05', 'crit', '+1 semana(s)', 'Equipamento entregue com atraso.', 'Montagem da linha.', 'Fornecedor atrasou a entrega em 8 dias.']]);
 
     const fLoja = await plano(loja, [['Iniciação', 0, 2], ['Planejamento', 2, 3], ['Contratação de fornecedor', 5, 3], ['Desenvolvimento', 8, 10], ['Testes', 18, 3], ['Implantação', 21, 2], ['Encerramento', 23, 1]], '2026-07-06');
