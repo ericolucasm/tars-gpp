@@ -153,6 +153,12 @@ Itens que o protótipo sugeria mas não desenhava. Todos usam o mesmo visual:
   - **Gerente de projeto:** meus projetos, tarefas em aberto (atrasadas destacadas) e equipe dos meus projetos.
   - **Colaborador:** minhas iniciativas e minhas tarefas.
   - Contam todas as iniciativas que não são rascunho. Projetos antigos podem não ter data de envio e aparecem com "—".
+  - **Filtros por relatório**, logo abaixo do título. Os números-resumo seguem os filtros. Cada filtro fica no endereço da página (ex.: `?r.saude.farol=crit`), então o link já leva filtrado. "Limpar filtros" volta ao todo.
+    - PMO: Portfólio por etapa (área, ciclo) · Saúde dos projetos (área, farol, etapa) · Ciclos (em andamento ou encerrados) · Demanda por área (ciclo, tipo) · Capacidade (área, situação da pessoa).
+    - Gestor: Iniciativas (situação; área, se cuida de mais de uma) · Projetos (farol; área) · Alocação do time (situação da pessoa).
+    - GP: Meus projetos (farol) · Tarefas em aberto (projeto, situação, responsável) · Equipe (projeto, situação da pessoa).
+    - Colaborador: Minhas iniciativas (situação) · Minhas tarefas (situação, projeto).
+    - O filtro de área inclui as subáreas (escolher uma diretoria traz as gerências e coordenações dela).
   - "Imprimir ou salvar PDF" usa a impressão do navegador, sem menu e barras. Exportar para planilha fica na task "Exportar relatórios e filtrar portfólio/projetos".
 - **[Decisão V1] Menu lateral diferente do protótipo** (pedido da Mariana): os títulos de seção (GESTÃO, MINHA ÁREA, CONFIGURAÇÃO), que não são clicáveis, ficam menores, mais claros e com uma linha separadora acima. Os itens clicáveis têm texto escuro, uma seta › à direita e fundo ao passar o mouse. No protótipo os dois tinham aparência parecida e se confundiam.
 - **[Decisão V1] Rótulos com gênero** ("Gestora", "Ativa") só quando o cadastro informa o tratamento. Sem essa informação, o sistema usa a forma neutra ("Gestor(a)").

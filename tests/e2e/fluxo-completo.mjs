@@ -259,9 +259,27 @@ try {
     await p.getByRole('navigation', { name: 'Menu principal' }).getByRole('link', { name: 'Relatórios' }).click();
     await p.waitForURL(/\/relatorios$/);
     for (const t of titulos) await p.getByRole('heading', { name: t, level: 2, exact: true }).waitFor();
+    if (perfil === 'pmo') {
+      // filtro: só projetos críticos; o resumo e a tabela seguem o filtro, e "Limpar filtros" volta ao todo
+      const saude = p.getByRole('region', { name: 'Saúde dos projetos' });
+      await saude.getByLabel('Farol').selectOption({ label: 'Crítico' });
+      await p.waitForURL(/r\.saude\.farol=crit/);
+      await saude.locator('tbody tr').first().waitFor();
+      const farois = await saude.locator('tbody tr > :nth-child(5)').allInnerTexts();
+      if (!farois.length || farois.some((f) => f.trim() !== 'Crítico')) throw new Error(`Filtro de farol não aplicou: ${farois.join(', ')}`);
+      await saude.getByRole('button', { name: 'Limpar filtros' }).click();
+      await p.waitForURL((u) => !u.search.includes('r.saude.farol'));
+    }
+    if (email.startsWith('carlos')) {
+      const tarefas = p.getByRole('region', { name: 'Tarefas em aberto' });
+      await tarefas.getByLabel('Situação').selectOption({ label: 'Atrasadas' });
+      await p.waitForURL(/r\.tarefas\.situacao=atrasada/);
+      const sit = await tarefas.locator('tbody tr td:last-child').allInnerTexts();
+      if (sit.some((x) => x.trim() !== 'Atrasada' && !x.includes('Nenhuma tarefa'))) throw new Error(`Filtro de tarefas não aplicou: ${sit.join(', ')}`);
+    }
     await p.context().close();
   }
-  ok('Relatórios: PMO, gestora, GP e colaborador abrem pelo menu e veem os relatórios do seu perfil');
+  ok('Relatórios: os quatro perfis abrem pelo menu; PMO e GP filtram (farol, tarefas atrasadas) e limpam os filtros');
 } catch (e) {
   console.error('✗ FALHOU no passo', passo + 1, '\n', e.message.split('\n').slice(0, 6).join('\n'));
   process.exitCode = 1;
