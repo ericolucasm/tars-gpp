@@ -8,6 +8,10 @@ import { fasesDo, linhaBaseDo, nomeArea, pessoa } from '@/lib/visoes';
 import { Shell } from '@/components/Shell';
 import { TelaProjeto } from './TelaProjeto';
 import { SecaoPontos } from './SecaoPontos';
+import { Mudancas } from './Mudancas';
+import { TIPOS_MUDANCA } from '@/lib/regras/mudancas';
+import { dinheiro } from '@/lib/regras/datas';
+import { orcamentoDoProjeto } from '@/lib/visoes';
 
 export const dynamic = 'force-dynamic';
 
@@ -61,6 +65,13 @@ export default async function Projeto({ params, searchParams }: { params: Promis
           faseInicial: fase && faseIds.has(fase) ? fase : '',
         }}
       />
+      <Mudancas iniciativaId={ini.id} orcamento={dinheiro(orcamentoDoProjeto(ini))} ehPmo={ehPmo} podePedir={ehPmo || ehGp}
+        pedidos={d.pedidosMudanca.filter((m) => m.iniciativaId === ini.id).reverse().map((m) => ({
+          id: m.id, tipo: m.tipo, tipoRotulo: TIPOS_MUDANCA[m.tipo] ?? m.tipo, descricao: m.descricao, justificativa: m.justificativa,
+          valores: m.tipo === 'custo' && m.valorNovo ? `${dinheiro(m.valorAnterior ?? 0)} → ${dinheiro(m.valorNovo)}` : '',
+          status: m.status, solicitante: pessoa(d, m.solicitanteId)?.nome ?? '', criadoEm: br(m.createdAt.toISOString().slice(0, 10)),
+          decisao: m.decididoEm ? `${m.status === 'aprovada' ? 'aprovada' : 'recusada'} por ${pessoa(d, m.decididoPor)?.nome ?? 'PMO'} em ${br(m.decididoEm.toISOString().slice(0, 10))}${m.comentarioDecisao ? `: "${m.comentarioDecisao}"` : ''}` : '',
+        }))} />
       <SecaoPontos d={d} sessao={sessao} iniId={ini.id} hoje={hoje} />
     </Shell>
   );

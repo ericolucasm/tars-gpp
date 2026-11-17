@@ -3,6 +3,7 @@ import { notaFinal, custoReferencia, ordenarPorNota, podeComunicar } from './ava
 import { acoesDoCard, validarGate, podeConfirmar, type Raia } from './esteira';
 import { desvio, farolSugerido, statusDaFase, fasesDoModelo, mesesDaLinha, descreverMudanca, progresso, reordenar, ordemValida } from './projeto';
 import { podeResolverPonto, pontoEsperaPor, pontoAtrasado } from './pontos';
+import { validarPedidoMudanca, variacaoCusto } from './mudancas';
 import { gestorDe, timeDireto, areasSobGestao, nomeCurto, acimaDoCedido } from './pessoas';
 import { addDias, diffDias, dataPorExtenso, haQuanto, proximaSexta } from './datas';
 
@@ -156,6 +157,22 @@ describe('pontos de atenção', () => {
     expect(pontoAtrasado(ponto(), '2026-11-21')).toBe(true);
     expect(pontoAtrasado(ponto(), '2026-11-20')).toBe(false);
     expect(pontoAtrasado(ponto({ prazo: null }), '2030-01-01')).toBe(false);
+  });
+});
+
+describe('pedidos de mudança de escopo e custo', () => {
+  it('valida tipo, descrição e o novo orçamento', () => {
+    expect(validarPedidoMudanca({ tipo: 'escopo', descricao: 'Incluir integração com o ERP', valorNovo: null }, 100)).toBeNull();
+    expect(validarPedidoMudanca({ tipo: 'prazo', descricao: 'qualquer coisa', valorNovo: null }, 100)).toMatch(/escopo ou de custo/);
+    expect(validarPedidoMudanca({ tipo: 'escopo', descricao: 'ab', valorNovo: null }, 100)).toMatch(/Descreva/);
+    expect(validarPedidoMudanca({ tipo: 'custo', descricao: 'Licenças extras', valorNovo: null }, 100)).toMatch(/novo orçamento/);
+    expect(validarPedidoMudanca({ tipo: 'custo', descricao: 'Licenças extras', valorNovo: 100 }, 100)).toMatch(/igual/);
+    expect(validarPedidoMudanca({ tipo: 'custo', descricao: 'Licenças extras', valorNovo: 120 }, 100)).toBeNull();
+  });
+  it('calcula a variação do custo', () => {
+    expect(variacaoCusto(100, 120)).toBe(20);
+    expect(variacaoCusto(100, 90)).toBe(-10);
+    expect(variacaoCusto(0, 90)).toBeNull();
   });
 });
 

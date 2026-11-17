@@ -139,6 +139,7 @@ export const iniciativas = pgTable('iniciativas', {
   farol: text('farol'), // ok | aten | crit
   motivoSaida: text('motivo_saida'),
   retomadaPrevista: date('retomada_prevista'),
+  orcamentoAprovado: numeric('orcamento_aprovado', { mode: 'number' }), // orçamento do projeto; vazio = custo estimado da iniciativa
   // carimbos de tempo do fluxo
   enviadaEm: timestamp('enviada_em', { withTimezone: true }),
   aprovadaGestorEm: timestamp('aprovada_gestor_em', { withTimezone: true }),
@@ -299,6 +300,24 @@ export const pontosAtencao = pgTable('pontos_atencao', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   resolvidoEm: timestamp('resolvido_em', { withTimezone: true }),
 }, (t) => [index('pontos_atencao_org').on(t.orgId, t.status)]);
+
+// Pedido de mudança de escopo ou de custo do projeto (a de prazo é a mudança de linha de base).
+export const pedidosMudanca = pgTable('pedidos_mudanca', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  orgId: uuid('org_id').notNull(),
+  iniciativaId: uuid('iniciativa_id').notNull().references(() => iniciativas.id, { onDelete: 'cascade' }),
+  tipo: text('tipo').notNull(), // escopo | custo
+  descricao: text('descricao').notNull(), // o que muda
+  justificativa: text('justificativa').notNull().default(''),
+  valorAnterior: numeric('valor_anterior', { mode: 'number' }), // custo: orçamento antes
+  valorNovo: numeric('valor_novo', { mode: 'number' }), // custo: novo orçamento total pedido
+  status: text('status').notNull().default('pendente'), // pendente | aprovada | recusada
+  comentarioDecisao: text('comentario_decisao'),
+  solicitanteId: uuid('solicitante_id'),
+  decididoPor: uuid('decidido_por'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  decididoEm: timestamp('decidido_em', { withTimezone: true }),
+});
 
 // ---------- Login (Better Auth) ----------
 // Tabelas mantidas pela biblioteca de login. As chaves JS seguem os nomes de campo que ela espera.

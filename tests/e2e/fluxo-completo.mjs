@@ -172,6 +172,13 @@ try {
   await p.getByRole('button', { name: 'Enviar' }).click();
   await p.getByText('Ponto de atenção enviado ao PMO.').waitFor();
   ok('GP abre um ponto de atenção (impedimento) para o PMO');
+  await p.getByRole('button', { name: 'Pedir mudança de escopo ou custo' }).click();
+  await p.getByRole('button', { name: 'Custo', exact: true }).click();
+  await p.getByLabel('O que muda').fill('Licenças adicionais do painel');
+  await p.getByLabel('Novo orçamento total do projeto (R$)').fill('95000');
+  await p.getByRole('button', { name: 'Enviar ao PMO' }).click();
+  await p.getByText('Pedido de mudança de custo enviado ao PMO.').waitFor();
+  ok('GP pede mudança de custo ao PMO');
   await p.context().close();
 
   // 7. PMO aprova a mudança de linha de base
@@ -191,6 +198,10 @@ try {
   await p.getByRole('region', { name: 'Resolvidos recentemente' }).getByText('Contrato acionado; ambiente liberado até quarta.').waitFor();
   ok('PMO vê o ponto de atenção na Início e registra a resolução');
   await p.goto(urlProjeto, { waitUntil: 'networkidle' });
+  const pedidoCusto = p.getByRole('article', { name: /Mudança de custo: Licenças adicionais do painel/ });
+  await pedidoCusto.getByRole('button', { name: 'Aprovar pedido' }).click();
+  await p.getByRole('region', { name: 'Mudanças de escopo e custo' }).getByText('R$ 95.000', { exact: true }).waitFor();
+  ok('PMO aprova a mudança de custo e o orçamento aprovado do projeto muda');
 
   // 7b. PMO reordena as fases da linha do tempo (seta e arraste); a ordem fica gravada
   const ordemFases = async () => (await p.getByRole('button', { name: /^Subir fase / }).evaluateAll((bs) => bs.map((b) => b.getAttribute('aria-label').replace('Subir fase ', ''))));
