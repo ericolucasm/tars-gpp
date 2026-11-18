@@ -25,7 +25,7 @@ export default async function Muro() {
   const escopo = ehPmo ? 'todo o portfólio' : sessao.perfil === 'gestor' ? 'você, seu time e os projetos que você gerencia' : sessao.perfil === 'gp' ? 'você e as pessoas dos seus projetos' : 'você';
   return (
     <Shell sessao={sessao} dados={d} atual="muro">
-      <Cabecalho trilha="Relatórios / Muro da vergonha" titulo="Muro da vergonha" texto={`Quem passou da data de uma tarefa, de um fim de fase ou do status report sem concluir, pedir mais prazo ou avisar. Mostrando: ${escopo}.`} />
+      <Cabecalho trilha="Relatórios / Muro da vergonha" titulo="Muro da vergonha" texto={`Quem passou da data de uma tarefa, de um fim de fase ou do status report sem concluir, pedir mais prazo ou avisar, e gestores com decisões paradas há mais de 5 dias. Mostrando: ${escopo}.`} />
       {linhas.length === 0 && <Vazio>Ninguém no muro. Todas as entregas estão em dia (ou com prazo em negociação).</Vazio>}
       {linhas.map((l, k) => (
         <section key={l.pessoaId} aria-label={`Muro: ${l.nome}`} style={s('background: #FFFFFF; border: 1px solid #F5D2D2; border-radius: 16px; padding: 18px 20px; display: flex; flex-direction: column; gap: 10px')}>
@@ -42,7 +42,7 @@ export default async function Muro() {
           {l.itens.map((x) => (
             <div key={x.id} style={s('display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 13px; padding: 8px 10px; border-radius: 10px; background: #FFFAFA')}>
               <span style={s('font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; background: #EFEAFE; color: #4B2FD1')}>{TIPO_ENTREGA[x.tipo]}</span>
-              <span style={s('flex: 1 1 240px')}><strong>{x.titulo}</strong> · {ehPmo || meusProjetos.has(x.iniciativaId) ? <Link href={`/projetos/${x.iniciativaId}#prazos`}>{x.projeto}</Link> : x.projeto}</span>
+              <span style={s('flex: 1 1 240px')}><strong>{x.titulo}</strong> · {x.tipo !== 'decisao' && (ehPmo || meusProjetos.has(x.iniciativaId)) ? <Link href={`/projetos/${x.iniciativaId}#prazos`}>{x.projeto}</Link> : x.projeto}</span>
               <span style={s('color: #B42318; font-weight: 600')}>{venceTexto(x)}</span>
             </div>
           ))}

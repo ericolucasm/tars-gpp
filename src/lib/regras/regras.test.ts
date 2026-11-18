@@ -7,7 +7,7 @@ import { validarPedidoMudanca, variacaoCusto } from './mudancas';
 import { resumoFinanceiro, situacaoCusto } from './financeiro';
 import { dimCusto, dimEscopo, dimPrazo, dimRiscos, farolGeral } from './farol';
 import { nivelDoRisco, riscoAtivo, validarRisco } from './riscos';
-import { validarNaoSeguir, ordenarPrioridadeArea } from './gestor';
+import { validarNaoSeguir, ordenarPrioridadeArea, prazoDecisao } from './gestor';
 import { picoNoPeriodo, situacaoCapacidade, pessoasEq, impactoPorMes } from './capacidade';
 import { podeMedirBeneficio, situacaoBeneficio, validarMedicao } from './beneficios';
 import { situacaoDependencia } from './dependencias';
@@ -395,5 +395,12 @@ describe('gestor: prioridade da área', () => {
     const x = (id: string, p: number | null, dia: string) => ({ id, prioridadeArea: p, enviadaEm: new Date(dia) });
     const r = ordenarPrioridadeArea([x('a', null, '2026-10-02'), x('b', 2, '2026-10-01'), x('c', null, '2026-09-01'), x('d', 1, '2026-10-05')]);
     expect(r.map((i) => i.id)).toEqual(['d', 'b', 'c', 'a']);
+  });
+});
+
+describe('gestor: prazo para decidir', () => {
+  it('5 dias corridos depois de chegar, ou o prazo pedido', () => {
+    expect(prazoDecisao('2026-10-12')).toBe('2026-10-17');
+    expect(prazoDecisao('2026-10-12', '2026-10-14')).toBe('2026-10-14');
   });
 });

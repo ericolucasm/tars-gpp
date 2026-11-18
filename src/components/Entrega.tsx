@@ -9,8 +9,8 @@ import { abrirPonto } from '@/app/acoes/pontos';
 import { estiloPill, sBtnPrim, sBtnSec, sInput, sLabel, sErro } from '@/components/ui';
 
 export type EntregaVM = {
-  tipo: 'tarefa' | 'fase' | 'status'; id: string; iniciativaId: string; projeto: string; titulo: string; tipoRotulo: string;
-  vence: string; atrasada: boolean; emNegociacao: boolean; faseId: string | null; linkStatus: string | null;
+  tipo: 'tarefa' | 'fase' | 'status' | 'decisao'; id: string; iniciativaId: string; projeto: string; titulo: string; tipoRotulo: string;
+  vence: string; atrasada: boolean; emNegociacao: boolean; faseId: string | null; linkStatus: string | null; link?: string | null;
 };
 type Acao = '' | 'prazo' | 'impedimento' | 'risco';
 
@@ -37,8 +37,9 @@ export function CartaoEntrega({ e }: { e: EntregaVM }) {
         {e.tipo === 'tarefa' && <button type="button" disabled={pend} onClick={() => rodar(() => alternarTarefa(e.id), 'Tarefa concluída.')} style={sBtnPrim}>Concluir tarefa</button>}
         {e.tipo === 'fase' && <button type="button" disabled={pend} onClick={() => rodar(() => confirmarFimFase(e.id), 'Fim da fase confirmado.')} style={sBtnPrim}>Confirmar fim da fase</button>}
         {e.tipo === 'status' && e.linkStatus && <Link href={e.linkStatus} style={{ ...sBtnPrim, display: 'inline-flex', alignItems: 'center' }}>Publicar status</Link>}
-        {e.tipo !== 'status' && !e.emNegociacao && <button type="button" onClick={() => setAcao(acao === 'prazo' ? '' : 'prazo')} style={sBtnSec}>Pedir mais prazo</button>}
-        {e.tipo !== 'status' && <button type="button" onClick={() => setAcao(acao === 'impedimento' ? '' : 'impedimento')} style={sBtnSec}>Informar impedimento</button>}
+        {e.tipo === 'decisao' && e.link && <Link href={e.link} style={{ ...sBtnPrim, display: 'inline-flex', alignItems: 'center' }}>Decidir</Link>}
+        {(e.tipo === 'tarefa' || e.tipo === 'fase') && !e.emNegociacao && <button type="button" onClick={() => setAcao(acao === 'prazo' ? '' : 'prazo')} style={sBtnSec}>Pedir mais prazo</button>}
+        {(e.tipo === 'tarefa' || e.tipo === 'fase') && <button type="button" onClick={() => setAcao(acao === 'impedimento' ? '' : 'impedimento')} style={sBtnSec}>Informar impedimento</button>}
         {e.faseId && <button type="button" onClick={() => setAcao(acao === 'risco' ? '' : 'risco')} style={sBtnSec}>Informar risco</button>}
       </div>
       {acao === 'prazo' && (
