@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { notaFinal, custoReferencia, ordenarPorNota, podeComunicar } from './avaliacao';
-import { acoesDoCard, acaoDeConclusao, prontoParaConcluir, validarGate, podeConfirmar, type Raia } from './esteira';
+import { acoesDoCard, acaoDeConclusao, prontoParaConcluir, retiradaPermitida, validarRetirada, validarGate, podeConfirmar, type Raia } from './esteira';
 import { desvio, farolSugerido, statusDaFase, fasesDoModelo, mesesDaLinha, descreverMudanca, progresso, reordenar, ordemValida, validarEdicaoTarefa, modoDoProjeto } from './projeto';
 import { podeResolverPonto, pontoEsperaPor, pontoAtrasado } from './pontos';
 import { validarPedidoMudanca, variacaoCusto } from './mudancas';
@@ -518,5 +518,21 @@ describe('acesso à página do projeto', () => {
   });
   it('quem pediu a iniciativa acompanha o projeto em leitura', () => {
     expect(modoDoProjeto({ ...ninguem, solicitante: true })).toBe('leitura');
+  });
+});
+
+describe('retirar uma iniciativa (quem pediu)', () => {
+  it('rascunho é excluído; devolvida ou com o gestor vai para Cancelados; depois do gestor, não', () => {
+    expect(retiradaPermitida('sol', 'rascunho')).toBe('excluir');
+    expect(retiradaPermitida('sol', 'devolvida')).toBe('cancelar');
+    expect(retiradaPermitida('sol', 'aguardando_gestor')).toBe('cancelar');
+    expect(retiradaPermitida('sol', 'aguardando_pmo')).toBeNull();
+    expect(retiradaPermitida('bkl', null)).toBeNull();
+    expect(retiradaPermitida('exe', null)).toBeNull();
+  });
+  it('retirar exige um comentário curto; excluir rascunho não', () => {
+    expect(validarRetirada('cancelar', 'ok')).toMatch(/poucas palavras/);
+    expect(validarRetirada('cancelar', 'Já resolvido pelo TI')).toBeNull();
+    expect(validarRetirada('excluir', '')).toBeNull();
   });
 });

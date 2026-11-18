@@ -552,6 +552,35 @@ try {
   await p.context().close();
   ok('Quem pediu abre "Acompanhar projeto" e vê o andamento, os status e o benefício esperado');
 
+  // Quem pediu desiste: exclui um rascunho e retira uma iniciativa que estava com o gestor
+  p = await como('joao.silva@acme.com.br');
+  const RASC = 'Rascunho que vou desistir';
+  const RET = 'Etiqueta nova para as caixas';
+  await ir(p, '/iniciativas/nova');
+  await p.getByPlaceholder('Reduzir o tempo de separação de pedidos').fill(RASC);
+  await p.getByRole('button', { name: 'Salvar rascunho' }).click();
+  await p.getByText('Rascunho salvo.', { exact: false }).waitFor();
+  await ir(p, '/iniciativas/nova');
+  await p.getByPlaceholder('Reduzir o tempo de separação de pedidos').fill(RET);
+  await p.getByPlaceholder(/A separação de um pedido leva/).fill('As etiquetas atuais descolam no transporte.');
+  await p.getByRole('button', { name: /Melhoria/ }).click();
+  await p.getByRole('button', { name: 'Enviar para aprovação' }).click();
+  await p.getByText('Iniciativa enviada para aprovação').waitFor();
+  await ir(p, '/inicio');
+  const minhasIni = p.getByRole('region', { name: 'Suas iniciativas' });
+  await minhasIni.locator('div').filter({ hasText: RASC }).getByRole('button', { name: 'Excluir rascunho' }).last().click();
+  await p.getByRole('group', { name: `Excluir rascunho: ${RASC}` }).getByRole('button', { name: 'Confirmar: excluir' }).click();
+  await minhasIni.getByText(RASC).waitFor({ state: 'detached' });
+  await minhasIni.locator('div').filter({ hasText: RET }).getByRole('button', { name: 'Retirar' }).last().click();
+  const ret = p.getByRole('group', { name: `Retirar: ${RET}` });
+  await ret.getByRole('button', { name: 'Confirmar: retirar' }).click();
+  await ret.getByText(/Conte em poucas palavras/).waitFor(); // o servidor exige o comentário
+  await ret.getByLabel('Por que está retirando?').fill('O fornecedor já trocou as etiquetas.');
+  await ret.getByRole('button', { name: 'Confirmar: retirar' }).click();
+  await minhasIni.getByText('Você retirou esta iniciativa · O fornecedor já trocou as etiquetas.').waitFor();
+  await p.context().close();
+  ok('Quem pediu exclui um rascunho e retira uma iniciativa que estava com o gestor (comentário obrigatório)');
+
   // GP conclui o projeto pela página do projeto (gate com o aceite de quem pediu)
   p = await como('carlos.andrade@acme.com.br');
   await ir(p, `/projetos/${projId}#encerramento`);
