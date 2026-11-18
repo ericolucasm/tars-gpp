@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { s } from '@/lib/css';
-import { decidirPrazo, definirCadencia, definirResponsavelFase } from '@/app/acoes/muro';
+import { decidirPrazo, definirCadencia } from '@/app/acoes/muro';
 import { sBtnPrim, sBtnSec, sErro } from '@/components/ui';
 
 type Fase = { id: string; nome: string; gate: string; responsavelId: string | null; confirmada: boolean; atraso: number };
@@ -20,7 +20,7 @@ export function Prazos(p: { iniciativaId: string; podeEditar: boolean; cadencia:
     <section id="prazos" aria-label="Prazos e responsáveis" style={s('background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px; scroll-margin-top: 16px')}>
       <div style={s('display: flex; flex-direction: column; gap: 2px')}>
         <h2 style={s('margin: 0; font-size: 18px; font-weight: 700')}>Prazos e responsáveis</h2>
-        <span style={s('font-size: 12px; color: #5E5770')}>Quando o status deve ser publicado e quem confirma o fim de cada fase (o gate). Quem passa da data sem registrar nada vai para o Muro da vergonha, com aviso para a pessoa, o GP e o gestor dela.</span>
+        <span style={s('font-size: 12px; color: #5E5770')}>Quando o status deve ser publicado e quem confirma o fim de cada fase (o gate). Para mudar o responsável de uma fase, clique na barra dela na linha do tempo. Quem passa da data sem registrar nada vai para o Muro da vergonha, com aviso para a pessoa, o GP e o gestor dela.</span>
       </div>
       {p.pedidos.length > 0 && (
         <div style={s('display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 12px; background: #FEF3DC')}>
@@ -56,9 +56,7 @@ export function Prazos(p: { iniciativaId: string; podeEditar: boolean; cadencia:
                 <th scope="row" style={s('text-align: left; padding: 8px 12px; border-bottom: 1px solid #F3F0EA')}>{f.nome}</th>
                 <td style={s('padding: 8px 12px; border-bottom: 1px solid #F3F0EA')}>{f.gate}</td>
                 <td style={s('padding: 8px 12px; border-bottom: 1px solid #F3F0EA')}>
-                  <select aria-label={`Responsável pela fase ${f.nome}`} value={f.responsavelId ?? ''} disabled={!p.podeEditar || pend} onChange={(e) => rodar(() => definirResponsavelFase(f.id, e.target.value || null))} style={sSel}>
-                    <option value="">GP do projeto</option>{p.pessoas.map((x) => <option key={x.id} value={x.id}>{x.nome}</option>)}
-                  </select>
+                  {p.pessoas.find((x) => x.id === f.responsavelId)?.nome ?? 'GP do projeto'}
                 </td>
                 <td style={s('padding: 8px 12px; border-bottom: 1px solid #F3F0EA')}>
                   {f.confirmada ? <span style={s('color: #17723D; font-weight: 600')}>Confirmada</span> : f.atraso > 0 ? <span style={s('color: #B42318; font-weight: 600')}>{f.atraso} dia(s) de atraso</span> : <span style={s('color: #5E5770')}>No prazo</span>}
