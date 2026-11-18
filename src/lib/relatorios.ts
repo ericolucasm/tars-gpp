@@ -316,6 +316,28 @@ function relatorioDependencias(d: DadosOrg, hoje: string, busca: Busca): Relator
   };
 }
 
+// ---------- Lições aprendidas (PMO e GP) ----------
+
+function relatorioLicoes(d: DadosOrg, busca: Busca): Relatorio {
+  const fTipo = filtro(busca, 'licoes', 'tipo', 'Tipo', com('Todas', [{ valor: 'funcionou', rotulo: 'O que funcionou' }, { valor: 'melhorar', rotulo: 'O que melhorar' }]));
+  const fModelo = filtro(busca, 'licoes', 'modelo', 'Modelo de projeto', com('Todos os modelos', d.modelos.map((m) => ({ valor: m.id, rotulo: m.nome }))));
+  const fArea = filtro(busca, 'licoes', 'area', 'Área', opcoesArea(d));
+  const lista = d.licoes.slice().reverse().flatMap((l) => {
+    const ini = d.iniciativas.find((i) => i.id === l.iniciativaId);
+    if (!ini || (fTipo.valor !== TODOS && l.tipo !== fTipo.valor) || (fModelo.valor !== TODOS && ini.modeloId !== fModelo.valor) || !naArea(d, ini.areaId, fArea)) return [];
+    return [{ l, ini }];
+  });
+  return {
+    id: 'licoes', titulo: 'Lições aprendidas', descricao: 'O que funcionou e o que melhorar, registrado nos projetos. Use antes de começar um projeto parecido.',
+    filtros: [fTipo, fModelo, fArea],
+    resumo: [{ rotulo: 'Lições', valor: String(lista.length) }, { rotulo: 'Projetos com lições', valor: String(new Set(lista.map((x) => x.ini.id)).size) }],
+    colunas: ['Lição', 'Tipo', 'Projeto', 'Modelo', 'Área', 'Quem registrou'],
+    linhas: lista.map(({ l, ini }): Celula[] => [l.texto, { texto: l.tipo === 'funcionou' ? 'Funcionou' : 'Melhorar', tom: l.tipo === 'funcionou' ? 'ok' : 'aten' },
+      nomeCurtoProjeto(ini.titulo), d.modelos.find((m) => m.id === ini.modeloId)?.nome ?? '—', nomeArea(d, ini.areaId), `${pessoa(d, l.autorId)?.nome ?? '—'} · ${dia(l.createdAt)}`]),
+    vazio: 'Nenhuma lição com esses filtros.',
+  };
+}
+
 // ---------- PMO ----------
 
 function relatoriosPmo(d: DadosOrg, hoje: string, busca: Busca): Relatorio[] {
@@ -419,6 +441,7 @@ function relatoriosPmo(d: DadosOrg, hoje: string, busca: Busca): Relatorio[] {
     },
     relatorioDependencias(d, hoje, busca),
     relatorioBeneficios(d, hoje, busca),
+    relatorioLicoes(d, busca),
     relatorioCapacidadeMes(d, hoje, busca),
     {
       id: 'capacidade', titulo: 'Capacidade das pessoas', descricao: 'Quanto cada pessoa pode ceder para projetos e quanto está alocada (pico nas fases que ainda vão acontecer).',
@@ -552,6 +575,7 @@ function relatoriosGp(d: DadosOrg, eu: Pessoa, hoje: string, busca: Busca): Rela
     },
     relatorioFinanceiro(d, meus, busca, false, []),
     relatorioRiscos(d, meus, busca, 'Riscos dos meus projetos', []),
+    relatorioLicoes(d, busca),
     {
       id: 'tarefas', titulo: 'Tarefas em aberto', descricao: 'Tarefas não concluídas dos seus projetos, pela ordem do prazo.',
       filtros: [fProj2, fSit2, fResp2],

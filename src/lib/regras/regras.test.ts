@@ -10,6 +10,7 @@ import { nivelDoRisco, riscoAtivo, validarRisco } from './riscos';
 import { picoNoPeriodo, situacaoCapacidade, pessoasEq } from './capacidade';
 import { podeMedirBeneficio, situacaoBeneficio, validarMedicao } from './beneficios';
 import { situacaoDependencia } from './dependencias';
+import { balancoCusto, balancoEscopo, balancoPrazo, validarLicao } from './encerramento';
 import { gestorDe, timeDireto, areasSobGestao, nomeCurto, acimaDoCedido } from './pessoas';
 import { addDias, diffDias, dataPorExtenso, haQuanto, proximaSexta } from './datas';
 
@@ -281,6 +282,26 @@ describe('dependências', () => {
     expect(situacaoDependencia('2027-01-31', null, false, '2026-11-18')).toBe('sem_data');
     expect(situacaoDependencia('2026-11-01', '2026-12-10', false, '2026-11-18')).toBe('atrasada');
     expect(situacaoDependencia('2026-11-01', '2026-12-10', true, '2026-11-18')).toBe('entregue');
+  });
+});
+
+describe('encerramento', () => {
+  it('balanço de prazo, custo e escopo', () => {
+    expect(balancoPrazo(null)).toBe('neutro');
+    expect(balancoPrazo(0)).toBe('ok');
+    expect(balancoPrazo(1)).toBe('aten');
+    expect(balancoPrazo(3)).toBe('crit');
+    expect(balancoCusto(100, 95)).toBe('ok');
+    expect(balancoCusto(100, 105)).toBe('aten');
+    expect(balancoCusto(100, 120)).toBe('crit');
+    expect(balancoCusto(0, 50)).toBe('neutro');
+    expect(balancoEscopo(1)).toBe('ok');
+    expect(balancoEscopo(2)).toBe('aten');
+  });
+  it('valida a lição', () => {
+    expect(validarLicao({ tipo: 'funcionou', texto: 'Reunião semanal com o fornecedor evitou atrasos' })).toBeNull();
+    expect(validarLicao({ tipo: 'outro', texto: 'Reunião semanal com o fornecedor' })).toMatch(/funcionou/);
+    expect(validarLicao({ tipo: 'melhorar', texto: 'curto' })).toMatch(/frase/);
   });
 });
 

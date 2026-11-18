@@ -64,6 +64,13 @@
       "when": 1794962896955,
       "tag": "0008_dependencias",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1794963248428,
+      "tag": "0009_licoes",
+      "breakpoints": true
     }
   ]
 }
