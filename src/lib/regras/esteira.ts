@@ -138,3 +138,16 @@ export function podeConfirmar(aprovador: string, p: PapelNoCard): boolean {
 export function ehProjeto(raia: Raia | undefined) {
   return raia?.tipoCard === 'Projeto';
 }
+
+/** Ação de concluir um projeto em execução (a passagem para a raia "Concluído"), se existir. */
+export function acaoDeConclusao(card: { raiaId: string; solStatus: string | null }, raias: Raia[]): Acao | undefined {
+  const atual = raias.find((r) => r.id === card.raiaId);
+  if (atual?.chave !== 'exe') return undefined;
+  const a = acoesDoCard(card, raias).primaria;
+  return a && raias.find((r) => r.id === a.paraRaiaId)?.chave === 'con' ? a : undefined;
+}
+
+/** Projeto pronto para concluir: tem fases e todas tiveram o fim confirmado. */
+export function prontoParaConcluir(fases: { confirmadaEm: Date | string | null }[]) {
+  return fases.length > 0 && fases.every((f) => !!f.confirmadaEm);
+}

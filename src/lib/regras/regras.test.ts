@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { notaFinal, custoReferencia, ordenarPorNota, podeComunicar } from './avaliacao';
-import { acoesDoCard, validarGate, podeConfirmar, type Raia } from './esteira';
+import { acoesDoCard, acaoDeConclusao, prontoParaConcluir, validarGate, podeConfirmar, type Raia } from './esteira';
 import { desvio, farolSugerido, statusDaFase, fasesDoModelo, mesesDaLinha, descreverMudanca, progresso, reordenar, ordemValida } from './projeto';
 import { podeResolverPonto, pontoEsperaPor, pontoAtrasado } from './pontos';
 import { validarPedidoMudanca, variacaoCusto } from './mudancas';
@@ -94,6 +94,19 @@ describe('esteira', () => {
     expect(podeConfirmar('Gestor da área solicitante', { ...base, ehAprovador: true })).toBe(true);
     expect(podeConfirmar('Gestor da área solicitante', { ...base, ehGp: true })).toBe(false);
     expect(podeConfirmar('Gerente de projeto', { ...base, ehPmo: true })).toBe(true);
+  });
+  it('concluir pela página do projeto: só em execução e só quando a próxima raia é Concluído', () => {
+    expect(acaoDeConclusao({ raiaId: 'exe', solStatus: null }, RAIAS)?.paraRaiaId).toBe('con');
+    expect(acaoDeConclusao({ raiaId: 'pau', solStatus: null }, RAIAS)).toBeUndefined();
+    expect(acaoDeConclusao({ raiaId: 'pre', solStatus: null }, RAIAS)).toBeUndefined();
+    // raia nova entre execução e concluído: a passagem não é a conclusão
+    const comNova = [...RAIAS, raia('aceite', 4.5, { chave: null, id: 'aceite', tipoCard: 'Projeto' })];
+    expect(acaoDeConclusao({ raiaId: 'exe', solStatus: null }, comNova)).toBeUndefined();
+  });
+  it('pronto para concluir quando todas as fases tiveram o fim confirmado', () => {
+    expect(prontoParaConcluir([])).toBe(false);
+    expect(prontoParaConcluir([{ confirmadaEm: new Date() }, { confirmadaEm: null }])).toBe(false);
+    expect(prontoParaConcluir([{ confirmadaEm: new Date() }, { confirmadaEm: '2026-10-01' }])).toBe(true);
   });
 });
 

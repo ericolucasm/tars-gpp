@@ -128,6 +128,7 @@ Raias padrão, na ordem: Solicitações → Backlog → Pré-projeto → Em exec
 - **[Implícita]** Atualizar uma linha de base já congelada exige **aprovação do PMO** (tela inicial do PMO: "Pedido para alterar linha de base"). O PMO decide na própria página do projeto.
 - **[Implícita]** O GP confirma o fim de cada fase pelo critério de conclusão da biblioteca (tela inicial do GP: "Confirmar o fim de uma fase · critério: contrato assinado").
 - **[Decisão V1]** % concluído do projeto = tarefas concluídas ÷ total de tarefas.
+- **[Decisão V2]** **Concluir pela página do projeto:** quem confirma a passagem para Concluído (pela configuração da raia, o GP; o PMO sempre pode) vê na seção **Balanço e lições aprendidas** o botão **Concluir projeto**, com o mesmo checklist do gate do Portfólio (padrão: aceite da entrega pelo solicitante, obrigatório; lições aprendidas registradas, opcional). O servidor valida a permissão e os critérios. O solicitante, o PMO, o GP e o patrocinador são avisados. Quando todas as fases tiveram o fim confirmado, a Início do GP mostra **Concluir o projeto**. Só vale quando a raia seguinte à execução é Concluído (se houver uma raia nova no meio, a passagem continua pelo Portfólio).
 
 ## 8. Telas iniciais ("Precisa de você")
 
@@ -135,7 +136,7 @@ Na V1, todos os itens e números são **calculados a partir dos dados reais**:
 
 - **PMO:** iniciativas prontas para avaliar · projetos críticos · pedidos de mudança de linha de base · status da semana atrasados (mais de 7 dias sem status) · pré-projetos prontos para o play (prontidão) · pessoas acima do cedido.
 - **Gestor:** aprovações pendentes (obrigatórias primeiro) · pedidos de alocação · pessoas do time acima do cedido.
-- **GP:** status da semana a publicar · tarefas atrasadas · pedidos de alocação aguardando o gestor · fases a confirmar.
+- **GP:** status da semana a publicar · tarefas atrasadas · pedidos de alocação aguardando o gestor · fases a confirmar · projeto pronto para concluir (todas as fases confirmadas).
 - **Colaborador:** suas iniciativas com o passo atual · suas tarefas em projetos.
 
 > **[Decisão V1]** No protótipo, alguns números eram ilustrativos e não batiam entre telas (ex.: "13 prontas para avaliar" na tela inicial e 9 linhas na Avaliação). Na V1, todas as telas leem a mesma base, então os números do seed podem ser diferentes dos do protótipo, mas são sempre consistentes entre si.

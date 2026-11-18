@@ -4,16 +4,18 @@ import { useState, useTransition } from 'react';
 import { s } from '@/lib/css';
 import type { ItemBalanco } from '@/lib/regras/encerramento';
 import { registrarLicao, removerLicao } from '@/app/acoes/licoes';
+import { ConcluirProjeto, type ConclusaoVM } from './ConcluirProjeto';
 import { estiloPill, sBtnPrim, sInput, sLabel, sErro } from '@/components/ui';
 
 type LicaoVM = { id: string; tipo: string; texto: string; autor: string; data: string; projeto?: string; podeRemover?: boolean };
 const COR = { ok: ['#E3F5EA', '#17723D'], aten: ['#FEF3DC', '#9A5B05'], crit: ['#FDE8E8', '#B42318'], neutro: ['#EDEAE3', '#4A4458'] };
 
-export function Encerramento({ iniciativaId, concluido, balanco, licoes, parecidas }: { iniciativaId: string; concluido: boolean; balanco: ItemBalanco[]; licoes: LicaoVM[]; parecidas: LicaoVM[] }) {
+export function Encerramento({ iniciativaId, concluido, balanco, licoes, parecidas, conclusao }: { iniciativaId: string; concluido: boolean; balanco: ItemBalanco[]; licoes: LicaoVM[]; parecidas: LicaoVM[]; conclusao?: ConclusaoVM | null }) {
   const [tipo, setTipo] = useState('funcionou');
   const [texto, setTexto] = useState('');
   const [msg, setMsg] = useState<{ ok: boolean; t: string } | null>(null);
   const [pend, start] = useTransition();
+  const [concluiu, setConcluiu] = useState(false);
   const lista = (titulo: string, ls: LicaoVM[], comProjeto?: boolean) => (
     <div style={s('display: flex; flex-direction: column; gap: 6px')}>
       <span style={s('font-size: 13px; font-weight: 700')}>{titulo}</span>
@@ -32,6 +34,9 @@ export function Encerramento({ iniciativaId, concluido, balanco, licoes, parecid
         <h2 style={s('margin: 0; font-size: 18px; font-weight: 700')}>{concluido ? 'Encerramento e lições aprendidas' : 'Balanço e lições aprendidas'}</h2>
         <span style={s('font-size: 12px; color: #5E5770')}>{concluido ? 'Balanço final do projeto: o planejado × o que aconteceu.' : 'Como o projeto está até agora em relação ao planejado. No encerramento, este vira o balanço final.'} Registre lições a qualquer momento: elas aparecem para projetos parecidos.</span>
       </div>
+      {concluiu
+        ? <span role="status" style={s('font-size: 13px; font-weight: 600; color: #17723D')}>Projeto concluído. O PMO e quem pediu foram avisados.</span>
+        : conclusao && <ConcluirProjeto iniciativaId={iniciativaId} c={conclusao} aoConcluir={() => setConcluiu(true)} />}
       <div style={s('overflow-x: auto; border: 1px solid #EFEBE3; border-radius: 12px')}>
         <table style={s('width: 100%; border-collapse: collapse; font-size: 13px; min-width: 620px')}>
           <thead><tr>{['', 'Planejado', 'Realizado', 'Leitura'].map((c) => <th key={c} scope="col" style={s('text-align: left; padding: 9px 12px; font-size: 12px; font-weight: 600; color: #5E5770; background: #FAF8F4; border-bottom: 1px solid #EFEBE3')}>{c}</th>)}</tr></thead>

@@ -59,7 +59,12 @@ export async function moverCard(input: { iniciativaId: string; tipo: TipoAcao; p
       Object.assign(upd, { raiaId: acao.paraRaiaId, solStatus: null });
       if (destino === 'bkl') Object.assign(upd, { prioridade: ini.prioridade ?? 'Média', situacao: 'Aguardando priorização', classificadaEm: agora });
       else if (destino === 'pre') Object.assign(upd, { situacao: 'Área complementando informações', preAprovadaEm: agora });
-      else if (destino === 'con') Object.assign(upd, { situacao: null, concluidaEm: agora });
+      else if (destino === 'con') {
+        Object.assign(upd, { situacao: null, concluidaEm: agora });
+        // quem acompanha o projeto fica sabendo da conclusão (o solicitante é avisado logo abaixo)
+        const pmos = dados.pessoas.filter((x) => x.perfis.includes('pmo') && !x.externo).map((x) => x.id);
+        await notificar(dados.org.id, [...pmos, ini.gpId, ini.patrocinadorId].filter((x) => x !== eu.id), `${eu.nome} concluiu o projeto "${ini.titulo}".`, `/projetos/${ini.id}#encerramento`);
+      }
       else if (destino === 'exe') {
         exigir(ex.gpId, 'Escolha o gerente de projeto.');
         exigir(ex.modeloId, 'Escolha o modelo de projeto.');
