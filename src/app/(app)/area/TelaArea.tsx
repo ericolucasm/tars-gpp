@@ -4,7 +4,7 @@ import { br, hojeISO, haQuanto, mesCurto } from '@/lib/regras/datas';
 import { areasSobGestao, gestorDe, iniciais, nomeCurto, timeDireto } from '@/lib/regras/pessoas';
 
 const primeiroNome = (n: string) => n.split(' ')[0];
-import { alocacaoDe, impactoDoPedido, chaveDaRaia, custoDe, infoProjeto, nomeCurtoProjeto, noRaia, pessoa, projetosDaPessoa, situacaoDoCard, TIPOS, URGENCIAS } from '@/lib/visoes';
+import { alocacaoDe, impactoDoPedido, prioridadesDoGestor, chaveDaRaia, custoDe, infoProjeto, nomeCurtoProjeto, noRaia, pessoa, projetosDaPessoa, situacaoDoCard, TIPOS, URGENCIAS } from '@/lib/visoes';
 import { detalheIniciativa } from '@/lib/detalhe';
 import { Shell } from '@/components/Shell';
 import { VisaoArea, type Aba } from './VisaoArea';
@@ -78,6 +78,7 @@ export async function TelaArea({ aba }: { aba: Aba }) {
         time={time}
         pedidos={pedidos}
         motivos={d.org.config.motivos.recusa}
+        prioridades={prioridadesDoGestor(d, eu.id).map((i) => ({ id: i.id, titulo: i.titulo, etapa: noRaia(d, i, 'bkl') ? 'Backlog' : 'Aguardando o PMO', quem: pessoa(d, i.solicitanteId)?.nome ?? '', ordenada: i.prioridadeArea != null }))}
         emExecucao={daArea.filter((i) => noRaia(d, i, 'exe')).length}
         rodando={daArea.filter((i) => noRaia(d, i, 'exe', 'pau')).length}
       />

@@ -63,6 +63,10 @@ try {
   await card.getByRole('button', { name: 'Devolver ao solicitante' }).click();
   await p.getByText(`“${TITULO2}” devolvida para João Silva ajustar.`).waitFor();
   ok('Gestora abre o detalhe, aprova uma iniciativa e devolve a outra com comentário');
+  const prio = p.getByRole('region', { name: 'Prioridade da área' });
+  await prio.getByRole('button', { name: `Subir ${TITULO}` }).click();
+  await p.getByText('Prioridade da área atualizada. O PMO vê essa ordem na Avaliação.').waitFor();
+  ok('Gestora ordena a prioridade da área');
   const ETQ = 'Etiquetagem automática na expedição';
   card = p.locator('#aprovacoes > div').filter({ hasText: ETQ }).first();
   await card.getByRole('button', { name: 'Não seguir' }).click();
@@ -108,6 +112,7 @@ try {
   // 4. PMO avalia e comunica
   await ir(p, '/avaliacao');
   await p.getByText(TITULO).waitFor();
+  await p.getByText(/prioridade da área: \dª de \d+ para Fernanda/).first().waitFor();
   await p.getByRole('button', { name: 'Comunicar decisões às áreas' }).click();
   await p.getByText(/Decida todas antes de comunicar/).waitFor();
   for (const [i, n] of [[0, 5], [1, 4], [2, 4], [3, 3]]) {
