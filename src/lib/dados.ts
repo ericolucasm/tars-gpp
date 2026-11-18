@@ -33,6 +33,7 @@ export type Licao = typeof t.licoes.$inferSelect;
 export type PedidoPrazo = typeof t.pedidosPrazo.$inferSelect;
 export type Ausencia = typeof t.ausencias.$inferSelect;
 export type Delegacao = typeof t.delegacoes.$inferSelect;
+export type Feedback = typeof t.feedbacks.$inferSelect;
 export type FaseBiblioteca = typeof t.fasesBiblioteca.$inferSelect;
 export type Modelo = typeof t.modelos.$inferSelect;
 
@@ -43,7 +44,7 @@ async function carregar(orgId: string) {
   const fasesDoOrg = sql`(select f.id from projeto_fases f join iniciativas i on i.id = f.iniciativa_id where i.org_id = ${orgId})`;
   const [
     org, areas, pessoas, ciclos, raias, iniciativas, fasesBiblioteca, modelos, pedidos, avaliacoes,
-    fases, alocacoes, tarefas, marcos, riscos, reports, linhasBase, mudancas, pontos, pedidosMudanca, lancamentos, dependencias, licoes, pedidosPrazo, ausencias, delegacoes,
+    fases, alocacoes, tarefas, marcos, riscos, reports, linhasBase, mudancas, pontos, pedidosMudanca, lancamentos, dependencias, licoes, pedidosPrazo, ausencias, delegacoes, feedbacks,
   ] = await Promise.all([
     db.query.orgs.findFirst({ where: eq(t.orgs.id, orgId) }),
     db.select().from(t.areas).where(eq(t.areas.orgId, orgId)).orderBy(t.areas.ordem),
@@ -71,6 +72,7 @@ async function carregar(orgId: string) {
     db.select().from(t.pedidosPrazo).where(eq(t.pedidosPrazo.orgId, orgId)).orderBy(t.pedidosPrazo.createdAt),
     db.select().from(t.ausencias).where(eq(t.ausencias.orgId, orgId)).orderBy(t.ausencias.inicio),
     db.select().from(t.delegacoes).where(eq(t.delegacoes.orgId, orgId)).orderBy(t.delegacoes.createdAt),
+    db.select().from(t.feedbacks).where(eq(t.feedbacks.orgId, orgId)).orderBy(t.feedbacks.createdAt),
   ]);
   if (!org) throw new Error('Empresa não encontrada');
 
@@ -80,7 +82,7 @@ async function carregar(orgId: string) {
 
   return {
     org, areas, pessoas, ciclos, raias: raias as unknown as (Raia & typeof raias[number])[], iniciativas, fasesBiblioteca, modelos,
-    pedidos, avaliacoes, fases, alocacoes, tarefas, marcos, riscos, reports, linhasBase, mudancas, pontos, pedidosMudanca, lancamentos, dependencias, licoes, pedidosPrazo, ausencias, delegacoes,
+    pedidos, avaliacoes, fases, alocacoes, tarefas, marcos, riscos, reports, linhasBase, mudancas, pontos, pedidosMudanca, lancamentos, dependencias, licoes, pedidosPrazo, ausencias, delegacoes, feedbacks,
   };
 }
 
