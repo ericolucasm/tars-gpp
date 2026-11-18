@@ -63,6 +63,20 @@ try {
   await card.getByRole('button', { name: 'Devolver ao solicitante' }).click();
   await p.getByText(`“${TITULO2}” devolvida para João Silva ajustar.`).waitFor();
   ok('Gestora abre o detalhe, aprova uma iniciativa e devolve a outra com comentário');
+  const ETQ = 'Etiquetagem automática na expedição';
+  card = p.locator('#aprovacoes > div').filter({ hasText: ETQ }).first();
+  await card.getByRole('button', { name: 'Não seguir' }).click();
+  await card.getByRole('button', { name: 'Confirmar: não seguir' }).click();
+  await p.getByText('Escolha o motivo.').waitFor(); // sem motivo, o servidor recusa
+  await card.getByLabel('Motivo').selectOption('Sobreposição com outra iniciativa');
+  await card.getByLabel('Comentário para quem pediu').fill('Já está no escopo do projeto de roteirização.');
+  await card.getByRole('button', { name: 'Confirmar: não seguir' }).click();
+  await p.getByText(`“${ETQ}” arquivada. Bruno Reis vai ver o motivo.`).waitFor();
+  await p.context().close();
+  p = await como('bruno.reis@acme.com.br');
+  await ir(p, '/inicio');
+  await p.getByText(/decidiu não seguir · motivo: Sobreposição com outra iniciativa — Já está no escopo/).first().waitFor();
+  ok('Gestora decide não seguir com uma iniciativa (motivo e comentário obrigatórios) e o solicitante vê o porquê');
   await p.context().close();
 
   // 3. João vê a devolução e reenvia

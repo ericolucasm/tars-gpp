@@ -6,7 +6,7 @@ import { s } from '@/lib/css';
 import { FAROL, type Farol } from '@/lib/regras/projeto';
 import { DetalheIniciativa, TituloExpansivel, cliqueNaLinha } from '@/components/DetalheIniciativa';
 import type { Detalhe } from '@/lib/detalhe';
-import { aprovarComoGestor, definirCedencia, devolverParaAjuste, responderPedido } from '@/app/acoes/gestor';
+import { aprovarComoGestor, definirCedencia, devolverParaAjuste, naoSeguirComoGestor, responderPedido } from '@/app/acoes/gestor';
 
 type Aprovacao = { id: string; titulo: string; quem: string; quando: string; problema: string; tipo: string; urg: string; urgente: boolean; custo: string; det: Detalhe };
 type Linha = { id: string; nome: string; tipo: string; chave: string; etapa: string; info: string; farol: string | null; det: Detalhe };
@@ -21,10 +21,12 @@ type Membro = { id: string; nome: string; ini: string; papel: string; cap: numbe
 type MesImp = { mes: string; carga: number; doProjeto: number; situacao: 'ok' | 'so_com_pedido' | 'acima' };
 type Pedido = { id: string; texto: string; delta: number; quem: string; impacto: { limiteAtual: number; limiteNovo: number; comCronograma: boolean; meses: MesImp[] } };
 
-export function VisaoArea(p: { aba: Aba; trilha: string; nome: string; escopo: string; aprovacoes: Aprovacao[]; linhas: Linha[]; time: Membro[]; pedidos: Pedido[]; emExecucao: number; rodando: number }) {
+export function VisaoArea(p: { aba: Aba; trilha: string; nome: string; escopo: string; aprovacoes: Aprovacao[]; linhas: Linha[]; time: Membro[]; pedidos: Pedido[]; motivos: string[]; emExecucao: number; rodando: number }) {
   const [toast, setToast] = useState('');
   const [devolvendo, setDevolvendo] = useState<string | null>(null);
   const [nota, setNota] = useState('');
+  const [recusando, setRecusando] = useState<string | null>(null);
+  const [motivo, setMotivo] = useState('');
   const [caps, setCaps] = useState<Record<string, number>>(() => Object.fromEntries(p.time.map((m) => [m.id, m.cap])));
   const [pend, start] = useTransition();
   const [aberta, setAberta] = useState<string | null>(null);
@@ -33,7 +35,8 @@ export function VisaoArea(p: { aba: Aba; trilha: string; nome: string; escopo: s
   const rodar = (fn: () => Promise<{ ok: boolean; msg?: string; erro?: string }>) => start(async () => {
     const r = await fn();
     setToast(r.ok ? r.msg ?? '' : r.erro ?? '');
-    setDevolvendo(null); setNota('');
+    if (!r.ok) return;
+    setDevolvendo(null); setRecusando(null); setNota(''); setMotivo('');
   });
 
   const acima = p.time.filter((m) => m.aloc > (caps[m.id] ?? m.cap)).length;
@@ -65,6 +68,7 @@ export function VisaoArea(p: { aba: Aba; trilha: string; nome: string; escopo: s
         <div style={s('display: flex; flex-direction: column; gap: 2px')}><h2 style={s('margin: 0; font-size: 18px; font-weight: 700')}>Iniciativas aguardando sua aprovação</h2><span style={s('font-size: 12px; color: #5E5770')}>Ao aprovar, a iniciativa segue para avaliação do PMO no fechamento do ciclo.</span></div>
         {p.aprovacoes.map((a) => {
           const ret = devolvendo === a.id;
+          const rec = recusando === a.id;
           const aberto = aberta === a.id;
           const alternar = () => setAberta(aberto ? null : a.id);
           return (
@@ -87,10 +91,30 @@ export function VisaoArea(p: { aba: Aba; trilha: string; nome: string; escopo: s
                   <textarea rows={2} value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Detalhe o custo estimado e quem mais é impactado." style={s('padding: 10px 12px; border-radius: 10px; border: 1px solid #E2DCD0; font-size: 14px; font-weight: 400; color: #26213A; resize: vertical')} />
                 </label>
               )}
+              {rec && (
+                <div style={s('display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 10px; background: #FBEAE8')}>
+                  <span style={s('font-size: 13px; color: #7A1A12')}>A iniciativa sai da esteira e vai para Cancelados. {a.quem.split(' ')[0]} vê o motivo e o seu comentário.</span>
+                  <label style={s('display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600')}>Motivo
+                    <select value={motivo} onChange={(e) => setMotivo(e.target.value)} style={s('height: 38px; padding: 0 10px; border-radius: 10px; border: 1px solid #E2DCD0; font-size: 14px; font-weight: 400; color: #26213A; background: #FFFFFF')}>
+                      <option value="">Escolha…</option>
+                      {p.motivos.map((m) => <option key={m} value={m}>{m}</option>)}
+                    </select>
+                  </label>
+                  <label style={s('display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600')}>Comentário para quem pediu
+                    <textarea rows={2} value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Ex.: já está coberto pelo projeto de roteirização." style={s('padding: 10px 12px; border-radius: 10px; border: 1px solid #E2DCD0; font-size: 14px; font-weight: 400; color: #26213A; resize: vertical; background: #FFFFFF')} />
+                  </label>
+                </div>
+              )}
               <div style={s('display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px')}>
-                {!ret ? (
+                {rec ? (
                   <>
-                    <button type="button" disabled={pend} onClick={() => { setDevolvendo(a.id); setNota(''); }} style={s('height: 38px; padding: 0 14px; border-radius: 10px; border: 1px solid #E2DCD0; background: #FFFFFF; color: #26213A; font-size: 13px')}>Devolver para ajuste</button>
+                    <button type="button" disabled={pend} onClick={() => setRecusando(null)} style={s('height: 38px; padding: 0 14px; border-radius: 10px; border: 1px solid #E2DCD0; background: #FFFFFF; color: #26213A; font-size: 13px')}>Voltar</button>
+                    <button type="button" disabled={pend} onClick={() => rodar(() => naoSeguirComoGestor(a.id, motivo, nota))} style={s('height: 38px; padding: 0 16px; border-radius: 10px; border: 0; background: #B42318; color: #FFFFFF; font-weight: 600; font-size: 13px')}>Confirmar: não seguir</button>
+                  </>
+                ) : !ret ? (
+                  <>
+                    <button type="button" disabled={pend} onClick={() => { setRecusando(a.id); setDevolvendo(null); setNota(''); setMotivo(''); }} style={s('height: 38px; padding: 0 14px; border-radius: 10px; border: 1px solid #F1C9C4; background: #FFFFFF; color: #B42318; font-size: 13px')}>Não seguir</button>
+                    <button type="button" disabled={pend} onClick={() => { setDevolvendo(a.id); setRecusando(null); setNota(''); }} style={s('height: 38px; padding: 0 14px; border-radius: 10px; border: 1px solid #E2DCD0; background: #FFFFFF; color: #26213A; font-size: 13px')}>Devolver para ajuste</button>
                     <button type="button" disabled={pend} onClick={() => rodar(() => aprovarComoGestor(a.id))} style={s('height: 38px; padding: 0 16px; border-radius: 10px; border: 0; background: #6D4AFF; color: #FFFFFF; font-weight: 600; font-size: 13px')}>Aprovar e enviar ao PMO</button>
                   </>
                 ) : (

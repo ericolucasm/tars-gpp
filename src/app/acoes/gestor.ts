@@ -3,7 +3,8 @@
 import { eq } from 'drizzle-orm';
 import { db, schema as t } from '@/db';
 import { gestorDe } from '@/lib/regras/pessoas';
-import { noRaia, pessoa } from '@/lib/visoes';
+import { validarNaoSeguir } from '@/lib/regras/gestor';
+import { noRaia, pessoa, raiaChave } from '@/lib/visoes';
 import { contexto, executar, exigir, notificar } from './_ctx';
 
 /** Gestor aprova a iniciativa do time e ela segue para o PMO. */
@@ -35,6 +36,27 @@ export async function devolverParaAjuste(iniciativaId: string, nota: string) {
     const sol = pessoa(dados, ini.solicitanteId);
     await notificar(dados.org.id, [ini.solicitanteId], `${eu.nome} devolveu "${ini.titulo}" para ajuste.`, `/iniciativas/${ini.id}/editar`);
     return { ok: true, msg: `“${ini.titulo}” devolvida para ${sol?.nome ?? 'o solicitante'} ajustar.` };
+  });
+}
+
+/** Gestor decide não seguir com a iniciativa: ela é arquivada (Cancelados) com motivo e comentário, e o solicitante vê o porquê. */
+export async function naoSeguirComoGestor(iniciativaId: string, motivo: string, comentario: string) {
+  return executar(async () => {
+    const { dados, eu, autoria, ehPmo } = await contexto();
+    const ini = dados.iniciativas.find((i) => i.id === iniciativaId);
+    exigir(ini && noRaia(dados, ini, 'sol') && ini.solStatus === 'aguardando_gestor', 'Esta iniciativa não está mais aguardando aprovação.');
+    exigir(ini.aprovadorId === eu.id || ehPmo, 'Só o gestor responsável pode decidir.');
+    const erro = validarNaoSeguir(motivo, comentario, dados.org.config.motivos.recusa);
+    exigir(!erro, erro ?? '');
+    const txt = comentario.trim();
+    const can = raiaChave(dados, 'can');
+    exigir(can, 'A etapa de cancelados não está configurada.');
+    const agora = new Date();
+    const motivoSaida = `${motivo} — ${txt}`;
+    await db.update(t.iniciativas).set({ raiaId: can.id, solStatus: null, motivoSaida, situacao: null, canceladaEm: agora, updatedAt: agora }).where(eq(t.iniciativas.id, ini.id));
+    await db.insert(t.transicoes).values({ orgId: dados.org.id, iniciativaId: ini.id, acao: 'nao_seguir_gestor', deRaiaId: ini.raiaId, paraRaiaId: can.id, motivo: motivoSaida, ...autoria });
+    await notificar(dados.org.id, [ini.solicitanteId], `${eu.nome} decidiu não seguir com "${ini.titulo}". Motivo: ${motivoSaida}`, '/inicio');
+    return { ok: true, msg: `“${ini.titulo}” arquivada. ${pessoa(dados, ini.solicitanteId)?.nome ?? 'O solicitante'} vai ver o motivo.` };
   });
 }
 
