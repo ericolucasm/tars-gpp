@@ -16,7 +16,7 @@ import { podeMedirBeneficio, situacaoBeneficio, validarMedicao } from './benefic
 import { situacaoDependencia } from './dependencias';
 import { balancoCusto, balancoEscopo, balancoPrazo, validarLicao } from './encerramento';
 import { diaDaSemana, diasDeAtraso, emNegociacao, proximoDiaSemana, proximoStatusDevido, validarPedidoPrazo, situacaoStatus, rotuloVencimentoStatus } from './muro';
-import { gestorDe, timeDireto, areasSobGestao, nomeCurto, acimaDoCedido } from './pessoas';
+import { gestorDe, timeDireto, areasSobGestao, nomeCurto, acimaDoCedido, patrocinadorValido } from './pessoas';
 import { addDias, diffDias, dataPorExtenso, haQuanto, proximaSexta } from './datas';
 
 const raia = (chave: string, ordem: number, extra: Partial<Raia> = {}): Raia => ({
@@ -534,5 +534,14 @@ describe('retirar uma iniciativa (quem pediu)', () => {
     expect(validarRetirada('cancelar', 'ok')).toMatch(/poucas palavras/);
     expect(validarRetirada('cancelar', 'Já resolvido pelo TI')).toBeNull();
     expect(validarRetirada('excluir', '')).toBeNull();
+  });
+});
+
+describe('patrocinador', () => {
+  it('só pessoas internas com o perfil Patrocinador', () => {
+    expect(patrocinadorValido({ externo: false, perfis: ['gestor', 'patrocinador'] })).toBe(true);
+    expect(patrocinadorValido({ externo: false, perfis: ['gestor'] })).toBe(false);
+    expect(patrocinadorValido({ externo: true, perfis: ['patrocinador'] })).toBe(false);
+    expect(patrocinadorValido(undefined)).toBe(false);
   });
 });

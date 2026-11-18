@@ -9,6 +9,7 @@ import { Shell } from '@/components/Shell';
 import { TelaProjeto } from './TelaProjeto';
 import { SecaoPontos } from './SecaoPontos';
 import { VisaoLeitura } from './VisaoLeitura';
+import { Patrocinio } from './Patrocinio';
 import { Mudancas } from './Mudancas';
 import { Financeiro } from './Financeiro';
 import { Feedback } from './Feedback';
@@ -83,6 +84,8 @@ export default async function Projeto({ params, searchParams }: { params: Promis
           faseInicial: fase && faseIds.has(fase) ? fase : '',
         }}
       />
+      {ehPmo && <Patrocinio iniciativaId={ini.id} atual={ini.patrocinadorId ?? ''} texto={ini.patrocinadorTexto}
+        opcoes={d.pessoas.filter((x) => !x.externo && x.perfis.includes('patrocinador')).map((x) => ({ id: x.id, nome: x.nome }))} />}
       {(() => {
         const info = infoProjeto(d, ini, hoje);
         return (
