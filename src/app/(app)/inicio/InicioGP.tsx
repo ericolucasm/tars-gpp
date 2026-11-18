@@ -6,12 +6,12 @@ import { addDias, br, diaCurto } from '@/lib/regras/datas';
 import { rotuloVencimentoStatus, situacaoStatus } from '@/lib/regras/muro';
 import { dataDaSemana } from '@/lib/regras/projeto';
 import { gestorDe } from '@/lib/regras/pessoas';
-import { alocacaoDe, conflitosDeAusencia, equipeParaFeedback, dependenciasVM, infoProjeto, nomeArea, noRaia, pessoa } from '@/lib/visoes';
+import { alocacaoDe, conclusaoPara, conflitosDeAusencia, equipeParaFeedback, dependenciasVM, infoProjeto, nomeArea, noRaia, pessoa } from '@/lib/visoes';
 import { Barra, ItemAcao, PillFarol, Vazio } from '@/components/ui';
 import { beneficiosParaMedir } from '@/lib/beneficios-vm';
 import { atrasos } from '@/lib/muro';
 import { pontoEsperaPor } from '@/lib/regras/pontos';
-import { acaoDeConclusao, prontoParaConcluir } from '@/lib/regras/esteira';
+import { prontoParaConcluir } from '@/lib/regras/esteira';
 import { ProjetosPatrocinados } from '@/components/ProjetosPatrocinados';
 import { Saudacao } from './Saudacao';
 
@@ -89,7 +89,7 @@ export function InicioGP({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao; hoj
   }
 
   for (const { i, info } of infos) {
-    if (prontoParaConcluir(info.fases) && acaoDeConclusao(i, d.raias)) {
+    if (prontoParaConcluir(info.fases) && conclusaoPara(d, i, eu.id, false)) {
       itens.push(<ItemAcao key={`concluir${i.id}`} href={`/projetos/${i.id}#encerramento`} titulo="Concluir o projeto"
         sub={`${curto(i.titulo)} · todas as fases foram confirmadas. Com o aceite de quem pediu, conclua.`} acao="Concluir →" />);
     }

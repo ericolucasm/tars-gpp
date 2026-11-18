@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { s } from '@/lib/css';
 import type { DadosOrg } from '@/lib/dados';
 import { br } from '@/lib/regras/datas';
-import { financeiroDo, infoProjeto, noRaia, pessoa } from '@/lib/visoes';
+import { conclusaoPara, financeiroDo, infoProjeto, noRaia, pessoa } from '@/lib/visoes';
 import { PillFarol } from './ui';
 
 /** Início de quem patrocina projetos (qualquer perfil, exceto o PMO, que já vê tudo): os projetos rodando, com farol, custo e último status. */
@@ -16,7 +16,9 @@ export function ProjetosPatrocinados({ d, pessoaId, hoje }: { d: DadosOrg; pesso
         const info = infoProjeto(d, i, hoje);
         const f = financeiroDo(d, i);
         const mud = d.pedidosMudanca.filter((m) => m.iniciativaId === i.id && m.status === 'pendente').length;
+        const aceite = conclusaoPara(d, i, pessoaId, false);
         const alertas = [
+          aceite?.pronto ? 'todas as fases confirmadas: aguardando o seu aceite para concluir' : null,
           f.situacao === 'crit' ? 'custo estourando' : f.situacao === 'aten' ? 'custo acima do orçado' : null,
           info.statusAtrasado ? 'status atrasado' : null,
           mud ? `${mud} ${mud === 1 ? 'mudança aguardando' : 'mudanças aguardando'} o PMO` : null,

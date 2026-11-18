@@ -4,7 +4,7 @@ import type { Sessao } from '@/lib/sessao';
 import { br } from '@/lib/regras/datas';
 import { dataDaSemana, FAROL, type Farol } from '@/lib/regras/projeto';
 import { detalheIniciativa } from '@/lib/detalhe';
-import { balancoDo, fasesDo, financeiroDo, nomeArea, noRaia, participaDoProjeto, pessoa } from '@/lib/visoes';
+import { balancoDo, conclusaoPara, fasesDo, financeiroDo, nomeArea, noRaia, participaDoProjeto, pessoa } from '@/lib/visoes';
 import { dinheiro } from '@/lib/regras/datas';
 import { TIPOS_MUDANCA } from '@/lib/regras/mudancas';
 import { beneficioVM } from '@/lib/beneficios-vm';
@@ -142,7 +142,7 @@ export function VisaoLeitura({ d, sessao, ini, hoje }: { d: DadosOrg; sessao: Se
       </section>
 
       <SecaoPontos d={d} sessao={sessao} iniId={ini.id} hoje={hoje} />
-      <Encerramento iniciativaId={ini.id} concluido={noRaia(d, ini, 'con')} balanco={balanco} licoes={licoes} parecidas={[]} />
+      <Encerramento iniciativaId={ini.id} concluido={noRaia(d, ini, 'con')} balanco={balanco} licoes={licoes} parecidas={[]} conclusao={conclusaoPara(d, ini, eu, false)} />
     </>
   );
 }

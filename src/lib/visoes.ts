@@ -16,6 +16,7 @@ import { ordenarPrioridadeArea } from './regras/gestor';
 import { cruza, fracaoAusente } from './regras/ausencias';
 import { gestoresRepresentados, substitutoAtivo } from './regras/delegacao';
 import { feedbackPendente } from './regras/feedback';
+import { acaoDeConclusao, podeConfirmar, prontoParaConcluir } from './regras/esteira';
 
 // Cálculos derivados usados por várias telas. Tudo a partir de DadosOrg (a "foto" da empresa).
 
@@ -479,4 +480,15 @@ export function equipeParaFeedback(d: DadosOrg, projeto: Iniciativa, hoje: strin
     const terminou = concluido || (!!x.fim && x.fim <= hoje);
     return [{ pessoa: p, fases: x.fases, fim: x.fim, terminou, feedback: fb, pendente: feedbackPendente(terminou ? (x.fim && x.fim <= hoje ? x.fim : hoje) : null, hoje, !!fb) }];
   });
+}
+
+/** Gate de conclusão que esta pessoa pode confirmar no projeto (pelo aprovador configurado da raia Concluído), ou null. */
+export function conclusaoPara(d: DadosOrg, ini: Iniciativa, pessoaId: string, ehPmo: boolean) {
+  const fim = acaoDeConclusao(ini, d.raias);
+  if (!fim) return null;
+  const pode = podeConfirmar(fim.aprovador, {
+    ehPmo, ehGp: ini.gpId === pessoaId, ehSolicitante: ini.solicitanteId === pessoaId, ehAprovador: ini.aprovadorId === pessoaId, ehPatrocinador: !!ini.patrocinadorId && ini.patrocinadorId === pessoaId,
+  });
+  if (!pode) return null;
+  return { paraRaiaId: fim.paraRaiaId, titulo: fim.titulo, dica: fim.dica, confirmar: fim.confirmar, criterios: fim.criterios, pronto: prontoParaConcluir(fasesDo(d, ini.id)), aprovador: fim.aprovador };
 }
