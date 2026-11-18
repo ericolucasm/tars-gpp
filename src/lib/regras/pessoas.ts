@@ -66,6 +66,7 @@ export function rotuloGestorCurto(t: Trat) {
 
 export function rotuloAtivo(status: string, t: Trat) {
   if (status === 'convite') return 'Aguardando 1º acesso';
+  if (status === 'inativo') return t === 'f' ? 'Desativada' : t === 'm' ? 'Desativado' : 'Desativado(a)';
   return t === 'f' ? 'Ativa' : t === 'm' ? 'Ativo' : 'Ativo(a)';
 }
 
@@ -93,4 +94,24 @@ export function subarvore(areaId: string, areas: AreaH[]): string[] {
 /** Patrocinador escolhido numa iniciativa: precisa ser uma pessoa cadastrada da empresa com o perfil Patrocinador. */
 export function patrocinadorValido(p: { externo: boolean; perfis: string[] } | undefined | null): boolean {
   return !!p && !p.externo && p.perfis.includes('patrocinador');
+}
+
+/** Pessoa desativada (saiu da empresa): não entra no sistema e não aparece para novas escolhas. */
+export function acessoBloqueado(p: { status: string; externo: boolean }) {
+  return p.externo || p.status === 'inativo';
+}
+
+/** Status ao reativar: quem nunca entrou volta a "aguardando 1º acesso". */
+export function statusAoReativar(p: { authUserId: string | null }) {
+  return p.authUserId ? 'ativo' : 'convite';
+}
+
+/** Frases com o que fica pendente quando uma pessoa é desativada (para o admin repassar antes). */
+export function pendenciasAoDesativar(c: { projetosGp: string[]; areasResponsavel: string[]; tarefasAbertas: number; aprovacoesPendentes: number }): string[] {
+  const r: string[] = [];
+  if (c.projetosGp.length) r.push(`GP de ${c.projetosGp.length === 1 ? 'um projeto' : `${c.projetosGp.length} projetos`} em andamento (${c.projetosGp.join(', ')}): troque o GP na página do projeto.`);
+  if (c.areasResponsavel.length) r.push(`Responsável por ${c.areasResponsavel.join(', ')}: indique outra pessoa em Áreas e hierarquia.`);
+  if (c.aprovacoesPendentes) r.push(`${c.aprovacoesPendentes} ${c.aprovacoesPendentes === 1 ? 'iniciativa aguardando' : 'iniciativas aguardando'} a aprovação dela.`);
+  if (c.tarefasAbertas) r.push(`${c.tarefasAbertas} ${c.tarefasAbertas === 1 ? 'tarefa aberta' : 'tarefas abertas'} em projetos.`);
+  return r;
 }

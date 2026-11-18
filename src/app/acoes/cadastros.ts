@@ -4,7 +4,7 @@ import { and, eq } from 'drizzle-orm';
 import { db, schema as t } from '@/db';
 import type { Criterio } from '@/db/schema';
 import { somaPesos } from '@/lib/regras/avaliacao';
-import { subarvore } from '@/lib/regras/pessoas';
+import { statusAoReativar, subarvore } from '@/lib/regras/pessoas';
 import { urlDoApp } from '@/lib/auth';
 import { contexto, executar, exigir, exigirAdminCtx } from './_ctx';
 
@@ -39,6 +39,19 @@ export async function salvarPessoa(f: PessoaForm) {
     if (f.externo) return { ok: true, msg: 'Fornecedor cadastrado.' };
     // Acesso liberado: a pessoa entra com a conta Google deste e-mail
     return { ok: true, msg: `Pessoa cadastrada. Avise ${f.nome.trim().split(' ')[0]} para entrar em ${urlDoApp()} com a conta Google ${email}.` };
+  });
+}
+
+/** Admin desativa (saiu da empresa) ou reativa o acesso de uma pessoa. O histórico dela continua no sistema. */
+export async function alterarAcesso(pessoaId: string, ativo: boolean) {
+  return executar(async () => {
+    const { dados, sessao } = await ctxAdmin();
+    const p = dados.pessoas.find((x) => x.id === pessoaId);
+    exigir(p && !p.externo, 'Pessoa não encontrada.');
+    exigir(p.id !== sessao.real.id, 'Você não pode desativar o seu próprio acesso.');
+    const status = ativo ? statusAoReativar(p) : 'inativo';
+    await db.update(t.pessoas).set({ status }).where(and(eq(t.pessoas.id, p.id), eq(t.pessoas.orgId, dados.org.id)));
+    return { ok: true, msg: ativo ? `Acesso de ${p.nome} reativado.` : `Acesso de ${p.nome} desativado. A pessoa não entra mais no TARS.` };
   });
 }
 

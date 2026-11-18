@@ -1,6 +1,7 @@
 import { exigirAdmin } from '@/lib/sessao';
 import { carregarOrg } from '@/lib/dados';
-import { gestorDe, iniciais, rotuloAtivo, rotuloPerfil } from '@/lib/regras/pessoas';
+import { gestorDe, iniciais, pendenciasAoDesativar, rotuloAtivo, rotuloPerfil } from '@/lib/regras/pessoas';
+import { noRaia } from '@/lib/visoes';
 import { Shell } from '@/components/Shell';
 import { TelaCadastros } from './TelaCadastros';
 
@@ -28,7 +29,13 @@ export default async function Cadastros({ searchParams }: { searchParams: Promis
             gestor: d.pessoas.find((x) => x.id === gestorDe(p, d.areas))?.nome ?? '—', cargo: p.cargo ?? '',
             perfis: p.perfis, rotulos: [...p.perfis.map((x) => rotuloPerfil(x, tr)), ...(p.admin ? ['Admin'] : [])], admin: p.admin,
             cedeAte: p.cedeAte, cede: p.externo ? 'Externo' : p.cedeAte == null ? '—' : `${p.cedeAte}%`, status: rotuloAtivo(p.status, tr), pendente: p.status !== 'ativo',
-            ini: iniciais(p.nome), tratamento: p.tratamento, externo: p.externo,
+            ini: iniciais(p.nome), tratamento: p.tratamento, externo: p.externo, inativo: p.status === 'inativo',
+            pendencias: pendenciasAoDesativar({
+              projetosGp: d.iniciativas.filter((i) => i.gpId === p.id && noRaia(d, i, 'exe', 'pau')).map((i) => i.titulo),
+              areasResponsavel: d.areas.filter((a) => a.responsavelId === p.id).map((a) => a.nome),
+              tarefasAbertas: d.tarefas.filter((t) => t.responsavelId === p.id && !t.concluida).length,
+              aprovacoesPendentes: d.iniciativas.filter((i) => i.aprovadorId === p.id && noRaia(d, i, 'sol') && i.solStatus === 'aguardando_gestor').length,
+            }),
           };
         })}
         areas={ordenarArvore(null).map((a) => {

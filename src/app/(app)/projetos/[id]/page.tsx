@@ -84,7 +84,7 @@ export default async function Projeto({ params, searchParams }: { params: Promis
         }}
       />
       {ehPmo && <Patrocinio iniciativaId={ini.id} atual={ini.patrocinadorId ?? ''} texto={ini.patrocinadorTexto}
-        opcoes={d.pessoas.filter((x) => !x.externo && x.perfis.includes('patrocinador')).map((x) => ({ id: x.id, nome: x.nome }))} />}
+        opcoes={d.pessoas.filter((x) => !x.externo && x.status !== 'inativo' && x.perfis.includes('patrocinador')).map((x) => ({ id: x.id, nome: x.nome }))} />}
       {(() => {
         const info = infoProjeto(d, ini, hoje);
         return (

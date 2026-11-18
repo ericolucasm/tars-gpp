@@ -90,7 +90,7 @@ export async function TelaArea({ aba }: { aba: Aba }) {
         substituicao={{
           minhas: d.delegacoes.filter((x) => x.gestorId === eu.id && x.fim >= hoje).map((x) => ({ id: x.id, texto: `${pessoa(d, x.substitutoId)?.nome ?? ''}: ${br(x.inicio)} a ${br(x.fim)}`, agora: x.inicio <= hoje })),
           substituindo: d.delegacoes.filter((x) => x.substitutoId === eu.id && x.inicio <= hoje && x.fim >= hoje).map((x) => `${pessoa(d, x.gestorId)?.nome ?? ''} até ${br(x.fim)}`),
-          opcoes: d.pessoas.filter((p) => p.id !== eu.id && p.perfis.includes('gestor') && !p.externo).map((p) => ({ id: p.id, nome: `${p.nome} · ${d.areas.find((a) => a.id === p.areaId)?.nome ?? ''}` })),
+          opcoes: d.pessoas.filter((p) => p.id !== eu.id && p.perfis.includes('gestor') && !p.externo && p.status !== 'inativo').map((p) => ({ id: p.id, nome: `${p.nome} · ${d.areas.find((a) => a.id === p.areaId)?.nome ?? ''}` })),
         }}
         prioridades={prioridadesDoGestor(d, eu.id).map((i) => ({ id: i.id, titulo: i.titulo, etapa: noRaia(d, i, 'bkl') ? 'Backlog' : 'Aguardando o PMO', quem: pessoa(d, i.solicitanteId)?.nome ?? '', ordenada: i.prioridadeArea != null }))}
         emExecucao={daArea.filter((i) => noRaia(d, i, 'exe')).length}

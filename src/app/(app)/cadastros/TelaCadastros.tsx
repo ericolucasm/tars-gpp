@@ -5,7 +5,7 @@ import { s } from '@/lib/css';
 import * as A from '@/app/acoes/cadastros';
 import { estiloPill } from '@/components/ui';
 
-type Pessoa = { id: string; nome: string; email: string; areaId: string; area: string; gestor: string; cargo: string; perfis: string[]; rotulos: string[]; admin: boolean; cedeAte: number | null; cede: string; status: string; pendente: boolean; ini: string; tratamento: string; externo: boolean };
+type Pessoa = { id: string; nome: string; email: string; areaId: string; area: string; gestor: string; cargo: string; perfis: string[]; rotulos: string[]; admin: boolean; cedeAte: number | null; cede: string; status: string; pendente: boolean; ini: string; tratamento: string; externo: boolean; inativo: boolean; pendencias: string[] };
 type Area = { id: string; nome: string; tipo: string; parentId: string; responsavelId: string; responsavel: string; ini: string; nivel: number; headcount: number | null; pessoas: number };
 type FaseB = { id: string; nome: string; dur: number; criterio: string; uso: number };
 type Modelo = { id: string; nome: string; descricao: string; fases: string[]; total: number };
@@ -55,6 +55,8 @@ type AbaProps = { p: Props; rodar: (fn: () => Promise<Res>, depois?: () => void)
 function AbaPessoas({ p, rodar, pend }: AbaProps) {
   const vazio: A.PessoaForm = { nome: '', email: '', areaId: '', cargo: '', perfis: ['colaborador'], admin: false, cedeAte: 20, tratamento: 'n', externo: false };
   const [ed, setEd] = useState<A.PessoaForm | null>(null);
+  const [desativar, setDesativar] = useState(false);
+  const atual = ed?.id ? p.pessoas.find((x) => x.id === ed.id) : undefined;
   const set = <K extends keyof A.PessoaForm>(k: K, v: A.PessoaForm[K]) => setEd((x) => (x ? { ...x, [k]: v } : x));
   const G = '2fr 1.4fr 1.4fr 1.8fr 0.9fr 0.9fr';
   return (
@@ -86,6 +88,33 @@ function AbaPessoas({ p, rodar, pend }: AbaProps) {
             </div>
           </div>
           <label style={s('display: flex; align-items: center; gap: 10px; font-size: 13px')}><input type="checkbox" checked={ed.externo} onChange={(e) => set('externo', e.target.checked)} style={s('width: 18px; height: 18px; accent-color: #6D4AFF')} />Fornecedor externo (sem login e sem limite de cedência)</label>
+          {atual && !atual.externo && (
+            <div role="group" aria-label={`Acesso de ${atual.nome}`} style={s('display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 12px; background: #F7F5F0')}>
+              <span style={s('font-size: 13px; font-weight: 700')}>Acesso ao TARS</span>
+              {atual.inativo ? (
+                <div style={s('display: flex; flex-wrap: wrap; gap: 10px; align-items: center')}>
+                  <span style={s('flex: 1 1 260px; font-size: 13px; color: #4A4458')}>Acesso desativado: a pessoa não entra no sistema e não aparece para novas escolhas. O histórico continua.</span>
+                  <button type="button" disabled={pend} onClick={() => rodar(() => A.alterarAcesso(atual.id, true), () => setEd(null))} style={sBtnS}>Reativar acesso</button>
+                </div>
+              ) : !desativar ? (
+                <div style={s('display: flex; flex-wrap: wrap; gap: 10px; align-items: center')}>
+                  <span style={s('flex: 1 1 260px; font-size: 13px; color: #4A4458')}>Saiu da empresa? Desative o acesso: o histórico (iniciativas, status, lições) continua no sistema.</span>
+                  <button type="button" onClick={() => setDesativar(true)} style={sBtnS}>Desativar acesso</button>
+                </div>
+              ) : (
+                <div style={s('display: flex; flex-direction: column; gap: 8px')}>
+                  {atual.pendencias.length > 0
+                    ? <><span style={s('font-size: 13px; color: #9A5B05; font-weight: 600')}>Antes ou depois de desativar, repasse o que está com {atual.nome}:</span>
+                        <ul style={s('margin: 0; padding-left: 18px; font-size: 13px; color: #4A4458; display: flex; flex-direction: column; gap: 4px')}>{atual.pendencias.map((x) => <li key={x}>{x}</li>)}</ul></>
+                    : <span style={s('font-size: 13px; color: #4A4458')}>{atual.nome} não tem projetos, áreas, aprovações nem tarefas pendentes.</span>}
+                  <div style={s('display: flex; gap: 8px; justify-content: flex-end')}>
+                    <button type="button" onClick={() => setDesativar(false)} style={sBtnS}>Voltar</button>
+                    <button type="button" disabled={pend} onClick={() => rodar(() => A.alterarAcesso(atual.id, false), () => { setDesativar(false); setEd(null); })} style={s('height: 38px; padding: 0 14px; border-radius: 10px; border: 0; background: #B42318; color: #FFFFFF; font-weight: 600; font-size: 13px')}>Confirmar: desativar</button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
           <div style={s('display: flex; justify-content: flex-end; gap: 8px')}>
             <button type="button" onClick={() => setEd(null)} style={sBtnS}>Cancelar</button>
             <button type="button" disabled={pend} onClick={() => rodar(() => A.salvarPessoa(ed), () => setEd(null))} style={sBtnP}>{ed.id ? 'Salvar' : ed.externo ? 'Cadastrar' : 'Liberar acesso'}</button>
@@ -96,7 +125,7 @@ function AbaPessoas({ p, rodar, pend }: AbaProps) {
         <div style={s('min-width: 900px')}>
           <div style={{ ...s('display: grid; gap: 10px; padding: 12px 16px; font-size: 12px; color: #5E5770; font-weight: 600; border-bottom: 1px solid #EFEBE3; background: #FAF8F4'), gridTemplateColumns: G }}><span>Pessoa</span><span>Área</span><span>Gestor</span><span>Perfis</span><span>Cede até</span><span>Status</span></div>
           {p.pessoas.map((x) => (
-            <button key={x.id} type="button" onClick={() => setEd({ id: x.id, nome: x.nome, email: x.email, areaId: x.areaId, cargo: x.cargo, perfis: x.perfis, admin: x.admin, cedeAte: x.cedeAte, tratamento: x.tratamento, externo: x.externo })}
+            <button key={x.id} type="button" onClick={() => { setDesativar(false); setEd({ id: x.id, nome: x.nome, email: x.email, areaId: x.areaId, cargo: x.cargo, perfis: x.perfis, admin: x.admin, cedeAte: x.cedeAte, tratamento: x.tratamento, externo: x.externo }); }}
               style={{ ...s('display: grid; gap: 10px; padding: 12px 16px; font-size: 13px; border: 0; border-bottom: 1px solid #F3F0EA; align-items: center; width: 100%; background: #FFFFFF; text-align: left; color: #26213A'), gridTemplateColumns: G }}>
               <span style={s('display: flex; align-items: center; gap: 10px')}><span style={s('width: 30px; height: 30px; border-radius: 50%; background: #E7E0FF; color: #4B2FD1; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; flex: 0 0 30px')}>{x.ini}</span><span style={s('display: flex; flex-direction: column; min-width: 0')}><span style={s('font-weight: 600')}>{x.nome}</span><span style={s('font-size: 12px; color: #5E5770')}>{x.email}</span></span></span>
               <span>{x.area}</span>

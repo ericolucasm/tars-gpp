@@ -16,7 +16,7 @@ import { podeMedirBeneficio, situacaoBeneficio, validarMedicao } from './benefic
 import { situacaoDependencia } from './dependencias';
 import { balancoCusto, balancoEscopo, balancoPrazo, validarLicao } from './encerramento';
 import { diaDaSemana, diasDeAtraso, emNegociacao, proximoDiaSemana, proximoStatusDevido, validarPedidoPrazo, situacaoStatus, rotuloVencimentoStatus } from './muro';
-import { gestorDe, timeDireto, areasSobGestao, nomeCurto, acimaDoCedido, patrocinadorValido } from './pessoas';
+import { gestorDe, timeDireto, areasSobGestao, nomeCurto, acimaDoCedido, patrocinadorValido, acessoBloqueado, statusAoReativar, pendenciasAoDesativar, rotuloAtivo } from './pessoas';
 import { addDias, diffDias, dataPorExtenso, haQuanto, proximaSexta } from './datas';
 
 const raia = (chave: string, ordem: number, extra: Partial<Raia> = {}): Raia => ({
@@ -549,5 +549,22 @@ describe('patrocinador', () => {
     expect(patrocinadorValido({ externo: false, perfis: ['gestor'] })).toBe(false);
     expect(patrocinadorValido({ externo: true, perfis: ['patrocinador'] })).toBe(false);
     expect(patrocinadorValido(undefined)).toBe(false);
+  });
+});
+
+describe('desativar o acesso de uma pessoa', () => {
+  it('desativada ou externa não entra; reativada volta a ativo ou aguardando 1º acesso', () => {
+    expect(acessoBloqueado({ status: 'inativo', externo: false })).toBe(true);
+    expect(acessoBloqueado({ status: 'convite', externo: false })).toBe(false);
+    expect(acessoBloqueado({ status: 'ativo', externo: true })).toBe(true);
+    expect(statusAoReativar({ authUserId: 'u1' })).toBe('ativo');
+    expect(statusAoReativar({ authUserId: null })).toBe('convite');
+    expect(rotuloAtivo('inativo', 'f')).toBe('Desativada');
+  });
+  it('lista o que fica pendente', () => {
+    expect(pendenciasAoDesativar({ projetosGp: [], areasResponsavel: [], tarefasAbertas: 0, aprovacoesPendentes: 0 })).toEqual([]);
+    const r = pendenciasAoDesativar({ projetosGp: ['App'], areasResponsavel: ['TI'], tarefasAbertas: 2, aprovacoesPendentes: 1 });
+    expect(r).toHaveLength(4);
+    expect(r[0]).toMatch(/GP de um projeto/);
   });
 });

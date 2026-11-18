@@ -12,7 +12,7 @@ export function SecaoPontos({ d, sessao, iniId, hoje }: { d: DadosOrg; sessao: S
   const pontos = d.pontos.filter((p) => p.iniciativaId === iniId).map((p) => pontoVM(d, p, sessao.pessoa.id, ehPmo, hoje));
   const abertos = pontos.filter((p) => p.status === 'aberto').sort((a, b) => Number(b.atrasado) - Number(a.atrasado));
   const resolvidos = pontos.filter((p) => p.status !== 'aberto').reverse();
-  const gestores = d.pessoas.filter((p) => p.perfis.includes('gestor') && !p.externo).map((p) => ({ id: p.id, nome: p.nome }));
+  const gestores = d.pessoas.filter((p) => p.perfis.includes('gestor') && !p.externo && p.status !== 'inativo').map((p) => ({ id: p.id, nome: p.nome }));
   return (
     <section id="pontos" aria-label="Pontos de atenção" style={s('background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px; scroll-margin-top: 16px')}>
       <div style={s('display: flex; flex-direction: column; gap: 2px')}>

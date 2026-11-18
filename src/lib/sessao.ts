@@ -6,6 +6,7 @@ import { eq } from 'drizzle-orm';
 import { db, schema as t } from '@/db';
 import { auth } from './auth';
 import { carregarOrg, type Pessoa } from './dados';
+import { acessoBloqueado } from './regras/pessoas';
 
 export type Perfil = 'colaborador' | 'gestor' | 'gp' | 'pmo';
 export const PERFIS: Perfil[] = ['colaborador', 'gestor', 'gp', 'pmo'];
@@ -47,14 +48,15 @@ async function pessoaLogada(): Promise<Pessoa | null> {
   if (modoAuth() === 'dev') {
     const id = store.get(COOKIE_DEV)?.value;
     if (!id) return null;
-    return (await db.query.pessoas.findFirst({ where: eq(t.pessoas.id, id) })) ?? null;
+    const p = await db.query.pessoas.findFirst({ where: eq(t.pessoas.id, id) });
+    return p && p.status !== 'inativo' ? p : null;
   }
   const sessao = await auth().api.getSession({ headers: await headers() });
   const user = sessao?.user;
   if (!user) return null;
   const email = user.email.trim().toLowerCase();
   const p = await db.query.pessoas.findFirst({ where: eq(t.pessoas.email, email) });
-  if (!p || p.externo) return null;
+  if (!p || acessoBloqueado(p)) return null; // fornecedor externo ou pessoa desativada não entra
   if (p.authUserId !== user.id || p.status !== 'ativo') {
     // primeiro acesso: liga a conta Google à pessoa cadastrada e ativa o convite
     await db.update(t.pessoas).set({ authUserId: user.id, status: 'ativo' }).where(eq(t.pessoas.id, p.id));

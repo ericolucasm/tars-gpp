@@ -648,6 +648,25 @@ try {
   await patroBox.getByText('Patrocinador: Helena Castro.').waitFor();
   await p.context().close();
   ok('PMO troca o patrocinador de um projeto por uma pessoa cadastrada');
+
+  // Admin desativa o acesso de quem saiu (vê as pendências), a pessoa não entra mais; depois reativa
+  p = await como('mariana@acme.com.br', 'pmo');
+  await ir(p, '/cadastros');
+  await p.getByRole('button', { name: /Diego Santos/ }).first().click();
+  const acesso = p.getByRole('group', { name: 'Acesso de Diego Santos' });
+  await acesso.getByRole('button', { name: 'Desativar acesso' }).click();
+  await acesso.getByText(/tarefa(s)? aberta(s)?|não tem projetos/).first().waitFor();
+  await acesso.getByRole('button', { name: 'Confirmar: desativar' }).click();
+  await p.getByText('Acesso de Diego Santos desativado. A pessoa não entra mais no TARS.').waitFor();
+  const diego = await como('diego.santos@acme.com.br');
+  await ir(diego, '/inicio');
+  await diego.waitForURL(/\/login/);
+  await diego.context().close();
+  await p.getByRole('button', { name: /Diego Santos/ }).first().click();
+  await p.getByRole('group', { name: 'Acesso de Diego Santos' }).getByRole('button', { name: 'Reativar acesso' }).click();
+  await p.getByText('Acesso de Diego Santos reativado.').waitFor();
+  await p.context().close();
+  ok('Admin desativa o acesso de quem saiu (vê as pendências), a pessoa não entra mais, e reativa');
 } catch (e) {
   console.error('✗ FALHOU no passo', passo + 1, '\n', e.message.split('\n').slice(0, 6).join('\n'));
   process.exitCode = 1;
