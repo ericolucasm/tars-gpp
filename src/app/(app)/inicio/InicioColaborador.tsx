@@ -24,6 +24,7 @@ function passo(d: DadosOrg, i: Iniciativa, hoje: string) {
   if (c === 'pre') return { at: 4, alerta: false, sub: `Aprovada${ciclo ? ` no ciclo ${ciclo.ano}` : ''} · em preparação para virar projeto` };
   if (c === 'exe' || c === 'pau') return { at: 4, alerta: false, sub: `Aprovada${ciclo ? ` no ciclo ${ciclo.ano}` : ''} · virou projeto${c === 'pau' ? ' (pausado)' : ' e está em execução'}` };
   if (c === 'con') return { at: 4, alerta: false, sub: `Aprovada${ciclo ? ` no ciclo ${ciclo.ano}` : ''} · virou projeto e foi entregue em ${br(dia(i.concluidaEm)).slice(0, 5)}` };
+  if (!i.aprovadaGestorEm && i.enviadaEm) return { at: 1, alerta: false, sub: `${aprov?.nome ?? 'Seu gestor'} decidiu não seguir${i.motivoSaida ? ` · motivo: ${i.motivoSaida}` : ''}` };
   return { at: 4, alerta: false, sub: `Não aprovada${i.motivoSaida ? ` · motivo: ${i.motivoSaida}` : ''}` };
 }
 

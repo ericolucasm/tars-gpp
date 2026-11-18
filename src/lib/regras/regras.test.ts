@@ -7,6 +7,7 @@ import { validarPedidoMudanca, variacaoCusto } from './mudancas';
 import { resumoFinanceiro, situacaoCusto } from './financeiro';
 import { dimCusto, dimEscopo, dimPrazo, dimRiscos, farolGeral } from './farol';
 import { nivelDoRisco, riscoAtivo, validarRisco } from './riscos';
+import { validarNaoSeguir } from './gestor';
 import { picoNoPeriodo, situacaoCapacidade, pessoasEq, impactoPorMes } from './capacidade';
 import { podeMedirBeneficio, situacaoBeneficio, validarMedicao } from './beneficios';
 import { situacaoDependencia } from './dependencias';
@@ -376,5 +377,15 @@ describe('impacto de ceder uma pessoa', () => {
     expect(r.map((x) => x.carga)).toEqual([20, 60, 90]);
     expect(r.map((x) => x.doProjeto)).toEqual([0, 40, 70]);
     expect(r.map((x) => x.situacao)).toEqual(['ok', 'so_com_pedido', 'acima']);
+  });
+});
+
+describe('gestor: não seguir com a iniciativa', () => {
+  const motivos = ['Sem orçamento no ciclo', 'Fora da estratégia atual'];
+  it('exige motivo da lista e comentário', () => {
+    expect(validarNaoSeguir('', 'Já coberto por outro projeto', motivos)).toMatch(/motivo/);
+    expect(validarNaoSeguir('Outro', 'Já coberto por outro projeto', motivos)).toMatch(/motivo/);
+    expect(validarNaoSeguir('Fora da estratégia atual', '  ok ', motivos)).toMatch(/Explique/);
+    expect(validarNaoSeguir('Fora da estratégia atual', 'Já coberto por outro projeto', motivos)).toBeNull();
   });
 });

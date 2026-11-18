@@ -77,6 +77,7 @@ Raias padrão, na ordem: Solicitações → Backlog → Pré-projeto → Em exec
 
 - **[Protótipo]** O gestor pode **Aprovar e enviar ao PMO** ou **Devolver para ajuste** com um comentário.
 - **[Implícita]** A iniciativa devolvida volta para o solicitante, que vê o comentário e o botão "Ajustar e reenviar". Ao reenviar, volta para o gestor.
+- **[Decisão V2]** **Não seguir:** além de aprovar ou devolver, o gestor pode decidir não seguir com a iniciativa. Exige um **motivo** (a mesma lista de motivos de recusa das Configurações) e um **comentário** para o solicitante (mín. 5 caracteres). A iniciativa vai para **Cancelados** com o motivo "motivo — comentário", o solicitante é avisado e vê na Início "<gestor> decidiu não seguir · motivo: …". Não volta para a esteira; se o problema reaparecer, abre-se uma iniciativa nova.
 - **[Protótipo]** O gestor define quanto cada pessoa do time pode ceder para projetos (0–100%, passos de 10).
 - **[Protótipo]** Pessoa acima do cedido = alocação atual maior que o limite.
 - **[Protótipo]** Pedido de alocação: o gestor **cede** (o limite sobe pelo valor pedido) ou **recusa** (o GP é avisado).

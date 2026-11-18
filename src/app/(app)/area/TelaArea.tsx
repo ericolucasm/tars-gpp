@@ -77,6 +77,7 @@ export async function TelaArea({ aba }: { aba: Aba }) {
         linhas={linhas}
         time={time}
         pedidos={pedidos}
+        motivos={d.org.config.motivos.recusa}
         emExecucao={daArea.filter((i) => noRaia(d, i, 'exe')).length}
         rodando={daArea.filter((i) => noRaia(d, i, 'exe', 'pau')).length}
       />
