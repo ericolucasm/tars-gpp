@@ -5,7 +5,7 @@ import { db, schema as t } from '@/db';
 import { gestorDe } from '@/lib/regras/pessoas';
 import { br, hojeISO } from '@/lib/regras/datas';
 import { validarAusencia } from '@/lib/regras/ausencias';
-import { conflitosDeAusencia, pessoa } from '@/lib/visoes';
+import { conflitosDeAusencia, pessoa, representados } from '@/lib/visoes';
 import { contexto, executar, exigir, notificar } from './_ctx';
 
 /** Gestor registra uma ausência (férias, licença…) de alguém do time. Os GPs dos projetos em que a pessoa está alocada no período são avisados. */
@@ -14,7 +14,7 @@ export async function registrarAusencia(pessoaId: string, a: { inicio: string; f
     const { dados, eu, sessao } = await contexto();
     const p = pessoa(dados, pessoaId);
     exigir(p, 'Pessoa não encontrada.');
-    exigir(gestorDe(p, dados.areas) === eu.id || sessao.admin, 'Só o gestor da pessoa registra a ausência dela.');
+    exigir(representados(dados, eu.id, hojeISO()).has(gestorDe(p, dados.areas) ?? '') || sessao.admin, 'Só o gestor da pessoa registra a ausência dela.');
     const hoje = hojeISO();
     const erro = validarAusencia(a, hoje);
     exigir(!erro, erro ?? '');
@@ -36,7 +36,7 @@ export async function removerAusencia(id: string) {
     const a = dados.ausencias.find((x) => x.id === id);
     exigir(a, 'Ausência não encontrada.');
     const p = pessoa(dados, a.pessoaId);
-    exigir(p && (gestorDe(p, dados.areas) === eu.id || sessao.admin), 'Só o gestor da pessoa remove a ausência dela.');
+    exigir(p && (representados(dados, eu.id, hojeISO()).has(gestorDe(p, dados.areas) ?? '') || sessao.admin), 'Só o gestor da pessoa remove a ausência dela.');
     await db.delete(t.ausencias).where(eq(t.ausencias.id, id));
     return { ok: true, msg: 'Ausência removida.' };
   });

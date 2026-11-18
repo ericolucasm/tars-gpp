@@ -4,7 +4,7 @@ import { dataDaSemana } from './regras/projeto';
 import { gestorDe } from './regras/pessoas';
 import { diasDeAtraso, emNegociacao } from './regras/muro';
 import { prazoDecisao } from './regras/gestor';
-import { infoProjeto, noRaia, pessoa } from './visoes';
+import { infoProjeto, noRaia, pessoa, responsavelPelaDecisao } from './visoes';
 
 // Entregas com data de cada pessoa (tarefas, gates = fim de fase, status report) e quem está atrasado.
 
@@ -19,7 +19,7 @@ const dia = (x: Date | null | undefined) => (x ?? new Date()).toISOString().slic
 /** Decisões esperando um gestor: aprovar iniciativa, responder pedido de alocação, resolver ponto de atenção. Prazo: 5 dias (ou o do ponto). */
 export function decisoesDeGestores(d: DadosOrg, hoje: string): Entrega[] {
   const res: Entrega[] = [];
-  const add = (e: Omit<Entrega, 'diasAtraso' | 'emNegociacao' | 'gpId'>) => res.push({ ...e, diasAtraso: diasDeAtraso(e.vencimento, hoje), emNegociacao: false, gpId: null });
+  const add = (e: Omit<Entrega, 'diasAtraso' | 'emNegociacao' | 'gpId'>) => res.push({ ...e, responsavelId: responsavelPelaDecisao(d, e.responsavelId, hoje), diasAtraso: diasDeAtraso(e.vencimento, hoje), emNegociacao: false, gpId: null });
   for (const i of d.iniciativas.filter((x) => noRaia(d, x, 'sol') && x.solStatus === 'aguardando_gestor' && x.aprovadorId)) {
     add({ tipo: 'decisao', id: `aprovar-${i.id}`, iniciativaId: i.id, projeto: curto(i.titulo), titulo: 'Aprovar ou devolver a iniciativa', responsavelId: i.aprovadorId!, vencimento: prazoDecisao(dia(i.enviadaEm)), link: '/area/iniciativas' });
   }

@@ -353,6 +353,34 @@ try {
   await p.context().close();
   ok('Gestora registra férias de alguém do time (valida datas) e o GP do projeto afetado é avisado na Início');
 
+  // Substituto: Fernanda indica o Marcos; ele vê as aprovações dela; ela cancela
+  const hojeE2E = new Date().toISOString().slice(0, 10);
+  const daqui10 = new Date(Date.now() + 10 * 864e5).toISOString().slice(0, 10);
+  p = await como('fernanda.oliveira@acme.com.br');
+  await ir(p, '/area/time');
+  const subst = p.getByRole('region', { name: 'Substituto durante sua ausência' });
+  await subst.getByRole('button', { name: 'Indicar substituto' }).click();
+  await subst.getByRole('alert').getByText('Escolha um substituto com perfil de gestor.').waitFor();
+  await subst.getByLabel('Substituto').selectOption({ label: 'Marcos Teixeira · TI' });
+  await subst.getByLabel('De', { exact: true }).fill(hojeE2E);
+  await subst.getByLabel('Até', { exact: true }).fill(daqui10);
+  await subst.getByRole('button', { name: 'Indicar substituto' }).click();
+  await p.getByText(/Marcos Teixeira vai substituir você de/).waitFor();
+  await subst.getByText('Em vigor').waitFor();
+  await p.context().close();
+  p = await como('marcos.teixeira@acme.com.br');
+  await ir(p, '/inicio');
+  await p.getByText(/Você está substituindo Fernanda Oliveira até/).waitFor();
+  await ir(p, '/area/iniciativas');
+  await p.locator('#aprovacoes > div').filter({ hasText: 'Adequação das empilhadeiras à norma de segurança' }).getByText(/no lugar de Fernanda/).waitFor();
+  await p.context().close();
+  p = await como('fernanda.oliveira@acme.com.br');
+  await ir(p, '/area/time');
+  await p.getByRole('region', { name: 'Substituto durante sua ausência' }).getByRole('button', { name: 'Cancelar' }).click();
+  await p.getByText('Substituição cancelada.').waitFor();
+  await p.context().close();
+  ok('Gestora indica um substituto; ele vê as aprovações dela "no lugar de Fernanda"; ela cancela');
+
   // 9. Admin: ver como + cadastros
   p = await como('mariana@acme.com.br', 'pmo');
   await ir(p, '/inicio');

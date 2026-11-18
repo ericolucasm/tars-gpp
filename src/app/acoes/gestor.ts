@@ -4,7 +4,8 @@ import { eq } from 'drizzle-orm';
 import { db, schema as t } from '@/db';
 import { gestorDe } from '@/lib/regras/pessoas';
 import { validarNaoSeguir } from '@/lib/regras/gestor';
-import { noRaia, pessoa, prioridadesDoGestor, raiaChave } from '@/lib/visoes';
+import { noRaia, pessoa, prioridadesDoGestor, raiaChave, representados } from '@/lib/visoes';
+import { hojeISO } from '@/lib/regras/datas';
 import { contexto, executar, exigir, notificar } from './_ctx';
 
 /** Gestor aprova a iniciativa do time e ela segue para o PMO. */
@@ -13,7 +14,7 @@ export async function aprovarComoGestor(iniciativaId: string) {
     const { dados, eu, autoria, ehPmo } = await contexto();
     const ini = dados.iniciativas.find((i) => i.id === iniciativaId);
     exigir(ini && noRaia(dados, ini, 'sol') && ini.solStatus === 'aguardando_gestor', 'Esta iniciativa não está mais aguardando aprovação.');
-    exigir(ini.aprovadorId === eu.id || ehPmo, 'Só o gestor responsável pode aprovar.');
+    exigir((!!ini.aprovadorId && representados(dados, eu.id, hojeISO()).has(ini.aprovadorId)) || ehPmo, 'Só o gestor responsável pode aprovar.');
     const sol = dados.raias.find((r) => r.id === ini.raiaId)!;
     const agora = new Date();
     await db.update(t.iniciativas).set({ solStatus: 'aguardando_pmo', aprovadaGestorEm: agora, updatedAt: agora, progressoGates: { ...ini.progressoGates, gestor: sol.criterios.map(() => true) } }).where(eq(t.iniciativas.id, ini.id));
@@ -29,7 +30,7 @@ export async function devolverParaAjuste(iniciativaId: string, nota: string) {
     const { dados, eu, autoria, ehPmo } = await contexto();
     const ini = dados.iniciativas.find((i) => i.id === iniciativaId);
     exigir(ini && noRaia(dados, ini, 'sol') && ini.solStatus === 'aguardando_gestor', 'Esta iniciativa não está mais aguardando aprovação.');
-    exigir(ini.aprovadorId === eu.id || ehPmo, 'Só o gestor responsável pode devolver.');
+    exigir((!!ini.aprovadorId && representados(dados, eu.id, hojeISO()).has(ini.aprovadorId)) || ehPmo, 'Só o gestor responsável pode devolver.');
     const agora = new Date();
     await db.update(t.iniciativas).set({ solStatus: 'devolvida', devolucaoNota: nota.trim() || null, devolvidaEm: agora, updatedAt: agora }).where(eq(t.iniciativas.id, ini.id));
     await db.insert(t.transicoes).values({ orgId: dados.org.id, iniciativaId: ini.id, acao: 'devolver', deRaiaId: ini.raiaId, paraRaiaId: ini.raiaId, motivo: nota.trim() || null, ...autoria });
@@ -45,7 +46,7 @@ export async function naoSeguirComoGestor(iniciativaId: string, motivo: string, 
     const { dados, eu, autoria, ehPmo } = await contexto();
     const ini = dados.iniciativas.find((i) => i.id === iniciativaId);
     exigir(ini && noRaia(dados, ini, 'sol') && ini.solStatus === 'aguardando_gestor', 'Esta iniciativa não está mais aguardando aprovação.');
-    exigir(ini.aprovadorId === eu.id || ehPmo, 'Só o gestor responsável pode decidir.');
+    exigir((!!ini.aprovadorId && representados(dados, eu.id, hojeISO()).has(ini.aprovadorId)) || ehPmo, 'Só o gestor responsável pode decidir.');
     const erro = validarNaoSeguir(motivo, comentario, dados.org.config.motivos.recusa);
     exigir(!erro, erro ?? '');
     const txt = comentario.trim();
@@ -79,7 +80,7 @@ export async function definirCedencia(pessoaId: string, pct: number) {
     const { dados, eu, sessao } = await contexto();
     const p = pessoa(dados, pessoaId);
     exigir(p, 'Pessoa não encontrada.');
-    exigir(gestorDe(p, dados.areas) === eu.id || sessao.admin, 'Só o gestor da pessoa define quanto ela pode ceder.');
+    exigir(representados(dados, eu.id, hojeISO()).has(gestorDe(p, dados.areas) ?? '') || sessao.admin, 'Só o gestor da pessoa define quanto ela pode ceder.');
     const v = Math.max(0, Math.min(100, Math.round(pct / 10) * 10));
     await db.update(t.pessoas).set({ cedeAte: v }).where(eq(t.pessoas.id, p.id));
   });
@@ -93,7 +94,7 @@ export async function responderPedido(pedidoId: string, aceitar: boolean) {
     exigir(ped && ped.status === 'pendente', 'Este pedido já foi respondido.');
     const p = pessoa(dados, ped.pessoaId);
     exigir(p, 'Pessoa não encontrada.');
-    exigir(gestorDe(p, dados.areas) === eu.id || sessao.admin, 'Só o gestor da pessoa responde este pedido.');
+    exigir(representados(dados, eu.id, hojeISO()).has(gestorDe(p, dados.areas) ?? '') || sessao.admin, 'Só o gestor da pessoa responde este pedido.');
     const proj = dados.iniciativas.find((i) => i.id === ped.iniciativaId);
     const agora = new Date();
     await db.update(t.pedidosAlocacao).set({ status: aceitar ? 'aceito' : 'recusado', decididoPor: eu.id, decididoEm: agora }).where(eq(t.pedidosAlocacao.id, ped.id));

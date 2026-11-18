@@ -7,6 +7,7 @@ import { validarPedidoMudanca, variacaoCusto } from './mudancas';
 import { resumoFinanceiro, situacaoCusto } from './financeiro';
 import { dimCusto, dimEscopo, dimPrazo, dimRiscos, farolGeral } from './farol';
 import { nivelDoRisco, riscoAtivo, validarRisco } from './riscos';
+import { substitutoAtivo, quemDecide, gestoresRepresentados, validarDelegacao } from './delegacao';
 import { diasAusente, fracaoAusente, cruza, validarAusencia } from './ausencias';
 import { validarNaoSeguir, ordenarPrioridadeArea, prazoDecisao } from './gestor';
 import { picoNoPeriodo, situacaoCapacidade, pessoasEq, impactoPorMes } from './capacidade';
@@ -422,5 +423,26 @@ describe('ausências do time', () => {
     expect(validarAusencia({ inicio: '2026-10-01', fim: '2026-10-10', motivo: 'Férias' }, '2026-11-18')).toMatch(/terminou/);
     expect(validarAusencia({ inicio: '2026-12-01', fim: '2026-12-10', motivo: 'X' }, '2026-11-18')).toMatch(/motivo/);
     expect(validarAusencia({ inicio: '2026-12-01', fim: '2026-12-10', motivo: 'Férias' }, '2026-11-18')).toBeNull();
+  });
+});
+
+describe('substituto do gestor', () => {
+  const dl = [{ gestorId: 'fer', substitutoId: 'mar', inicio: '2026-12-01', fim: '2026-12-15' }];
+  it('vale só no período', () => {
+    expect(substitutoAtivo(dl, 'fer', '2026-11-30')).toBeNull();
+    expect(quemDecide(dl, 'fer', '2026-12-01')).toBe('mar');
+    expect(quemDecide(dl, 'fer', '2026-12-16')).toBe('fer');
+  });
+  it('quem responde por quem', () => {
+    expect(gestoresRepresentados(dl, 'mar', '2026-12-05')).toEqual(['mar', 'fer']);
+    expect(gestoresRepresentados(dl, 'fer', '2026-12-05')).toEqual(['fer']);
+    expect(gestoresRepresentados(dl, 'fer', '2026-12-20')).toEqual(['fer']);
+  });
+  it('valida', () => {
+    const ok = () => true;
+    expect(validarDelegacao({ substitutoId: 'fer', inicio: '2026-12-01', fim: '2026-12-02' }, 'fer', '2026-11-18', ok)).toMatch(/outra pessoa/);
+    expect(validarDelegacao({ substitutoId: 'mar', inicio: '2026-12-01', fim: '2026-12-02' }, 'fer', '2026-11-18', () => false)).toMatch(/perfil de gestor/);
+    expect(validarDelegacao({ substitutoId: 'mar', inicio: '2026-12-05', fim: '2026-12-02' }, 'fer', '2026-11-18', ok)).toMatch(/fim/);
+    expect(validarDelegacao({ substitutoId: 'mar', inicio: '2026-12-01', fim: '2026-12-02' }, 'fer', '2026-11-18', ok)).toBeNull();
   });
 });

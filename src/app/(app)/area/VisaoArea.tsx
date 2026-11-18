@@ -7,10 +7,11 @@ import { FAROL, type Farol } from '@/lib/regras/projeto';
 import { DetalheIniciativa, TituloExpansivel, cliqueNaLinha } from '@/components/DetalheIniciativa';
 import type { Detalhe } from '@/lib/detalhe';
 import { registrarAusencia, removerAusencia } from '@/app/acoes/ausencias';
+import { definirSubstituto, removerSubstituto } from '@/app/acoes/delegacao';
 import { MOTIVOS_AUSENCIA } from '@/lib/regras/ausencias';
 import { aprovarComoGestor, definirCedencia, definirPrioridadeArea, devolverParaAjuste, naoSeguirComoGestor, responderPedido } from '@/app/acoes/gestor';
 
-type Aprovacao = { id: string; titulo: string; quem: string; quando: string; problema: string; tipo: string; urg: string; urgente: boolean; custo: string; det: Detalhe };
+type Aprovacao = { id: string; titulo: string; noLugarDe: string | null; quem: string; quando: string; problema: string; tipo: string; urg: string; urgente: boolean; custo: string; det: Detalhe };
 type Linha = { id: string; nome: string; tipo: string; chave: string; etapa: string; info: string; farol: string | null; det: Detalhe };
 export type Aba = 'iniciativas' | 'projetos' | 'time';
 
@@ -20,11 +21,12 @@ const TEXTO: Record<Aba, string> = {
   time: 'Quanto cada pessoa do time pode ceder e os pedidos de alocação.',
 };
 type Membro = { id: string; nome: string; ini: string; papel: string; cap: number; aloc: number; alocado: string; ausencias: { id: string; texto: string; agora: boolean }[] };
+type Substituicao = { minhas: { id: string; texto: string; agora: boolean }[]; substituindo: string[]; opcoes: { id: string; nome: string }[] };
 type Prio = { id: string; titulo: string; etapa: string; quem: string; ordenada: boolean };
 type MesImp = { mes: string; carga: number; doProjeto: number; situacao: 'ok' | 'so_com_pedido' | 'acima' };
-type Pedido = { id: string; texto: string; delta: number; quem: string; impacto: { limiteAtual: number; limiteNovo: number; comCronograma: boolean; meses: MesImp[] } };
+type Pedido = { id: string; texto: string; delta: number; quem: string; noLugarDe: string | null; impacto: { limiteAtual: number; limiteNovo: number; comCronograma: boolean; meses: MesImp[] } };
 
-export function VisaoArea(p: { aba: Aba; trilha: string; nome: string; escopo: string; aprovacoes: Aprovacao[]; linhas: Linha[]; time: Membro[]; pedidos: Pedido[]; motivos: string[]; prioridades: Prio[]; emExecucao: number; rodando: number }) {
+export function VisaoArea(p: { aba: Aba; trilha: string; nome: string; escopo: string; aprovacoes: Aprovacao[]; linhas: Linha[]; time: Membro[]; pedidos: Pedido[]; motivos: string[]; prioridades: Prio[]; substituicao: Substituicao; emExecucao: number; rodando: number }) {
   const [toast, setToast] = useState('');
   const [devolvendo, setDevolvendo] = useState<string | null>(null);
   const [nota, setNota] = useState('');
@@ -65,6 +67,7 @@ export function VisaoArea(p: { aba: Aba; trilha: string; nome: string; escopo: s
         <Link href="/area/time" style={sKpi}><span style={s('font-size: 12px; color: #5E5770')}>Pessoas acima do cedido</span><span style={{ ...s('font-size: 26px; font-weight: 700'), color: acima > 0 ? '#9A5B05' : '#26213A' }}>{acima}</span></Link>
       </div>
 
+      {p.substituicao.substituindo.length > 0 && <div style={s('padding: 12px 16px; border-radius: 12px; background: #E7F6EC; color: #17723D; font-size: 13px; font-weight: 600')}>Você está substituindo {p.substituicao.substituindo.join(' e ')}: as aprovações, os pedidos e o time aparecem aqui junto com os seus.</div>}
       {toast && <div role="status" style={s('padding: 12px 16px; border-radius: 12px; background: #EFEAFE; color: #3A22A8; font-size: 13px; font-weight: 600')}>{toast}</div>}
 
       {p.aba === 'iniciativas' && <section id="aprovacoes" aria-label="Aprovações pendentes" style={s('background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px')}>
@@ -79,7 +82,7 @@ export function VisaoArea(p: { aba: Aba; trilha: string; nome: string; escopo: s
               <div style={s('display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start')}>
                 <div style={s('display: flex; flex-direction: column; gap: 4px; flex: 1 1 280px; min-width: 0')}>
                   <TituloExpansivel id={a.id} titulo={a.titulo} aberto={aberto} alternar={alternar} tamanho={15} />
-                  <span style={s('font-size: 12px; color: #5E5770')}>{a.quem} · enviada {a.quando}</span>
+                  <span style={s('font-size: 12px; color: #5E5770')}>{a.quem} · enviada {a.quando}{a.noLugarDe ? ` · no lugar de ${a.noLugarDe}` : ''}</span>
                   {!aberto && <span style={s('font-size: 13px; color: #4A4458; line-height: 1.5')}>{a.problema}</span>}
                 </div>
                 <div style={s('display: flex; flex-wrap: wrap; gap: 6px')}>
@@ -133,6 +136,7 @@ export function VisaoArea(p: { aba: Aba; trilha: string; nome: string; escopo: s
         {p.aprovacoes.length === 0 && <div style={s('border: 1px dashed #D6CFC2; border-radius: 12px; padding: 18px; font-size: 13px; color: #5E5770; text-align: center')}>Tudo em dia. Nenhuma iniciativa aguardando você.</div>}
       </section>}
 
+      {p.aba === 'time' && <Substituto sub={p.substituicao} aviso={setToast} />}
       {p.aba === 'iniciativas' && <PrioridadeArea itens={p.prioridades} aviso={setToast} />}
 
       <div style={s('display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start')}>
@@ -142,7 +146,7 @@ export function VisaoArea(p: { aba: Aba; trilha: string; nome: string; escopo: s
           <div style={s('display: flex; flex-direction: column; gap: 2px')}><h2 style={s('margin: 0; font-size: 18px; font-weight: 700')}>Quanto o time pode ceder</h2><span style={s('font-size: 12px; color: #5E5770')}>Você conhece a operação: defina o máximo de cada pessoa para projetos.</span></div>
           {p.pedidos.map((x) => (
             <div key={x.id} style={s('padding: 12px; border-radius: 12px; background: #FEF3DC; display: flex; flex-direction: column; gap: 8px')}>
-              <span style={s('font-size: 13px; font-weight: 600; color: #6B3F03')}>Pedido de alocação</span>
+              <span style={s('font-size: 13px; font-weight: 600; color: #6B3F03')}>Pedido de alocação{x.noLugarDe ? ` · no lugar de ${x.noLugarDe}` : ''}</span>
               <span style={s('font-size: 13px; color: #4A3205')}>{x.texto}</span>
               <ImpactoPedido quem={x.quem} imp={x.impacto} />
               <div style={s('display: flex; gap: 8px; justify-content: flex-end')}>
@@ -182,6 +186,46 @@ export function VisaoArea(p: { aba: Aba; trilha: string; nome: string; escopo: s
         </section>}
       </div>
     </>
+  );
+}
+
+/** O gestor indica quem decide no lugar dele durante um período (férias, viagem). */
+function Substituto({ sub, aviso }: { sub: Substituicao; aviso: (t: string) => void }) {
+  const [f, setF] = useState({ substitutoId: '', inicio: '', fim: '' });
+  const [erro, setErro] = useState('');
+  const [pend, start] = useTransition();
+  const sCampo = s('height: 36px; padding: 0 8px; border-radius: 8px; border: 1px solid #E2DCD0; font-size: 13px; color: #26213A; background: #FFFFFF');
+  const sLab = s('display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #5E5770');
+  return (
+    <section aria-label="Substituto durante sua ausência" style={s('background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 10px')}>
+      <div style={s('display: flex; flex-direction: column; gap: 2px')}>
+        <h2 style={s('margin: 0; font-size: 18px; font-weight: 700')}>Substituto durante sua ausência</h2>
+        <span style={s('font-size: 12px; color: #5E5770')}>No período, a pessoa indicada aprova as iniciativas, responde os pedidos de alocação e cuida do seu time. Você continua podendo decidir; os prazos de decisão passam a ser cobrados dela.</span>
+      </div>
+      {sub.minhas.map((x) => (
+        <div key={x.id} style={s('display: flex; align-items: center; gap: 8px; font-size: 13px')}>
+          <span style={{ ...s('padding: 3px 10px; border-radius: 10px; font-size: 12px; font-weight: 600'), background: x.agora ? '#E7F6EC' : '#EDEAE3', color: x.agora ? '#17723D' : '#4A4458' }}>{x.agora ? 'Em vigor' : 'Agendada'}</span>
+          <span>{x.texto}</span>
+          <button type="button" disabled={pend} onClick={() => start(async () => { const r = await removerSubstituto(x.id); aviso(r.ok ? r.msg ?? '' : r.erro ?? ''); })} style={s('border: 0; background: transparent; color: #B42318; font-size: 12px; cursor: pointer')}>Cancelar</button>
+        </div>
+      ))}
+      <div style={s('display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end')}>
+        <label style={sLab}>Substituto
+          <select value={f.substitutoId} onChange={(e) => setF({ ...f, substitutoId: e.target.value })} style={sCampo}>
+            <option value="">Escolha…</option>
+            {sub.opcoes.map((o) => <option key={o.id} value={o.id}>{o.nome}</option>)}
+          </select>
+        </label>
+        <label style={sLab}>De<input type="date" value={f.inicio} onChange={(e) => setF({ ...f, inicio: e.target.value })} style={sCampo} /></label>
+        <label style={sLab}>Até<input type="date" value={f.fim} onChange={(e) => setF({ ...f, fim: e.target.value })} style={sCampo} /></label>
+        <button type="button" disabled={pend} onClick={() => start(async () => {
+          const r = await definirSubstituto(f);
+          if (!r.ok) { setErro(r.erro ?? ''); return; }
+          setErro(''); aviso(r.msg ?? ''); setF({ substitutoId: '', inicio: '', fim: '' });
+        })} style={s('height: 36px; padding: 0 14px; border-radius: 8px; border: 0; background: #6D4AFF; color: #FFFFFF; font-weight: 600; font-size: 13px')}>Indicar substituto</button>
+      </div>
+      {erro && <span role="alert" style={s('font-size: 12px; color: #B42318; font-weight: 600')}>{erro}</span>}
+    </section>
   );
 }
 

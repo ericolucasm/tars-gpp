@@ -14,6 +14,7 @@ import { situacaoBeneficio } from './regras/beneficios';
 import { proximoStatusDevido } from './regras/muro';
 import { ordenarPrioridadeArea } from './regras/gestor';
 import { cruza, fracaoAusente } from './regras/ausencias';
+import { gestoresRepresentados, substitutoAtivo } from './regras/delegacao';
 
 // Cálculos derivados usados por várias telas. Tudo a partir de DadosOrg (a "foto" da empresa).
 
@@ -442,4 +443,16 @@ export function conflitosDeAusencia(d: DadosOrg, hoje: string) {
     }
   }
   return res;
+}
+
+// ---------- Substituto do gestor ----------
+
+/** Gestores pelos quais a pessoa decide hoje (ela mesma + quem a deixou como substituto). */
+export function representados(d: DadosOrg, pessoaId: string, hoje: string) {
+  return new Set(gestoresRepresentados(d.delegacoes, pessoaId, hoje));
+}
+
+/** Quem cobra a decisão de um gestor hoje: o substituto em vigor, ou o próprio gestor. */
+export function responsavelPelaDecisao(d: DadosOrg, gestorId: string, hoje: string) {
+  return substitutoAtivo(d.delegacoes, gestorId, hoje) ?? gestorId;
 }
