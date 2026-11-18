@@ -4,7 +4,7 @@ import { carregarOrg } from '@/lib/dados';
 import { br, hojeISO } from '@/lib/regras/datas';
 import { iniciais } from '@/lib/regras/pessoas';
 import { modoDoProjeto, semanaHoje } from '@/lib/regras/projeto';
-import { equipeParaFeedback, fasesDo, linhaBaseDo, nomeArea, participaDoProjeto, pessoa } from '@/lib/visoes';
+import { conclusaoPara, equipeParaFeedback, fasesDo, linhaBaseDo, nomeArea, participaDoProjeto, pessoa } from '@/lib/visoes';
 import { Shell } from '@/components/Shell';
 import { TelaProjeto } from './TelaProjeto';
 import { SecaoPontos } from './SecaoPontos';
@@ -17,7 +17,6 @@ import { Dependencias } from './Dependencias';
 import { Encerramento } from './Encerramento';
 import { Prazos } from './Prazos';
 import { diasDeAtraso } from '@/lib/regras/muro';
-import { acaoDeConclusao, podeConfirmar, prontoParaConcluir } from '@/lib/regras/esteira';
 import { dataDaSemana } from '@/lib/regras/projeto';
 import { ROTULO_DEP, TOM_DEP } from '@/lib/regras/dependencias';
 import { CartaoBeneficio } from '@/components/Beneficio';
@@ -143,12 +142,9 @@ export default async function Projeto({ params, searchParams }: { params: Promis
         const vm = (l: (typeof d.licoes)[number]) => ({ id: l.id, tipo: l.tipo, texto: l.texto, autor: pessoa(d, l.autorId)?.nome ?? '', data: br(l.createdAt.toISOString().slice(0, 10)),
           projeto: d.iniciativas.find((i) => i.id === l.iniciativaId)?.titulo, podeRemover: ehPmo || l.autorId === sessao.pessoa.id });
         const parecidos = new Set(d.iniciativas.filter((i) => i.id !== ini.id && i.modeloId && i.modeloId === ini.modeloId).map((i) => i.id));
-        const fim = acaoDeConclusao(ini, d.raias);
-        const eu = sessao.pessoa.id;
-        const podeConcluir = fim && podeConfirmar(fim.aprovador, { ehPmo, ehGp, ehSolicitante: ini.solicitanteId === eu, ehAprovador: ini.aprovadorId === eu, ehPatrocinador: ini.patrocinadorId === eu });
         return (
           <Encerramento iniciativaId={ini.id} concluido={noRaia(d, ini, 'con')} balanco={balancoDo(d, ini, hoje)}
-            conclusao={fim && podeConcluir ? { paraRaiaId: fim.paraRaiaId, titulo: fim.titulo, dica: fim.dica, confirmar: fim.confirmar, criterios: fim.criterios, pronto: prontoParaConcluir(fases) } : null}
+            conclusao={conclusaoPara(d, ini, sessao.pessoa.id, ehPmo)}
             licoes={d.licoes.filter((l) => l.iniciativaId === ini.id).reverse().map(vm)}
             parecidas={d.licoes.filter((l) => parecidos.has(l.iniciativaId)).reverse().slice(0, 8).map(vm)} />
         );

@@ -94,6 +94,9 @@ describe('esteira', () => {
     expect(podeConfirmar('Gestor da área solicitante', { ...base, ehAprovador: true })).toBe(true);
     expect(podeConfirmar('Gestor da área solicitante', { ...base, ehGp: true })).toBe(false);
     expect(podeConfirmar('Gerente de projeto', { ...base, ehPmo: true })).toBe(true);
+    // aceite do patrocinador na conclusão, quando configurado
+    expect(podeConfirmar('Patrocinador', { ...base, ehPatrocinador: true })).toBe(true);
+    expect(podeConfirmar('Patrocinador', { ...base, ehGp: true })).toBe(false);
   });
   it('concluir pela página do projeto: só em execução e só quando a próxima raia é Concluído', () => {
     expect(acaoDeConclusao({ raiaId: 'exe', solStatus: null }, RAIAS)?.paraRaiaId).toBe('con');

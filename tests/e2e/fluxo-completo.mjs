@@ -595,6 +595,23 @@ try {
   await p.context().close();
   ok('Patrocinador vê na Início os projetos que patrocina e acompanha o custo e as mudanças');
 
+  // Aceite do patrocinador: com a raia Concluído configurada para o Patrocinador, é ele quem conclui (e não o GP)
+  sql("update raias set aprovador='Patrocinador' where chave='con'");
+  try {
+    p = await como('ricardo.moura@acme.com.br');
+    await ir(p, `/projetos/${projId}#encerramento`);
+    await p.getByRole('group', { name: 'Concluir o projeto' }).getByRole('button', { name: 'Concluir projeto' }).waitFor();
+    await p.context().close();
+    p = await como('carlos.andrade@acme.com.br');
+    await ir(p, `/projetos/${projId}#encerramento`);
+    await p.getByRole('region', { name: 'Encerramento e lições aprendidas' }).waitFor();
+    if (await p.getByRole('group', { name: 'Concluir o projeto' }).count()) throw new Error('GP não deveria concluir quando o aceite é do patrocinador');
+    await p.context().close();
+  } finally {
+    sql("update raias set aprovador='Gerente de projeto' where chave='con'");
+  }
+  ok('Com o aceite configurado para o Patrocinador, ele vê "Concluir projeto" e o GP não');
+
   // GP conclui o projeto pela página do projeto (gate com o aceite de quem pediu)
   p = await como('carlos.andrade@acme.com.br');
   await ir(p, `/projetos/${projId}#encerramento`);
