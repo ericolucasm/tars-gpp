@@ -9,6 +9,8 @@ import { dimCusto, dimEscopo, dimPrazo, dimRiscos, type Dimensao } from './regra
 import { pontoAtrasado } from './regras/pontos';
 import { riscoAtivo } from './regras/riscos';
 import { situacaoDependencia } from './regras/dependencias';
+import { balancoCusto, balancoEscopo, balancoPrazo, type ItemBalanco } from './regras/encerramento';
+import { situacaoBeneficio } from './regras/beneficios';
 
 // Cálculos derivados usados por várias telas. Tudo a partir de DadosOrg (a "foto" da empresa).
 
@@ -220,6 +222,33 @@ export function dependenciasVM(d: DadosOrg, hoje: string) {
     return [{ x, dep, de, fimPrevisto: fim, situacao: situacaoDependencia(x.precisaAte, fim, noRaia(d, de, 'con'), hoje) }];
   });
 }
+
+/** Balanço do projeto: prazo, custo, escopo, riscos, pontos de atenção e benefício (planejado × realizado). */
+export function balancoDo(d: DadosOrg, i: Iniciativa, hoje: string): ItemBalanco[] {
+  const info = infoProjeto(d, i, hoje);
+  const f = financeiroDo(d, i);
+  const fimBase = info.base && i.inicioProjeto ? dataDaSemana(i.inicioProjeto, fimDoPlano(info.base)) : null;
+  const fimReal = i.concluidaEm ? i.concluidaEm.toISOString().slice(0, 10) : info.fimPrevisto;
+  const faseIds = new Set(info.fases.map((x) => x.id));
+  const riscos = d.riscos.filter((r) => faseIds.has(r.faseId));
+  const escopo = d.pedidosMudanca.filter((m) => m.iniciativaId === i.id && m.tipo === 'escopo' && m.status === 'aprovada').length;
+  const pontos = d.pontos.filter((p) => p.iniciativaId === i.id);
+  const ben = situacaoBeneficio(i, hoje);
+  return [
+    { dimensao: 'Prazo', planejado: fimBase ? `fim em ${br(fimBase)} (linha de base)` : 'sem linha de base', realizado: `${i.concluidaEm ? 'entregue' : 'previsto'} em ${br(fimReal)}`,
+      tom: balancoPrazo(info.desvio), leitura: info.desvio === null ? 'sem linha de base para comparar' : info.desvio > 0 ? `${info.desvio} semana(s) depois do planejado` : 'dentro do prazo' },
+    { dimensao: 'Custo', planejado: f.orcado ? `${dinheiroBr(f.orcado)} orçado` : 'sem orçamento', realizado: `${dinheiroBr(f.realizado)} gasto`,
+      tom: balancoCusto(f.orcado, f.realizado), leitura: f.orcado ? `${f.consumoPct}% do orçamento` : 'sem orçamento para comparar' },
+    { dimensao: 'Escopo', planejado: 'escopo aprovado no play', realizado: escopo ? `${escopo} mudança(s) de escopo aprovada(s)` : 'sem mudanças de escopo', tom: balancoEscopo(escopo), leitura: escopo >= 2 ? 'escopo mudou várias vezes' : 'escopo estável' },
+    { dimensao: 'Riscos', planejado: `${riscos.length} risco(s) mapeado(s)`, realizado: `${riscos.filter((r) => r.status === 'ocorreu').length} ocorreu(ram)`,
+      tom: riscos.some((r) => r.status === 'ocorreu') ? 'aten' : 'ok', leitura: riscos.some((r) => r.status === 'ocorreu') ? 'houve riscos que viraram problema' : 'nenhum risco virou problema' },
+    { dimensao: 'Pontos de atenção', planejado: '—', realizado: `${pontos.length} registrado(s) no projeto`, tom: pontos.some((p) => p.status === 'aberto') ? 'aten' : 'neutro', leitura: pontos.some((p) => p.status === 'aberto') ? 'ainda há pontos abertos' : 'todos resolvidos' },
+    { dimensao: 'Benefício', planejado: i.beneficioIndicador ? `${i.beneficioIndicador}: ${i.beneficioMeta ?? ''}` : 'sem benefício definido', realizado: i.beneficioResultado ?? (ben === 'aguardando' ? 'ainda não é hora de medir' : 'não medido'),
+      tom: i.beneficioAtingido === 'sim' ? 'ok' : i.beneficioAtingido === 'parcial' ? 'aten' : i.beneficioAtingido === 'nao' ? 'crit' : 'neutro', leitura: ({ sim: 'meta atingida', parcial: 'meta parcialmente atingida', nao: 'meta não atingida' } as Record<string, string>)[i.beneficioAtingido ?? ''] ?? (ben === 'medir' ? 'hora de medir' : '—') },
+  ];
+}
+
+const dinheiroBr = (v: number) => 'R$ ' + Math.round(v).toLocaleString('pt-BR');
 
 /** Linha de contexto dos cards do portfólio. */
 export function subDoCard(d: DadosOrg, i: Iniciativa, hoje: string): string {

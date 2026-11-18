@@ -11,13 +11,14 @@ import { SecaoPontos } from './SecaoPontos';
 import { Mudancas } from './Mudancas';
 import { Financeiro } from './Financeiro';
 import { Dependencias } from './Dependencias';
+import { Encerramento } from './Encerramento';
 import { ROTULO_DEP, TOM_DEP } from '@/lib/regras/dependencias';
 import { CartaoBeneficio } from '@/components/Beneficio';
 import { beneficioVM } from '@/lib/beneficios-vm';
 import { s } from '@/lib/css';
 import { TIPOS_MUDANCA } from '@/lib/regras/mudancas';
 import { dinheiro } from '@/lib/regras/datas';
-import { dependenciasVM, dimensoesSemPrazo, financeiroDo, noRaia, orcamentoDoProjeto } from '@/lib/visoes';
+import { balancoDo, dependenciasVM, dimensoesSemPrazo, financeiroDo, noRaia, orcamentoDoProjeto } from '@/lib/visoes';
 
 export const dynamic = 'force-dynamic';
 
@@ -107,6 +108,16 @@ export default async function Projeto({ params, searchParams }: { params: Promis
         );
       })()}
       <SecaoPontos d={d} sessao={sessao} iniId={ini.id} hoje={hoje} />
+      {(() => {
+        const vm = (l: (typeof d.licoes)[number]) => ({ id: l.id, tipo: l.tipo, texto: l.texto, autor: pessoa(d, l.autorId)?.nome ?? '', data: br(l.createdAt.toISOString().slice(0, 10)),
+          projeto: d.iniciativas.find((i) => i.id === l.iniciativaId)?.titulo, podeRemover: ehPmo || l.autorId === sessao.pessoa.id });
+        const parecidos = new Set(d.iniciativas.filter((i) => i.id !== ini.id && i.modeloId && i.modeloId === ini.modeloId).map((i) => i.id));
+        return (
+          <Encerramento iniciativaId={ini.id} concluido={noRaia(d, ini, 'con')} balanco={balancoDo(d, ini, hoje)}
+            licoes={d.licoes.filter((l) => l.iniciativaId === ini.id).reverse().map(vm)}
+            parecidas={d.licoes.filter((l) => parecidos.has(l.iniciativaId)).reverse().slice(0, 8).map(vm)} />
+        );
+      })()}
     </Shell>
   );
 }

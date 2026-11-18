@@ -220,3 +220,8 @@ Funcionalidades que nasceram da análise da mecânica do PMO (17/11), para o aco
 - **[Decisão V2]** O GP (ou o PMO) registra no projeto que ele **depende de uma entrega de outro projeto até uma data** (o que precisa receber e até quando). O GP do outro projeto é avisado, e a dependência aparece nos dois projetos ("depende de" e "dependem deste").
 - **[Decisão V2]** Situação: **entregue** (o outro projeto foi concluído); **atrasada** (a data passou e ele não foi concluído); **em risco** (o fim previsto dele é depois da data); **sem data prevista** (ainda não virou projeto); **no prazo**.
 - **[Decisão V2]** Dependências em risco ou atrasadas geram aviso na Início do PMO e dos GPs dos dois projetos. Relatório **Dependências entre projetos** (PMO).
+
+### Encerramento e lições aprendidas
+- **[Decisão V2]** A página do projeto mostra um **balanço** planejado × realizado: **prazo** (fim da linha de base × entregue/previsto), **custo** (orçado × gasto), **escopo** (mudanças aprovadas), **riscos** (mapeados × que ocorreram), **pontos de atenção** e **benefício** (meta × medido). Enquanto o projeto está em andamento, é o balanço parcial; depois de concluído, é o **balanço de encerramento**.
+- **[Decisão V2]** Quem participa do projeto (GP, alocados, responsáveis de tarefa) ou o PMO registra **lições aprendidas** a qualquer momento: **o que funcionou** e **o que melhorar**. Quem escreveu ou o PMO pode remover.
+- **[Decisão V2]** As lições de **projetos do mesmo modelo** aparecem na página de cada projeto. O relatório **Lições aprendidas** (PMO e GP) junta todas, com filtros de tipo, modelo e área.

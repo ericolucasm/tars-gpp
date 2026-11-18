@@ -215,6 +215,13 @@ try {
   await deps.getByRole('button', { name: 'Registrar', exact: true }).click();
   await deps.getByRole('group', { name: 'Dependência: API de pedidos publicada' }).getByText('Em risco').waitFor(); // o App termina em 2027
   ok('GP registra dependência de outro projeto e ela aparece em risco');
+  const enc = p.getByRole('region', { name: 'Encerramento e lições aprendidas' });
+  await enc.getByRole('rowheader', { name: 'Custo' }).waitFor();
+  await enc.getByRole('button', { name: 'O que melhorar' }).click();
+  await enc.getByLabel('Lição aprendida').fill('Validar a base de dados da expedição antes de desenhar o painel');
+  await enc.getByRole('button', { name: 'Registrar lição' }).click();
+  await enc.getByText('Validar a base de dados da expedição antes de desenhar o painel').waitFor();
+  ok('GP vê o balanço do projeto e registra uma lição aprendida');
   await p.context().close();
 
   // 7. PMO aprova a mudança de linha de base
@@ -336,9 +343,9 @@ try {
 
   // Relatórios: cada perfil chega pelo menu e vê os relatórios dele
   const relatoriosPorPerfil = [
-    ['mariana@acme.com.br', 'pmo', ['Portfólio por etapa', 'Saúde dos projetos', 'Financeiro dos projetos', 'Matriz de riscos', 'Riscos do portfólio', 'Ciclos de planejamento', 'Demanda por área', 'Dependências entre projetos', 'Benefícios', 'Capacidade por área e mês', 'Capacidade das pessoas']],
+    ['mariana@acme.com.br', 'pmo', ['Portfólio por etapa', 'Saúde dos projetos', 'Financeiro dos projetos', 'Matriz de riscos', 'Riscos do portfólio', 'Ciclos de planejamento', 'Demanda por área', 'Dependências entre projetos', 'Benefícios', 'Lições aprendidas', 'Capacidade por área e mês', 'Capacidade das pessoas']],
     ['fernanda.oliveira@acme.com.br', null, ['Iniciativas da área', 'Projetos da área', 'Capacidade por área e mês', 'Alocação do time']],
-    ['carlos.andrade@acme.com.br', null, ['Meus projetos', 'Financeiro dos projetos', 'Riscos dos meus projetos', 'Tarefas em aberto', 'Equipe dos meus projetos']],
+    ['carlos.andrade@acme.com.br', null, ['Meus projetos', 'Financeiro dos projetos', 'Riscos dos meus projetos', 'Lições aprendidas', 'Tarefas em aberto', 'Equipe dos meus projetos']],
     ['joao.silva@acme.com.br', null, ['Minhas iniciativas', 'Minhas tarefas']],
   ];
   for (const [email, perfil, titulos] of relatoriosPorPerfil) {

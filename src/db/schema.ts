@@ -358,6 +358,17 @@ export const dependencias = pgTable('dependencias', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
+// Lições aprendidas do projeto (o que funcionou e o que melhorar), consultáveis por outros projetos.
+export const licoes = pgTable('licoes', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  orgId: uuid('org_id').notNull(),
+  iniciativaId: uuid('iniciativa_id').notNull().references(() => iniciativas.id, { onDelete: 'cascade' }),
+  tipo: text('tipo').notNull(), // funcionou | melhorar
+  texto: text('texto').notNull(),
+  autorId: uuid('autor_id'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
 // ---------- Login (Better Auth) ----------
 // Tabelas mantidas pela biblioteca de login. As chaves JS seguem os nomes de campo que ela espera.
 
