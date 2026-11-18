@@ -5,7 +5,7 @@ import type { Sessao } from '@/lib/sessao';
 import { addDias, br, diaCurto, proximaSexta, segundaDaSemana } from '@/lib/regras/datas';
 import { dataDaSemana } from '@/lib/regras/projeto';
 import { gestorDe } from '@/lib/regras/pessoas';
-import { alocacaoDe, dependenciasVM, infoProjeto, nomeArea, noRaia, pessoa } from '@/lib/visoes';
+import { alocacaoDe, conflitosDeAusencia, dependenciasVM, infoProjeto, nomeArea, noRaia, pessoa } from '@/lib/visoes';
 import { Barra, ItemAcao, PillFarol, Vazio } from '@/components/ui';
 import { beneficiosParaMedir } from '@/lib/beneficios-vm';
 import { atrasos } from '@/lib/muro';
@@ -51,6 +51,10 @@ export function InicioGP({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao; hoj
   if (pontosGp.length) {
     itens.push(<ItemAcao key="pontos-gp" href="/pontos" numero={pontosGp.length} tom="vermelho" titulo={pontosGp.length === 1 ? 'Impedimento informado pela equipe' : 'Impedimentos informados pela equipe'}
       sub={pontosGp.map((x) => x.titulo).join(' · ')} acao="Resolver →" />);
+  }
+  for (const c of conflitosDeAusencia(d, hoje).filter((x) => x.projeto.gpId === eu.id)) {
+    itens.push(<ItemAcao key={`aus${c.ausencia.id}${c.projeto.id}${c.fase}`} href={`/projetos/${c.projeto.id}`} tom="ambar" titulo={`${c.pessoa.nome} estará ausente (${c.ausencia.motivo.toLowerCase()})`}
+      sub={`${br(c.ausencia.inicio).slice(0, 5)} a ${br(c.ausencia.fim).slice(0, 5)} · alocado(a) em ${c.pct}% na fase ${c.fase} do ${curto(c.projeto.titulo)}. Replaneje ou combine a cobertura.`} acao="Ver projeto →" />);
   }
   for (const { i } of devidos) itens.push(<ItemAcao key={`st${i.id}`} href={`/projetos/${i.id}#status`} titulo="Publicar o status da semana" sub={`${curto(i.titulo)} · vence sexta, ${br(sexta).slice(0, 5)}`} acao="Escrever →" />);
   const atrasadas = infos.flatMap(({ i, info }) => info.atrasadas.map((t) => ({ i, t })));

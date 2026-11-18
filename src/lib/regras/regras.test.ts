@@ -7,6 +7,7 @@ import { validarPedidoMudanca, variacaoCusto } from './mudancas';
 import { resumoFinanceiro, situacaoCusto } from './financeiro';
 import { dimCusto, dimEscopo, dimPrazo, dimRiscos, farolGeral } from './farol';
 import { nivelDoRisco, riscoAtivo, validarRisco } from './riscos';
+import { diasAusente, fracaoAusente, cruza, validarAusencia } from './ausencias';
 import { validarNaoSeguir, ordenarPrioridadeArea, prazoDecisao } from './gestor';
 import { picoNoPeriodo, situacaoCapacidade, pessoasEq, impactoPorMes } from './capacidade';
 import { podeMedirBeneficio, situacaoBeneficio, validarMedicao } from './beneficios';
@@ -402,5 +403,24 @@ describe('gestor: prazo para decidir', () => {
   it('5 dias corridos depois de chegar, ou o prazo pedido', () => {
     expect(prazoDecisao('2026-10-12')).toBe('2026-10-17');
     expect(prazoDecisao('2026-10-12', '2026-10-14')).toBe('2026-10-14');
+  });
+});
+
+describe('ausências do time', () => {
+  const ferias = [{ inicio: '2026-12-01', fim: '2026-12-15' }, { inicio: '2026-12-10', fim: '2026-12-20' }];
+  it('conta dias dentro do mês sem duplicar sobreposição', () => {
+    expect(diasAusente(ferias, '2026-12-01', '2027-01-01')).toBe(20);
+    expect(diasAusente(ferias, '2026-11-01', '2026-12-01')).toBe(0);
+    expect(fracaoAusente([{ inicio: '2026-11-01', fim: '2026-11-30' }], '2026-11-01', '2026-12-01')).toBe(1);
+  });
+  it('cruza com uma fase', () => {
+    expect(cruza(ferias[0], '2026-10-26', '2026-12-21')).toBe(true);
+    expect(cruza(ferias[0], '2026-12-16', '2027-01-01')).toBe(false);
+  });
+  it('valida', () => {
+    expect(validarAusencia({ inicio: '2026-12-10', fim: '2026-12-01', motivo: 'Férias' }, '2026-11-18')).toMatch(/fim/);
+    expect(validarAusencia({ inicio: '2026-10-01', fim: '2026-10-10', motivo: 'Férias' }, '2026-11-18')).toMatch(/terminou/);
+    expect(validarAusencia({ inicio: '2026-12-01', fim: '2026-12-10', motivo: 'X' }, '2026-11-18')).toMatch(/motivo/);
+    expect(validarAusencia({ inicio: '2026-12-01', fim: '2026-12-10', motivo: 'Férias' }, '2026-11-18')).toBeNull();
   });
 });

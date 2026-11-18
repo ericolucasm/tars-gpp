@@ -251,13 +251,13 @@ function relatorioCapacidadeMes(d: DadosOrg, hoje: string, busca: Busca, areasPe
     .filter((a) => (!areasPermitidas || areasPermitidas.has(a.id)) && naArea(d, a.id, fArea))
     .map((a) => ({ a, c: capacidadeDaArea(d, a.id, meses, hoje, false) }))
     .filter((x) => x.c.cedido > 0 || x.c.meses.some((m) => m > 0));
-  const estouradas = linhas.filter((x) => x.c.meses.some((m) => situacaoCapacidade(m, x.c.cedido) === 'crit')).length;
+  const estouradas = linhas.filter((x) => x.c.meses.some((m, k) => situacaoCapacidade(m, x.c.cedidoMeses[k]) === 'crit')).length;
   return {
-    id: 'capmes', titulo: 'Capacidade por área e mês', descricao: 'Pessoas-equivalentes alocadas em projetos × o que a área cede (100% = uma pessoa em tempo integral). Vermelho: acima do cedido; âmbar: acima de 85%.',
+    id: 'capmes', titulo: 'Capacidade por área e mês', descricao: 'Pessoas-equivalentes alocadas em projetos × o que a área cede (100% = uma pessoa em tempo integral). Vermelho: acima do cedido; âmbar: acima de 85%. * mês com ausências (férias, licenças): mostra o que a área cede de fato no mês.',
     filtros: [fArea, fHor],
     resumo: [{ rotulo: 'Áreas', valor: String(linhas.length) }, { rotulo: 'Acima do cedido em algum mês', valor: String(estouradas), tom: estouradas ? 'crit' : 'ok' }],
     colunas: ['Área', 'Pode ceder', ...meses.map((m) => `${MES_CURTO[Number(m.de.slice(5, 7)) - 1]} ${m.de.slice(2, 4)}`)],
-    linhas: linhas.map(({ a, c }): Celula[] => [a.nome, `${pessoasEq(c.cedido)} (${c.pessoas} ${c.pessoas === 1 ? "pessoa" : "pessoas"})`, ...c.meses.map((m): Celula => ({ texto: pessoasEq(m), tom: m === 0 ? 'neutro' : situacaoCapacidade(m, c.cedido) }))]),
+    linhas: linhas.map(({ a, c }): Celula[] => [a.nome, `${pessoasEq(c.cedido)} (${c.pessoas} ${c.pessoas === 1 ? "pessoa" : "pessoas"})`, ...c.meses.map((m, k): Celula => ({ texto: pessoasEq(m) + (c.cedidoMeses[k] < c.cedido ? ` de ${pessoasEq(c.cedidoMeses[k])}*` : ''), tom: m === 0 ? 'neutro' : situacaoCapacidade(m, c.cedidoMeses[k]) }))]),
     vazio: 'Nenhuma área com capacidade cedida.',
   };
 }

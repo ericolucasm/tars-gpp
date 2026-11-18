@@ -394,6 +394,8 @@ export async function seedDemo(db: DB, hoje: string) {
     }
 
     // Pedido de alocação de um pré-projeto (Reforma do CD)
+    // Ausência: Clara (Expedição) de férias em dezembro, alocada no Inventário rotativo (GP Carlos)
+    await tx.insert(t.ausencias).values({ orgId, pessoaId: pes['Clara Mendes'], inicio: '2026-12-01', fim: '2026-12-15', motivo: 'Férias', registradaPor: pes['Fernanda Oliveira'] });
     await tx.insert(t.pedidosAlocacao).values({ orgId, iniciativaId: ini['Reforma do centro de distribuição'], pessoaId: pes['Bruno Reis'], deltaPct: 20, aPartirDe: 'abril', solicitadoPor: pes['Mariana'], createdAt: ts('2026-10-15') });
 
     return { orgId };

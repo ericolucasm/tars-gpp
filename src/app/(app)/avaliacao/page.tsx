@@ -58,7 +58,7 @@ export default async function Avaliacao({ searchParams }: { searchParams: Promis
           const impactadas = new Set(itens.flatMap((x) => x.ini.areasImpactadas));
           return d.areas.filter((a) => impactadas.has(a.id)).map((a) => {
             const c = capacidadeDaArea(d, a.id, meses, hoje);
-            return { id: a.id, nome: a.nome, cedido: c.cedido, folga: Math.min(...c.meses.map((m) => c.cedido - m)) };
+            return { id: a.id, nome: a.nome, cedido: c.cedido, folga: Math.min(...c.meses.map((m, k) => c.cedidoMeses[k] - m)) };
           });
         })()}
         linhas={[
