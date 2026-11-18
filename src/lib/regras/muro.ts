@@ -48,3 +48,22 @@ export function validarPedidoPrazo(p: { novoPrazo: string; motivo: string }, pra
   if (p.motivo.trim().length < 5) return 'Explique por que precisa de mais prazo.';
   return null;
 }
+
+/**
+ * Status a publicar na Início do GP, pela cadência combinada: atrasado (o dia passou sem publicação),
+ * a vencer (vence nos próximos `janela` dias) ou nada a fazer ainda.
+ */
+export function situacaoStatus(proximo: string, hoje: string, janela = 7): 'atrasado' | 'a_vencer' | null {
+  if (proximo < hoje) return 'atrasado';
+  if (proximo <= addDias(hoje, janela)) return 'a_vencer';
+  return null;
+}
+
+/** "vence hoje", "vence sexta, 23/10" ou "venceu sexta, 16/10 (3 dias de atraso)". */
+export function rotuloVencimentoStatus(proximo: string, hoje: string) {
+  const dia = `${DIAS_SEMANA[diaDaSemana(proximo)] ?? ''}, ${proximo.slice(8, 10)}/${proximo.slice(5, 7)}`;
+  if (proximo === hoje) return 'vence hoje';
+  if (proximo > hoje) return `vence ${dia}`;
+  const n = diasDeAtraso(proximo, hoje);
+  return `venceu ${dia} (${n} ${n === 1 ? 'dia' : 'dias'} de atraso)`;
+}
