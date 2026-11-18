@@ -4,8 +4,8 @@ import type { DadosOrg, Iniciativa } from '@/lib/dados';
 import type { Sessao } from '@/lib/sessao';
 import { addDias, br, haDias, haQuanto, segundaDaSemana } from '@/lib/regras/datas';
 import { primeiroNome } from '@/lib/regras/pessoas';
-import { chaveDaRaia, cicloAberto, nomeArea, noRaia, pessoa } from '@/lib/visoes';
-import { Etapas, Vazio } from '@/components/ui';
+import { chaveDaRaia, cicloAberto, infoProjeto, nomeArea, noRaia, participaDoProjeto, pessoa } from '@/lib/visoes';
+import { Etapas, PillFarol, Vazio } from '@/components/ui';
 import { atrasos } from '@/lib/muro';
 import { Saudacao, frase } from './Saudacao';
 
@@ -82,6 +82,29 @@ export function InicioColaborador({ d, sessao, hoje }: { d: DadosOrg; sessao: Se
           </div>
         ))}
       </section>
+      {(() => {
+        const participo = d.iniciativas.filter((i) => i.inicioProjeto && i.gpId !== eu.id && noRaia(d, i, 'exe', 'pau') && participaDoProjeto(d, i.id, eu.id));
+        if (!participo.length) return null;
+        return (
+          <section aria-label="Projetos em que você participa" style={s('background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 10px')}>
+            <h2 style={s('margin: 0; font-size: 18px; font-weight: 700')}>Projetos em que você participa</h2>
+            {participo.map((i) => {
+              const info = infoProjeto(d, i, hoje);
+              const minhas = info.tarefas.filter((t) => t.responsavelId === eu.id && !t.concluida).length;
+              return (
+                <Link key={i.id} href={`/projetos/${i.id}`} style={s('display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; border: 1px solid #EFEBE3; color: #26213A')}>
+                  <span style={s('display: flex; flex-direction: column; gap: 2px; flex: 1 1 260px')}>
+                    <span style={s('font-size: 14px; font-weight: 600')}>{i.titulo}</span>
+                    <span style={s('font-size: 12px; color: #5E5770')}>GP: {pessoa(d, i.gpId)?.nome ?? '—'} · fase atual: {info.faseAtual?.nome ?? '—'} · {minhas ? `${minhas} ${minhas === 1 ? 'tarefa sua' : 'tarefas suas'} em aberto` : 'nenhuma tarefa sua em aberto'}</span>
+                  </span>
+                  {noRaia(d, i, 'exe') ? <PillFarol farol={i.farol} /> : <span style={s('font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 10px; background: #EDEAE3; color: #4A4458')}>Pausado</span>}
+                  <span style={s('font-size: 13px; font-weight: 600; color: #4B2FD1')}>Ver projeto →</span>
+                </Link>
+              );
+            })}
+          </section>
+        );
+      })()}
       <section aria-label="Suas tarefas" style={s('background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 10px')}>
         <h2 style={s('margin: 0; font-size: 18px; font-weight: 700')}>Suas tarefas em projetos</h2>
         {tarefas.length === 0 && <span style={s('font-size: 13px; color: #5E5770')}>Nenhuma tarefa aberta.</span>}

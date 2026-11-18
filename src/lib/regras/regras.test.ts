@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { notaFinal, custoReferencia, ordenarPorNota, podeComunicar } from './avaliacao';
 import { acoesDoCard, acaoDeConclusao, prontoParaConcluir, validarGate, podeConfirmar, type Raia } from './esteira';
-import { desvio, farolSugerido, statusDaFase, fasesDoModelo, mesesDaLinha, descreverMudanca, progresso, reordenar, ordemValida, validarEdicaoTarefa } from './projeto';
+import { desvio, farolSugerido, statusDaFase, fasesDoModelo, mesesDaLinha, descreverMudanca, progresso, reordenar, ordemValida, validarEdicaoTarefa, modoDoProjeto } from './projeto';
 import { podeResolverPonto, pontoEsperaPor, pontoAtrasado } from './pontos';
 import { validarPedidoMudanca, variacaoCusto } from './mudancas';
 import { resumoFinanceiro, situacaoCusto } from './financeiro';
@@ -505,5 +505,15 @@ describe('editar tarefa', () => {
   it('com pedido de mais prazo aguardando, o prazo não muda por aqui (o resto pode)', () => {
     expect(validarEdicaoTarefa({ ...base, pedidoPrazoPendente: true })).toMatch(/pedido de mais prazo/);
     expect(validarEdicaoTarefa({ ...base, prazo: '2026-11-10', pedidoPrazoPendente: true })).toBeNull();
+  });
+});
+
+describe('acesso à página do projeto', () => {
+  const ninguem = { ehPmo: false, ehGp: false, participa: false };
+  it('GP e PMO editam; quem participa vê em leitura; os demais não acessam', () => {
+    expect(modoDoProjeto({ ...ninguem, ehPmo: true })).toBe('edicao');
+    expect(modoDoProjeto({ ...ninguem, ehGp: true, participa: true })).toBe('edicao');
+    expect(modoDoProjeto({ ...ninguem, participa: true })).toBe('leitura');
+    expect(modoDoProjeto(ninguem)).toBeNull();
   });
 });
