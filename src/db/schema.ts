@@ -346,6 +346,18 @@ export const lancamentosCusto = pgTable('lancamentos_custo', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
+// Dependência: um projeto precisa de uma entrega de outro até uma data.
+export const dependencias = pgTable('dependencias', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  orgId: uuid('org_id').notNull(),
+  iniciativaId: uuid('iniciativa_id').notNull().references(() => iniciativas.id, { onDelete: 'cascade' }), // quem depende
+  dependeDeId: uuid('depende_de_id').notNull().references(() => iniciativas.id, { onDelete: 'cascade' }), // de quem depende
+  descricao: text('descricao').notNull(), // o que precisa receber
+  precisaAte: date('precisa_ate').notNull(),
+  criadoPor: uuid('criado_por'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
 // ---------- Login (Better Auth) ----------
 // Tabelas mantidas pela biblioteca de login. As chaves JS seguem os nomes de campo que ela espera.
 

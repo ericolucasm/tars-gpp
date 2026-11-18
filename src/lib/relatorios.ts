@@ -6,9 +6,10 @@ import { rotuloDesvioCurto, FAROL, type Farol } from './regras/projeto';
 import { numerosAoVivo, rotuloEtapa, type Snapshot } from './ciclo-vm';
 import { pessoasEq, situacaoCapacidade } from './regras/capacidade';
 import { situacaoBeneficio } from './regras/beneficios';
+import { ROTULO_DEP, TOM_DEP } from './regras/dependencias';
 import { ESCALA, ESCALA_IMPACTO, STATUS_RISCO, nivelDoRisco, riscoAtivo } from './regras/riscos';
 import {
-  alocacaoDe, capacidadeDaArea, chaveDaRaia, custoDe, dimensoesDo, financeiroDo, infoProjeto, proximosMeses, nomeArea, noRaia, pessoa, projetosDaPessoa, rotuloCiclo, situacaoDoCard, TIPOS,
+  alocacaoDe, capacidadeDaArea, dependenciasVM, chaveDaRaia, custoDe, dimensoesDo, financeiroDo, infoProjeto, proximosMeses, nomeArea, noRaia, pessoa, projetosDaPessoa, rotuloCiclo, situacaoDoCard, TIPOS,
 } from './visoes';
 
 // Relatórios de cada perfil. Tudo calculado a partir da mesma foto da empresa (carregarOrg),
@@ -298,6 +299,23 @@ function relatorioBeneficios(d: DadosOrg, hoje: string, busca: Busca): Relatorio
   };
 }
 
+// ---------- Dependências (PMO) ----------
+
+function relatorioDependencias(d: DadosOrg, hoje: string, busca: Busca): Relatorio {
+  const fSit = filtro(busca, 'dependencias', 'situacao', 'Situação', com('Todas', [{ valor: 'ruins', rotulo: 'Em risco ou atrasadas' }, { valor: 'ok', rotulo: 'No prazo' }, { valor: 'sem_data', rotulo: 'Sem data prevista' }, { valor: 'entregue', rotulo: 'Entregues' }]));
+  const todas = dependenciasVM(d, hoje);
+  const lista = todas.filter((y) => fSit.valor === TODOS || (fSit.valor === 'ruins' ? y.situacao === 'risco' || y.situacao === 'atrasada' : y.situacao === fSit.valor));
+  const ruins = todas.filter((y) => y.situacao === 'risco' || y.situacao === 'atrasada').length;
+  return {
+    id: 'dependencias', titulo: 'Dependências entre projetos', descricao: 'O que cada projeto precisa receber de outro e até quando, comparado com o fim previsto do outro projeto.',
+    filtros: [fSit],
+    resumo: [{ rotulo: 'Dependências', valor: String(todas.length) }, { rotulo: 'Em risco ou atrasadas', valor: String(ruins), tom: ruins ? 'crit' : 'ok' }],
+    colunas: ['Precisa', 'Projeto que depende', 'Depende de', 'Precisa até', 'Fim previsto do outro', 'Situação'],
+    linhas: lista.map((y): Celula[] => [y.x.descricao, nomeCurtoProjeto(y.dep.titulo), nomeCurtoProjeto(y.de.titulo), br(y.x.precisaAte), y.fimPrevisto ? br(y.fimPrevisto) : '—', { texto: ROTULO_DEP[y.situacao], tom: TOM_DEP[y.situacao] }]),
+    vazio: 'Nenhuma dependência com esse filtro.',
+  };
+}
+
 // ---------- PMO ----------
 
 function relatoriosPmo(d: DadosOrg, hoje: string, busca: Busca): Relatorio[] {
@@ -399,6 +417,7 @@ function relatoriosPmo(d: DadosOrg, hoje: string, busca: Busca): Relatorio[] {
       colunas: ['Área', 'Iniciativas', 'Em avaliação', 'Pré-projeto', 'Em projeto', 'Concluídas', 'Recusadas ou canceladas'],
       linhas: porArea, vazio: 'Nenhuma iniciativa com esses filtros.',
     },
+    relatorioDependencias(d, hoje, busca),
     relatorioBeneficios(d, hoje, busca),
     relatorioCapacidadeMes(d, hoje, busca),
     {

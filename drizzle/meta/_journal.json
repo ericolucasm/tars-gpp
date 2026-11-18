@@ -57,6 +57,13 @@
       "when": 1794962182713,
       "tag": "0007_beneficios",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1794962896955,
+      "tag": "0008_dependencias",
+      "breakpoints": true
     }
   ]
 }

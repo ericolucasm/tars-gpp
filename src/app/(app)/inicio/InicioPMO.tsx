@@ -3,7 +3,7 @@ import type { DadosOrg } from '@/lib/dados';
 import type { Sessao } from '@/lib/sessao';
 import { br, diffDias } from '@/lib/regras/datas';
 import { cicloVM } from '@/lib/ciclo-vm';
-import { cicloAberto, financeiroDo, infoProjeto, listaAvaliacao, nomeArea, noRaia, pessoa, pessoasAcimaDoCedido, raiaChave } from '@/lib/visoes';
+import { cicloAberto, dependenciasVM, financeiroDo, infoProjeto, listaAvaliacao, nomeArea, noRaia, pessoa, pessoasAcimaDoCedido, raiaChave } from '@/lib/visoes';
 import { ItemAcao, Kpi, GradeKpi, Painel, Vazio } from '@/components/ui';
 import { pontoAtrasado, pontoEsperaPor } from '@/lib/regras/pontos';
 import { riscoAtivo } from '@/lib/regras/riscos';
@@ -53,6 +53,12 @@ export function InicioPMO({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao; ho
     itens.push(<ItemAcao key="riscos" href="/relatorios?r.riscos.nivel=Alto&r.riscos.plano=sem#riscos" numero={altosSemPlano.length} tom="ambar" badgeTom="ambar"
       titulo={altosSemPlano.length === 1 ? 'Risco alto sem plano de resposta' : 'Riscos altos sem plano de resposta'}
       sub={altosSemPlano.slice(0, 3).map((r) => r.nome).join(' · ') + (altosSemPlano.length > 3 ? ` +${altosSemPlano.length - 3}` : '')} acao="Ver →" />);
+  }
+  const depsRuins = dependenciasVM(d, hoje).filter((y) => y.situacao === 'risco' || y.situacao === 'atrasada');
+  if (depsRuins.length) {
+    itens.push(<ItemAcao key="deps" href="/relatorios?r.dependencias.situacao=ruins#dependencias" numero={depsRuins.length} tom="vermelho"
+      titulo={depsRuins.length === 1 ? 'Dependência entre projetos em risco' : 'Dependências entre projetos em risco'}
+      sub={depsRuins.slice(0, 3).map((y) => `${y.dep.titulo.split(' para ')[0]} ← ${y.de.titulo.split(' para ')[0]}`).join(' · ')} acao="Ver →" />);
   }
   for (const m of d.pedidosMudanca.filter((x) => x.status === 'pendente')) {
     const proj = d.iniciativas.find((i) => i.id === m.iniciativaId);

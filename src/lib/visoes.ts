@@ -8,6 +8,7 @@ import { resumoFinanceiro } from './regras/financeiro';
 import { dimCusto, dimEscopo, dimPrazo, dimRiscos, type Dimensao } from './regras/farol';
 import { pontoAtrasado } from './regras/pontos';
 import { riscoAtivo } from './regras/riscos';
+import { situacaoDependencia } from './regras/dependencias';
 
 // Cálculos derivados usados por várias telas. Tudo a partir de DadosOrg (a "foto" da empresa).
 
@@ -207,6 +208,17 @@ export function dimensoesDo(d: DadosOrg, i: Iniciativa, hoje: string): Dimensao[
   const doProjeto = new Set(d.alocacoes.filter((a) => faseIds.has(a.faseId)).map((a) => a.pessoaId));
   const acima = d.pessoas.filter((p) => doProjeto.has(p.id) && acimaDoCedido(alocacaoDe(d, p.id, hoje), p.cedeAte, p.externo)).length;
   return [dimPrazo(info.desvio, acima), ...dimensoesSemPrazo(d, i, hoje)];
+}
+
+/** Dependências com a situação de cada uma (fim previsto do projeto do qual se depende × data em que se precisa). */
+export function dependenciasVM(d: DadosOrg, hoje: string) {
+  return d.dependencias.flatMap((x) => {
+    const dep = d.iniciativas.find((i) => i.id === x.iniciativaId);
+    const de = d.iniciativas.find((i) => i.id === x.dependeDeId);
+    if (!dep || !de) return [];
+    const fim = de.inicioProjeto ? infoProjeto(d, de, hoje).fimPrevisto : null;
+    return [{ x, dep, de, fimPrevisto: fim, situacao: situacaoDependencia(x.precisaAte, fim, noRaia(d, de, 'con'), hoje) }];
+  });
 }
 
 /** Linha de contexto dos cards do portfólio. */

@@ -10,12 +10,14 @@ import { TelaProjeto } from './TelaProjeto';
 import { SecaoPontos } from './SecaoPontos';
 import { Mudancas } from './Mudancas';
 import { Financeiro } from './Financeiro';
+import { Dependencias } from './Dependencias';
+import { ROTULO_DEP, TOM_DEP } from '@/lib/regras/dependencias';
 import { CartaoBeneficio } from '@/components/Beneficio';
 import { beneficioVM } from '@/lib/beneficios-vm';
 import { s } from '@/lib/css';
 import { TIPOS_MUDANCA } from '@/lib/regras/mudancas';
 import { dinheiro } from '@/lib/regras/datas';
-import { dimensoesSemPrazo, financeiroDo, orcamentoDoProjeto } from '@/lib/visoes';
+import { dependenciasVM, dimensoesSemPrazo, financeiroDo, noRaia, orcamentoDoProjeto } from '@/lib/visoes';
 
 export const dynamic = 'force-dynamic';
 
@@ -91,6 +93,19 @@ export default async function Projeto({ params, searchParams }: { params: Promis
           status: m.status, solicitante: pessoa(d, m.solicitanteId)?.nome ?? '', criadoEm: br(m.createdAt.toISOString().slice(0, 10)),
           decisao: m.decididoEm ? `${m.status === 'aprovada' ? 'aprovada' : 'recusada'} por ${pessoa(d, m.decididoPor)?.nome ?? 'PMO'} em ${br(m.decididoEm.toISOString().slice(0, 10))}${m.comentarioDecisao ? `: "${m.comentarioDecisao}"` : ''}` : '',
         }))} />
+      {(() => {
+        const deps = dependenciasVM(d, hoje);
+        const vm = (y: (typeof deps)[number], outro: typeof ini) => ({
+          id: y.x.id, outro: outro.titulo, outroHref: outro.inicioProjeto && (ehPmo || outro.gpId === sessao.pessoa.id) ? `/projetos/${outro.id}#dependencias` : null,
+          descricao: y.x.descricao, precisaAte: br(y.x.precisaAte), fimPrevisto: y.fimPrevisto ? br(y.fimPrevisto) : 'sem data', rotulo: ROTULO_DEP[y.situacao], tom: TOM_DEP[y.situacao],
+        });
+        return (
+          <Dependencias iniciativaId={ini.id} podeEditar={ehPmo || ehGp}
+            dependeDe={deps.filter((y) => y.dep.id === ini.id).map((y) => vm(y, y.de))}
+            dependemDeste={deps.filter((y) => y.de.id === ini.id).map((y) => vm(y, y.dep))}
+            opcoes={d.iniciativas.filter((i) => i.id !== ini.id && noRaia(d, i, 'bkl', 'pre', 'exe', 'pau')).map((i) => ({ id: i.id, nome: i.titulo }))} />
+        );
+      })()}
       <SecaoPontos d={d} sessao={sessao} iniId={ini.id} hoje={hoje} />
     </Shell>
   );

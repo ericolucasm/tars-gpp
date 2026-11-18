@@ -207,6 +207,14 @@ try {
   await fin.getByRole('button', { name: 'Atualizar previsão' }).click();
   await fin.getByText('Previsão de custo atualizada.').waitFor();
   ok('GP lança custo realizado e atualiza a previsão de custo');
+  const deps = p.getByRole('region', { name: 'Dependências' });
+  await deps.getByRole('button', { name: 'Registrar dependência' }).click();
+  await deps.getByLabel('Depende do projeto').selectOption({ label: 'App de pedidos para representantes' });
+  await deps.getByLabel('O que precisa receber').fill('API de pedidos publicada');
+  await deps.getByLabel('Precisa até').fill('2026-12-31');
+  await deps.getByRole('button', { name: 'Registrar', exact: true }).click();
+  await deps.getByRole('group', { name: 'Dependência: API de pedidos publicada' }).getByText('Em risco').waitFor(); // o App termina em 2027
+  ok('GP registra dependência de outro projeto e ela aparece em risco');
   await p.context().close();
 
   // 7. PMO aprova a mudança de linha de base
@@ -244,6 +252,7 @@ try {
   await p.getByRole('listitem', { name: /^Custo: Crítico · previsão 26% acima do orçado/ }).waitFor(); // farol por dimensão
   await ir(p, '/inicio');
   await p.getByText('Projeto estourando o orçamento').waitFor();
+  await p.getByText('Dependência entre projetos em risco').waitFor();
   await p.goto(urlProjeto, { waitUntil: 'networkidle' });
   ok('Previsão acima do orçamento: estouro no financeiro, farol de custo crítico e aviso na Início do PMO');
 
@@ -327,7 +336,7 @@ try {
 
   // Relatórios: cada perfil chega pelo menu e vê os relatórios dele
   const relatoriosPorPerfil = [
-    ['mariana@acme.com.br', 'pmo', ['Portfólio por etapa', 'Saúde dos projetos', 'Financeiro dos projetos', 'Matriz de riscos', 'Riscos do portfólio', 'Ciclos de planejamento', 'Demanda por área', 'Benefícios', 'Capacidade por área e mês', 'Capacidade das pessoas']],
+    ['mariana@acme.com.br', 'pmo', ['Portfólio por etapa', 'Saúde dos projetos', 'Financeiro dos projetos', 'Matriz de riscos', 'Riscos do portfólio', 'Ciclos de planejamento', 'Demanda por área', 'Dependências entre projetos', 'Benefícios', 'Capacidade por área e mês', 'Capacidade das pessoas']],
     ['fernanda.oliveira@acme.com.br', null, ['Iniciativas da área', 'Projetos da área', 'Capacidade por área e mês', 'Alocação do time']],
     ['carlos.andrade@acme.com.br', null, ['Meus projetos', 'Financeiro dos projetos', 'Riscos dos meus projetos', 'Tarefas em aberto', 'Equipe dos meus projetos']],
     ['joao.silva@acme.com.br', null, ['Minhas iniciativas', 'Minhas tarefas']],

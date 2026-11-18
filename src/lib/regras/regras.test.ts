@@ -9,6 +9,7 @@ import { dimCusto, dimEscopo, dimPrazo, dimRiscos, farolGeral } from './farol';
 import { nivelDoRisco, riscoAtivo, validarRisco } from './riscos';
 import { picoNoPeriodo, situacaoCapacidade, pessoasEq } from './capacidade';
 import { podeMedirBeneficio, situacaoBeneficio, validarMedicao } from './beneficios';
+import { situacaoDependencia } from './dependencias';
 import { gestorDe, timeDireto, areasSobGestao, nomeCurto, acimaDoCedido } from './pessoas';
 import { addDias, diffDias, dataPorExtenso, haQuanto, proximaSexta } from './datas';
 
@@ -270,6 +271,16 @@ describe('benefícios', () => {
     expect(validarMedicao({ resultado: '14 minutos', atingido: 'sim' })).toBeNull();
     expect(validarMedicao({ resultado: '', atingido: 'sim' })).toMatch(/resultado/);
     expect(validarMedicao({ resultado: '14 min', atingido: 'talvez' })).toMatch(/meta/);
+  });
+});
+
+describe('dependências', () => {
+  it('situação pela data em que se precisa e o fim previsto do outro projeto', () => {
+    expect(situacaoDependencia('2027-01-31', '2027-01-15', false, '2026-11-18')).toBe('ok');
+    expect(situacaoDependencia('2027-01-31', '2027-02-10', false, '2026-11-18')).toBe('risco');
+    expect(situacaoDependencia('2027-01-31', null, false, '2026-11-18')).toBe('sem_data');
+    expect(situacaoDependencia('2026-11-01', '2026-12-10', false, '2026-11-18')).toBe('atrasada');
+    expect(situacaoDependencia('2026-11-01', '2026-12-10', true, '2026-11-18')).toBe('entregue');
   });
 });
 
