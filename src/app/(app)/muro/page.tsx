@@ -11,7 +11,7 @@ import { Cabecalho, Vazio } from '@/components/ui';
 
 export const dynamic = 'force-dynamic';
 
-/** Muro da vergonha: quem passou da data sem registrar nada. PMO vê todos; gestor, o time; GP, os projetos dele; os demais, a si mesmos. */
+/** Quadro de avisos (antigo "muro da vergonha"): quem passou da data sem registrar nada. PMO vê todos; gestor, o time; GP, os projetos dele; os demais, a si mesmos. */
 export default async function Muro() {
   const sessao = await exigirSessao();
   const d = await carregarOrg(sessao.orgId);
@@ -25,8 +25,8 @@ export default async function Muro() {
   const escopo = ehPmo ? 'todo o portfólio' : sessao.perfil === 'gestor' ? 'você, seu time e os projetos que você gerencia' : sessao.perfil === 'gp' ? 'você e as pessoas dos seus projetos' : 'você';
   return (
     <Shell sessao={sessao} dados={d} atual="muro">
-      <Cabecalho trilha="Relatórios / Muro da vergonha" titulo="Muro da vergonha" texto={`Quem passou da data de uma tarefa, de um fim de fase ou do status report sem concluir, pedir mais prazo ou avisar, e gestores com decisões paradas há mais de 5 dias. Mostrando: ${escopo}.`} />
-      {linhas.length === 0 && <Vazio>Ninguém no muro. Todas as entregas estão em dia (ou com prazo em negociação).</Vazio>}
+      <Cabecalho trilha="Meu TARS / Quadro de avisos" titulo="Quadro de avisos" texto={`Quem passou da data de uma tarefa, de um fim de fase ou do status report sem concluir, pedir mais prazo ou avisar, e gestores com decisões paradas há mais de 5 dias. Mostrando: ${escopo}.`} />
+      {linhas.length === 0 && <Vazio>Nada no quadro de avisos. Todas as entregas estão em dia (ou com prazo em negociação).</Vazio>}
       {linhas.map((l, k) => (
         <section key={l.pessoaId} aria-label={`Muro: ${l.nome}`} style={s('background: #FFFFFF; border: 1px solid #F5D2D2; border-radius: 16px; padding: 18px 20px; display: flex; flex-direction: column; gap: 10px')}>
           <div style={s('display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between')}>

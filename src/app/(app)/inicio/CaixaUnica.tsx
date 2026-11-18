@@ -78,7 +78,7 @@ export async function CaixaUnica({ d, sessao, hoje, estilo }: { d: DadosOrg; ses
       {bloco('Meu plano para hoje', comPlano.filter((x) => x.plano === 'hoje'), undefined, true)}
       {bloco('Meu plano para esta semana', comPlano.filter((x) => x.plano === 'semana'), undefined, true)}
       {GRUPOS_CAIXA.map((g) => <span key={g.chave} style={s('display: contents')}>{bloco(g.titulo, semPlano.filter((x) => x.grupo === g.chave), g.dica)}</span>)}
-      {recolhido('Deixei para depois', comPlano.filter((x) => x.plano === 'depois'), (x) => (x.grupo === 'atrasado' ? 'continua atrasado no muro' : undefined))}
+      {recolhido('Deixei para depois', comPlano.filter((x) => x.plano === 'depois'), (x) => (x.grupo === 'atrasado' ? 'continua atrasado no quadro de avisos' : undefined))}
       {recolhido('Adiados', comPlano.filter((x) => x.plano === 'adiado'), (x) => (x.adiadoAte ? `volta em ${br(x.adiadoAte).slice(0, 5)}` : undefined))}
       {concluidas.length > 0 && (
         <details role="group" aria-label="Tarefas pessoais concluídas">

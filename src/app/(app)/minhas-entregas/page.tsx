@@ -34,7 +34,7 @@ export default async function MinhasEntregas() {
   );
   return (
     <Shell sessao={sessao} dados={d} atual="entregas">
-      <Cabecalho trilha="Minhas entregas" titulo="Minhas entregas" texto="Tudo que tem data e é seu: tarefas, fins de fase (gates), status report e, para gestores, as decisões esperando você. Conclua, peça mais prazo ou avise do impedimento ou risco antes da data: assim você não vai para o Muro da vergonha." />
+      <Cabecalho trilha="Minhas entregas" titulo="Minhas entregas" texto="Tudo que tem data e é seu: tarefas, fins de fase (gates), status report e, para gestores, as decisões esperando você. Conclua, peça mais prazo ou avise do impedimento ou risco antes da data: assim você não vai para o Quadro de avisos." />
       {bloco('Atrasadas', atrasadas, 'Nada atrasado. 👏')}
       {bloco('Próximos 14 dias', proximas, 'Nada vencendo nas próximas duas semanas.')}
       {depois.length > 0 && bloco('Mais adiante', depois)}

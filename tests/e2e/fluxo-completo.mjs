@@ -480,7 +480,7 @@ try {
   }
   ok('Relatórios: os quatro perfis abrem pelo menu; PMO e GP filtram (farol, tarefas atrasadas) e limpam os filtros');
 
-  // Muro da vergonha: o responsável pede mais prazo em Minhas entregas, o GP aprova; o PMO vê o muro
+  // Quadro de avisos (antigo muro): o responsável pede mais prazo em Minhas entregas, o GP aprova; o PMO vê o muro
   const novoPrazo = new Date(Date.now() + 20 * 86400000).toISOString().slice(0, 10);
   p = await como('joao.silva@acme.com.br');
   await ir(p, '/inicio');
@@ -501,7 +501,7 @@ try {
   await p.context().close();
   p = await como('mariana@acme.com.br', 'pmo');
   await ir(p, '/muro');
-  await p.getByRole('heading', { name: 'Muro da vergonha', level: 1 }).waitFor();
+  await p.getByRole('heading', { name: 'Quadro de avisos', level: 1 }).waitFor();
   await p.getByRole('region', { name: 'Muro: Marina Gomes' }).waitFor();
   await p.getByRole('region', { name: 'Muro: Marcos Teixeira' }).getByText('Responder o pedido de +20% de Pedro Lima').waitFor();
   await ir(p, '/inicio');
@@ -852,6 +852,20 @@ try {
   await p.getByRole('region', { name: `Painel da fase ${fasePer}` }).getByRole('group', { name: 'Alocação de Bruno Reis' }).waitFor();
   await p.context().close();
   ok('Detalhamento por fase: tabela de quem atua em cada fase e período; "Editar" abre o painel da barra');
+
+  // Menu lateral: bloco do dia a dia (com o Quadro de avisos) e, no PMO, Iniciativas separadas de Projetos
+  p = await como('mariana@acme.com.br', 'pmo');
+  await ir(p, '/inicio');
+  const menu = p.getByRole('navigation', { name: 'Menu principal' });
+  const textoMenu = (await menu.innerText()).split('\n').map((x) => x.replace('›', '').trim()).filter(Boolean);
+  const ordem = ['Meu TARS', 'Minhas entregas', 'Quadro de avisos', 'INICIATIVAS', 'Portfólio', 'Ciclos de planejamento', 'Avaliação e priorização', 'PROJETOS', 'Projetos', 'Roadmap', 'RELATÓRIOS', 'Relatórios'];
+  const pos = ordem.map((x) => textoMenu.findIndex((y) => y === x || y.startsWith(x + ' ')));
+  if (pos.some((x) => x < 0) || pos.some((x, k) => k && x < pos[k - 1])) throw new Error('Menu do PMO fora da ordem: ' + textoMenu.join(' | '));
+  if (textoMenu.some((x) => /muro/i.test(x))) throw new Error('Ainda há "muro" no menu');
+  await menu.getByRole('link', { name: 'Quadro de avisos' }).click();
+  await p.getByRole('heading', { name: 'Quadro de avisos', level: 1 }).waitFor();
+  await p.context().close();
+  ok('Menu lateral: Meu TARS, Minhas entregas e Quadro de avisos no topo; no PMO, Iniciativas (portfólio, ciclos, avaliação) separadas de Projetos (projetos, roadmap)');
 } catch (e) {
   console.error('✗ FALHOU no passo', passo + 1, '\n', e.message.split('\n').slice(0, 6).join('\n'));
   process.exitCode = 1;

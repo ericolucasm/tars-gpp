@@ -199,6 +199,7 @@ Itens que o protótipo sugeria mas não desenhava. Todos usam o mesmo visual:
     - Colaborador: Minhas iniciativas (situação) · Minhas tarefas (situação, projeto).
     - O filtro de área inclui as subáreas (escolher uma diretoria traz as gerências e coordenações dela).
   - "Imprimir ou salvar PDF" usa a impressão do navegador, sem menu e barras. Exportar para planilha fica na task "Exportar relatórios e filtrar portfólio/projetos".
+- **[Decisão V2] Menu lateral organizado por assunto** (pedido da Mariana): no topo, em todos os perfis, o bloco do dia a dia: **Meu TARS · Minhas entregas · Quadro de avisos**. No PMO, a antiga seção GESTÃO virou duas: **INICIATIVAS** (Portfólio · Ciclos de planejamento · Avaliação e priorização) e **PROJETOS** (Projetos · Roadmap). **RELATÓRIOS** ficou só com Relatórios. Gestor (MINHA ÁREA) e GP (MEUS PROJETOS) mantêm as suas seções. O **"Muro da vergonha" passou a se chamar "Quadro de avisos"** e saiu de Relatórios. As regras de atraso continuam as mesmas (§11); só mudam o nome e o lugar.
 - **[Decisão V1] Menu lateral diferente do protótipo** (pedido da Mariana): os títulos de seção (GESTÃO, MINHA ÁREA, CONFIGURAÇÃO), que não são clicáveis, ficam menores, mais claros e com uma linha separadora acima. Os itens clicáveis têm texto escuro, uma seta › à direita e fundo ao passar o mouse. No protótipo os dois tinham aparência parecida e se confundiam.
 - **[Decisão V1] Rótulos com gênero** ("Gestora", "Ativa") só quando o cadastro informa o tratamento. Sem essa informação, o sistema usa a forma neutra ("Gestor(a)").
 
