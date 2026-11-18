@@ -12,6 +12,7 @@ import { beneficiosParaMedir } from '@/lib/beneficios-vm';
 import { atrasos } from '@/lib/muro';
 import { pontoEsperaPor } from '@/lib/regras/pontos';
 import { acaoDeConclusao, prontoParaConcluir } from '@/lib/regras/esteira';
+import { ProjetosPatrocinados } from '@/components/ProjetosPatrocinados';
 import { Saudacao } from './Saudacao';
 
 export function InicioGP({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao; hoje: string }) {
@@ -147,6 +148,7 @@ export function InicioGP({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao; hoj
           ))}
         </section>
       </div>
+      <ProjetosPatrocinados d={d} pessoaId={eu.id} hoje={hoje} />
     </>
   );
 }

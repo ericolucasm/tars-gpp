@@ -519,6 +519,9 @@ describe('acesso à página do projeto', () => {
   it('quem pediu a iniciativa acompanha o projeto em leitura', () => {
     expect(modoDoProjeto({ ...ninguem, solicitante: true })).toBe('leitura');
   });
+  it('o patrocinador acompanha o projeto em leitura', () => {
+    expect(modoDoProjeto({ ...ninguem, patrocinador: true })).toBe('leitura');
+  });
 });
 
 describe('retirar uma iniciativa (quem pediu)', () => {

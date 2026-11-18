@@ -4,7 +4,9 @@ import type { Sessao } from '@/lib/sessao';
 import { br } from '@/lib/regras/datas';
 import { dataDaSemana, FAROL, type Farol } from '@/lib/regras/projeto';
 import { detalheIniciativa } from '@/lib/detalhe';
-import { balancoDo, fasesDo, nomeArea, noRaia, participaDoProjeto, pessoa } from '@/lib/visoes';
+import { balancoDo, fasesDo, financeiroDo, nomeArea, noRaia, participaDoProjeto, pessoa } from '@/lib/visoes';
+import { dinheiro } from '@/lib/regras/datas';
+import { TIPOS_MUDANCA } from '@/lib/regras/mudancas';
 import { beneficioVM } from '@/lib/beneficios-vm';
 import { CartaoBeneficio } from '@/components/Beneficio';
 import { DetalheIniciativa } from '@/components/DetalheIniciativa';
@@ -23,6 +25,7 @@ export function VisaoLeitura({ d, sessao, ini, hoje }: { d: DadosOrg; sessao: Se
   const eu = sessao.pessoa.id;
   const participa = participaDoProjeto(d, ini.id, eu);
   const pediu = ini.solicitanteId === eu;
+  const patrocina = !!ini.patrocinadorId && ini.patrocinadorId === eu;
   const fases = fasesDo(d, ini.id);
   const faseIds = new Set(fases.map((f) => f.id));
   const gp = pessoa(d, ini.gpId);
@@ -36,19 +39,22 @@ export function VisaoLeitura({ d, sessao, ini, hoje }: { d: DadosOrg; sessao: Se
   const licoes = d.licoes.filter((l) => l.iniciativaId === ini.id).reverse().map((l) => ({
     id: l.id, tipo: l.tipo, texto: l.texto, autor: pessoa(d, l.autorId)?.nome ?? '', data: br(l.createdAt.toISOString().slice(0, 10)), podeRemover: l.autorId === eu,
   }));
-  // o custo é do GP e do PMO: no balanço de leitura, fica de fora
-  const balanco = balancoDo(d, ini, hoje).filter((b) => b.dimensao !== 'Custo');
+  // o custo é do GP, do PMO e do patrocinador (dono do orçamento): para os demais, fica de fora do balanço
+  const balanco = balancoDo(d, ini, hoje).filter((b) => patrocina || b.dimensao !== 'Custo');
+  const fin = financeiroDo(d, ini);
+  const mudancas = d.pedidosMudanca.filter((m) => m.iniciativaId === ini.id).slice().reverse().slice(0, 5);
+  const SIT: Record<string, [string, string, string]> = { ok: ['Dentro do orçado', '#E3F5EA', '#17723D'], aten: ['Acima do orçado', '#FEF3DC', '#9A5B05'], crit: ['Estouro', '#FDE8E8', '#B42318'] };
 
   return (
     <>
       <div style={s('display: flex; flex-direction: column; gap: 6px')}>
-        <span style={s('font-size: 12px; color: #4B2FD1; font-weight: 600; letter-spacing: 0.4px')}>PROJETO · {nomeArea(d, ini.areaId).toUpperCase()} · {participa ? 'VOCÊ PARTICIPA' : 'VOCÊ PEDIU'}</span>
+        <span style={s('font-size: 12px; color: #4B2FD1; font-weight: 600; letter-spacing: 0.4px')}>PROJETO · {nomeArea(d, ini.areaId).toUpperCase()} · {patrocina ? 'VOCÊ PATROCINA' : participa ? 'VOCÊ PARTICIPA' : 'VOCÊ PEDIU'}</span>
         <div style={s('display: flex; flex-wrap: wrap; gap: 10px; align-items: center')}>
           <h1 style={s('margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.3px')}>{ini.titulo}</h1>
           {noRaia(d, ini, 'exe', 'pau') && <PillFarol farol={ini.farol} />}
         </div>
         <span style={s('font-size: 13px; color: #5E5770')}>{[gp ? `GP: ${gp.nome}` : null, patro ? `Patrocinador: ${patro}` : null, raia && raia.chave !== 'exe' ? `Etapa: ${raia.nome}` : null].filter(Boolean).join(' · ')}</span>
-        <span style={s('font-size: 12px; color: #5E5770')}>{participa ? 'Visão de leitura para quem participa do projeto.' : 'Este projeto nasceu da iniciativa que você pediu. Acompanhe o andamento por aqui.'} Quem planeja e altera o projeto é o GP{gp ? ` (${gp.nome})` : ''}.</span>
+        <span style={s('font-size: 12px; color: #5E5770')}>{patrocina ? 'Você é o patrocinador deste projeto: acompanhe o andamento, o custo e as mudanças.' : participa ? 'Visão de leitura para quem participa do projeto.' : 'Este projeto nasceu da iniciativa que você pediu. Acompanhe o andamento por aqui.'} Quem planeja e altera o projeto é o GP{gp ? ` (${gp.nome})` : ''}.</span>
       </div>
 
       {participa && <section aria-label="Sua parte no projeto" style={sCartao}>
@@ -88,7 +94,28 @@ export function VisaoLeitura({ d, sessao, ini, hoje }: { d: DadosOrg; sessao: Se
         {fases.map((f) => <span key={f.id} style={s('font-size: 13px; color: #4A4458')}>{f.nome} · {datas(f)}{f.confirmadaEm ? ' · concluída' : ''}</span>)}
       </section>
 
-      {(ini.beneficioIndicador || pediu) && (
+      {patrocina && (
+        <section aria-label="Custo e mudanças" style={sCartao}>
+          <h2 style={s('margin: 0; font-size: 18px; font-weight: 700')}>Custo e mudanças</h2>
+          {fin.orcado ? (
+            <div style={s('display: flex; flex-wrap: wrap; gap: 18px; align-items: center; font-size: 13px')}>
+              <span>Orçado <strong>{dinheiro(fin.orcado)}</strong></span>
+              <span>Realizado <strong>{dinheiro(fin.realizado)}</strong> ({fin.consumoPct}% do orçado; {fin.concluidoPct}% das tarefas prontas)</span>
+              <span>Previsto no fim <strong>{dinheiro(fin.previsao)}</strong></span>
+              <span style={{ ...s('font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 10px'), background: SIT[fin.situacao][1], color: SIT[fin.situacao][2] }}>{SIT[fin.situacao][0]}</span>
+            </div>
+          ) : <span style={s('font-size: 13px; color: #5E5770')}>Orçamento não definido.</span>}
+          <span style={s('font-size: 13px; font-weight: 700')}>Pedidos de mudança (escopo e custo)</span>
+          {mudancas.map((m) => (
+            <span key={m.id} style={s('font-size: 13px; color: #4A4458')}>
+              <strong>{TIPOS_MUDANCA[m.tipo] ?? m.tipo}</strong> · {m.descricao} · {m.status === 'pendente' ? 'aguardando o PMO' : m.status === 'aprovada' ? 'aprovada' : 'recusada'}{m.tipo === 'custo' && m.valorNovo ? ` (${dinheiro(m.valorAnterior ?? 0)} → ${dinheiro(m.valorNovo)})` : ''}
+            </span>
+          ))}
+          {mudancas.length === 0 && <span style={s('font-size: 13px; color: #5E5770')}>Nenhum pedido de mudança.</span>}
+        </section>
+      )}
+
+      {(ini.beneficioIndicador || pediu || patrocina) && (
         <section id="beneficio" aria-label="Benefício esperado" style={sCartao}>
           <div style={s('display: flex; flex-direction: column; gap: 2px')}>
             <h2 style={s('margin: 0; font-size: 18px; font-weight: 700')}>Benefício esperado</h2>

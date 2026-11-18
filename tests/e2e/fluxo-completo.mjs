@@ -583,6 +583,18 @@ try {
   await p.context().close();
   ok('Quem pediu exclui um rascunho e retira uma iniciativa que estava com o gestor (comentário obrigatório)');
 
+  // Patrocinador acompanha pela Início o projeto que patrocina, com custo e mudanças
+  p = await como('ricardo.moura@acme.com.br');
+  await ir(p, '/inicio');
+  await p.getByRole('region', { name: 'Projetos que você patrocina' }).getByRole('link', { name: new RegExp(TITULO) }).click();
+  await p.waitForURL(new RegExp(`/projetos/${projId}`));
+  await p.getByText(/VOCÊ PATROCINA/).waitFor();
+  const custoPatro = p.getByRole('region', { name: 'Custo e mudanças' });
+  await custoPatro.getByText(/Orçado/).first().waitFor();
+  await custoPatro.getByText(/aprovada \(/).first().waitFor(); // mudança de custo aprovada, com valores
+  await p.context().close();
+  ok('Patrocinador vê na Início os projetos que patrocina e acompanha o custo e as mudanças');
+
   // GP conclui o projeto pela página do projeto (gate com o aceite de quem pediu)
   p = await como('carlos.andrade@acme.com.br');
   await ir(p, `/projetos/${projId}#encerramento`);
