@@ -8,6 +8,7 @@ import { diffDias, br } from '@/lib/regras/datas';
 import { nivelDoRisco, validarRisco } from '@/lib/regras/riscos';
 import { participaDoProjeto } from '@/lib/visoes';
 import { contexto, executar, exigir, notificar } from './_ctx';
+import { estenderFase } from './_periodos';
 
 async function ctxGpOuPmo(iniciativaId: string) {
   const ctx = await contexto();
@@ -81,8 +82,9 @@ export async function decidirPrazo(id: string, aprovar: boolean) {
       else {
         const f = dados.fases.find((x) => x.id === ped.alvoId);
         if (f) {
+          // a fase é estendida até a nova data: cresce o último período dela
           const semanas = Math.max(f.duracao, Math.ceil(diffDias(ped.novoPrazo, dataDaSemana(ini.inicioProjeto!, f.inicioSemana)) / 7));
-          await tx.update(t.projetoFases).set({ duracao: semanas }).where(eq(t.projetoFases.id, f.id));
+          await estenderFase(tx, f.id, f.inicioSemana + semanas);
         }
       }
     });

@@ -279,6 +279,7 @@ export async function seedDemo(db: DB, hoje: string) {
     // ---------- Planos dos projetos ----------
     type F = [string, number, number];
     // Fases que terminaram antes da data do protótipo já nascem confirmadas pelo GP
+    const periodoDe: Record<string, string> = {};
     const plano = async (iniId: string, fases: F[], inicio: string) => {
       const ids: Record<string, string> = {};
       for (const [i, [nome, s, dur]] of fases.entries()) {
@@ -286,11 +287,13 @@ export async function seedDemo(db: DB, hoje: string) {
         const confirmadaEm = fim < DATA_PROTOTIPO ? ts(fim) : null;
         const [row] = await tx.insert(t.projetoFases).values({ iniciativaId: iniId, nome, inicioSemana: s, duracao: dur, ordem: i, criterioConclusao: fase[nome]?.crit ?? '', confirmadaEm }).returning();
         ids[nome] = row.id;
+        const [per] = await tx.insert(t.fasePeriodos).values({ faseId: row.id, inicioSemana: s, duracao: dur }).returning();
+        periodoDe[row.id] = per.id; // cada fase da demo nasce com um período
       }
       return ids;
     };
     const aloc = async (ids: Record<string, string>, lista: [string, string, number][]) => {
-      for (const [f, p, pct] of lista) await tx.insert(t.alocacoes).values({ faseId: ids[f], pessoaId: pes[p], pct });
+      for (const [f, p, pct] of lista) await tx.insert(t.alocacoes).values({ faseId: ids[f], periodoId: periodoDe[ids[f]], pessoaId: pes[p], pct });
     };
     const tarefas = async (iniId: string, ids: Record<string, string>, lista: [string, string, string, string, boolean][]) => {
       for (const [f, titulo, p, prazo, concluida] of lista) await tx.insert(t.tarefas).values({ iniciativaId: iniId, faseId: ids[f], titulo, responsavelId: pes[p], prazo: d(prazo), concluida });

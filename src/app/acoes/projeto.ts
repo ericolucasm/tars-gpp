@@ -2,12 +2,13 @@
 
 import { and, eq, inArray } from 'drizzle-orm';
 import { db, schema as t } from '@/db';
-import { dataDaSemana, descreverMudanca, desvio, fasesDoModelo, ordemValida, rotuloDesvio, validarEdicaoTarefa, validarEquipeFase, type Fase } from '@/lib/regras/projeto';
+import { dataDaSemana, descreverMudanca, desvio, fasesDoModelo, ordemValida, rotuloDesvio, validarEdicaoTarefa, validarEquipeFase, novoPeriodo, type Fase } from '@/lib/regras/projeto';
 import { gestorDe } from '@/lib/regras/pessoas';
 import { nivelDoRisco, validarRisco } from '@/lib/regras/riscos';
 import { br, nomeMes } from '@/lib/regras/datas';
 import { fasesDo, linhaBaseDo, pessoa } from '@/lib/visoes';
 import { contexto, executar, exigir, exigirPmo, notificar } from './_ctx';
+import { criarPeriodosIniciais, primeiroPeriodo, recalcularFase, unificarPeriodos } from './_periodos';
 
 // Quem mexe no projeto: o GP dele ou o PMO.
 async function ctxProjeto(iniciativaId: string) {
@@ -49,11 +50,49 @@ export async function definirFarol(iniciativaId: string, farol: 'ok' | 'aten' | 
 
 // ---------- Fases ----------
 
-export async function moverFase(faseId: string, inicioSemana: number, duracao: number) {
+/** Arrastar ou esticar uma barra: muda as datas de um período, e a fase acompanha (do início do 1º ao fim do último). */
+export async function moverPeriodo(periodoId: string, inicioSemana: number, duracao: number) {
   return executar(async () => {
-    await ctxFase(faseId);
+    const ctx0 = await contexto();
+    const per = ctx0.dados.periodos.find((x) => x.id === periodoId);
+    exigir(per, 'Período não encontrado.');
+    await ctxFase(per.faseId);
     exigir(inicioSemana >= 0 && duracao >= 1 && duracao <= 104, 'Datas inválidas.');
-    await db.update(t.projetoFases).set({ inicioSemana, duracao }).where(eq(t.projetoFases.id, faseId));
+    await db.transaction(async (tx) => {
+      await tx.update(t.fasePeriodos).set({ inicioSemana, duracao }).where(eq(t.fasePeriodos.id, periodoId));
+      await recalcularFase(tx, per.faseId);
+    });
+  });
+}
+
+/** "+": a fase ganha outro período (outro momento na linha do tempo, com equipe própria), logo depois do último. */
+export async function adicionarPeriodo(faseId: string) {
+  return executar(async () => {
+    const { dados, fase } = await ctxFase(faseId);
+    const novo = novoPeriodo(dados.periodos.filter((x) => x.faseId === faseId));
+    await db.transaction(async (tx) => {
+      await tx.insert(t.fasePeriodos).values({ faseId, ...novo });
+      await recalcularFase(tx, faseId);
+    });
+    return { ok: true, msg: `Novo período em ${fase.nome}. Arraste a barra para a data certa e clique nela para atribuir pessoas.` };
+  });
+}
+
+/** Remove um período (e as alocações dele). A fase precisa continuar com pelo menos um. */
+export async function removerPeriodo(periodoId: string) {
+  return executar(async () => {
+    const ctx0 = await contexto();
+    const per = ctx0.dados.periodos.find((x) => x.id === periodoId);
+    exigir(per, 'Período não encontrado.');
+    const { dados, fase } = await ctxFase(per.faseId);
+    exigir(dados.periodos.filter((x) => x.faseId === per.faseId).length > 1, 'A fase precisa de pelo menos um período. Para tirar a fase, use o × da linha.');
+    const pessoas = dados.alocacoes.filter((a) => a.periodoId === periodoId).map((a) => a.pessoaId);
+    await db.transaction(async (tx) => {
+      await tx.delete(t.fasePeriodos).where(eq(t.fasePeriodos.id, periodoId));
+      await recalcularFase(tx, per.faseId);
+    });
+    for (const p of pessoas) await sincronizarPedido(fase.iniciativaId, p);
+    return { ok: true, msg: 'Período removido.' };
   });
 }
 
@@ -83,7 +122,7 @@ export async function adicionarFase(iniciativaId: string, faseBibliotecaId: stri
     exigir(bib, 'Fase não encontrada na biblioteca.');
     const fases = fasesDo(dados, ini.id);
     const fim = fases.reduce((m, f) => Math.max(m, f.inicioSemana + f.duracao), 0);
-    await db.insert(t.projetoFases).values({ iniciativaId: ini.id, nome: bib.nome, inicioSemana: fim, duracao: bib.duracaoSemanas, ordem: fases.length, criterioConclusao: bib.criterioConclusao });
+    await criarPeriodosIniciais(db, await db.insert(t.projetoFases).values({ iniciativaId: ini.id, nome: bib.nome, inicioSemana: fim, duracao: bib.duracaoSemanas, ordem: fases.length, criterioConclusao: bib.criterioConclusao }).returning());
   });
 }
 
@@ -99,8 +138,10 @@ export async function recriarDoModelo(iniciativaId: string) {
     await db.transaction(async (tx) => {
       for (const p of padrao) {
         const f = atuais.find((x) => x.nome === p.nome);
-        if (f) await tx.update(t.projetoFases).set({ inicioSemana: p.inicioSemana, duracao: p.duracao, ordem: p.ordem }).where(eq(t.projetoFases.id, f.id));
-        else await tx.insert(t.projetoFases).values({ ...p, iniciativaId: ini.id });
+        if (f) {
+          await tx.update(t.projetoFases).set({ ordem: p.ordem }).where(eq(t.projetoFases.id, f.id));
+          await unificarPeriodos(tx, f.id, p.inicioSemana, p.duracao); // volta a um período só, com as datas do modelo
+        } else await criarPeriodosIniciais(tx, await tx.insert(t.projetoFases).values({ ...p, iniciativaId: ini.id }).returning());
       }
     });
   });
@@ -224,7 +265,8 @@ async function sincronizarPedido(iniciativaId: string, pessoaId: string) {
   if (pior && pior.pct > p.cedeAte) {
     const delta = pior.pct - p.cedeAte;
     const fase = fases.find((f) => f.id === pior.faseId);
-    const aPartirDe = fase && ini.inicioProjeto ? nomeMes(dataDaSemana(ini.inicioProjeto, fase.inicioSemana)) : null;
+    const janela = ctx.dados.periodos.find((x) => x.id === pior.periodoId) ?? fase; // mês em que a pessoa começa a atuar naquele período
+    const aPartirDe = janela && ini.inicioProjeto ? nomeMes(dataDaSemana(ini.inicioProjeto, janela.inicioSemana)) : null;
     if (pendente) await db.update(t.pedidosAlocacao).set({ deltaPct: delta, aPartirDe }).where(eq(t.pedidosAlocacao.id, pendente.id));
     else {
       await db.insert(t.pedidosAlocacao).values({ orgId: ctx.dados.org.id, iniciativaId, pessoaId, deltaPct: delta, aPartirDe, solicitadoPor: ctx.eu.id });
@@ -239,7 +281,9 @@ export async function alocarPessoa(faseId: string, pessoaId: string) {
   return executar(async () => {
     const { fase } = await ctxFase(faseId);
     exigir(pessoaId, 'Escolha a pessoa.');
-    await db.insert(t.alocacoes).values({ faseId, pessoaId, pct: 20 }).onConflictDoNothing();
+    const per = await primeiroPeriodo(db, faseId);
+    exigir(per, 'A fase não tem período.');
+    await db.insert(t.alocacoes).values({ faseId, periodoId: per.id, pessoaId, pct: 20 }).onConflictDoNothing();
     await sincronizarPedido(fase.iniciativaId, pessoaId);
   });
 }
@@ -265,7 +309,7 @@ export async function removerAlocacao(faseId: string, pessoaId: string) {
  * Painel da fase (linha expandida da linha do tempo): salva de uma vez a equipe (pessoas e %), o responsável pelo fim
  * da fase e os marcos novos ou removidos. Quem passar do que o gestor cede gera (ou atualiza) o pedido de alocação.
  */
-export async function salvarPainelFase(faseId: string, p: {
+export async function salvarPainelFase(faseId: string, periodoId: string, p: {
   alocacoes: { pessoaId: string; pct: number }[]; responsavelId: string | null;
   marcosNovos: { nome: string; data: string }[]; marcosRemovidos: string[];
 }) {
@@ -277,13 +321,14 @@ export async function salvarPainelFase(faseId: string, p: {
     exigir(!p.responsavelId || dados.pessoas.some((x) => x.id === p.responsavelId && !x.externo), 'Responsável inválido.');
     exigir(p.marcosNovos.every((m) => m.nome.trim()), 'Dê um nome ao marco.');
     exigir(p.marcosRemovidos.every((id) => dados.marcos.some((m) => m.id === id && m.faseId === faseId)), 'Marco não encontrado.');
-    const atuais = dados.alocacoes.filter((a) => a.faseId === faseId);
+    exigir(dados.periodos.some((x) => x.id === periodoId && x.faseId === faseId), 'Período não encontrado.');
+    const atuais = dados.alocacoes.filter((a) => a.periodoId === periodoId);
     const novos = new Map(p.alocacoes.map((a) => [a.pessoaId, a.pct]));
     const afetados = new Set<string>();
     for (const a of atuais) if (!novos.has(a.pessoaId)) { await db.delete(t.alocacoes).where(eq(t.alocacoes.id, a.id)); afetados.add(a.pessoaId); }
     for (const [pessoaId, pct] of novos) {
       if (atuais.find((a) => a.pessoaId === pessoaId)?.pct === pct) continue;
-      await db.insert(t.alocacoes).values({ faseId, pessoaId, pct }).onConflictDoUpdate({ target: [t.alocacoes.faseId, t.alocacoes.pessoaId], set: { pct } });
+      await db.insert(t.alocacoes).values({ faseId, periodoId, pessoaId, pct }).onConflictDoUpdate({ target: [t.alocacoes.periodoId, t.alocacoes.pessoaId], set: { pct } });
       afetados.add(pessoaId);
     }
     for (const pessoaId of afetados) await sincronizarPedido(fase.iniciativaId, pessoaId);

@@ -17,6 +17,7 @@ export type Ciclo = typeof t.ciclos.$inferSelect;
 export type Iniciativa = typeof t.iniciativas.$inferSelect;
 export type ProjetoFase = typeof t.projetoFases.$inferSelect;
 export type Alocacao = typeof t.alocacoes.$inferSelect;
+export type FasePeriodo = typeof t.fasePeriodos.$inferSelect;
 export type Tarefa = typeof t.tarefas.$inferSelect;
 export type Marco = typeof t.marcos.$inferSelect;
 export type Risco = typeof t.riscos.$inferSelect;
@@ -44,7 +45,7 @@ async function carregar(orgId: string) {
   const fasesDoOrg = sql`(select f.id from projeto_fases f join iniciativas i on i.id = f.iniciativa_id where i.org_id = ${orgId})`;
   const [
     org, areas, pessoas, ciclos, raias, iniciativas, fasesBiblioteca, modelos, pedidos, avaliacoes,
-    fases, alocacoes, tarefas, marcos, riscos, reports, linhasBase, mudancas, pontos, pedidosMudanca, lancamentos, dependencias, licoes, pedidosPrazo, ausencias, delegacoes, feedbacks,
+    fases, alocacoes, tarefas, marcos, riscos, reports, linhasBase, mudancas, pontos, pedidosMudanca, lancamentos, dependencias, licoes, pedidosPrazo, ausencias, delegacoes, feedbacks, periodos,
   ] = await Promise.all([
     db.query.orgs.findFirst({ where: eq(t.orgs.id, orgId) }),
     db.select().from(t.areas).where(eq(t.areas.orgId, orgId)).orderBy(t.areas.ordem),
@@ -73,6 +74,7 @@ async function carregar(orgId: string) {
     db.select().from(t.ausencias).where(eq(t.ausencias.orgId, orgId)).orderBy(t.ausencias.inicio),
     db.select().from(t.delegacoes).where(eq(t.delegacoes.orgId, orgId)).orderBy(t.delegacoes.createdAt),
     db.select().from(t.feedbacks).where(eq(t.feedbacks.orgId, orgId)).orderBy(t.feedbacks.createdAt),
+    db.select().from(t.fasePeriodos).where(inArray(t.fasePeriodos.faseId, fasesDoOrg)).orderBy(t.fasePeriodos.inicioSemana, t.fasePeriodos.createdAt),
   ]);
   if (!org) throw new Error('Empresa não encontrada');
 
@@ -82,7 +84,7 @@ async function carregar(orgId: string) {
 
   return {
     org, areas, pessoas, ciclos, raias: raias as unknown as (Raia & typeof raias[number])[], iniciativas, fasesBiblioteca, modelos,
-    pedidos, avaliacoes, fases, alocacoes, tarefas, marcos, riscos, reports, linhasBase, mudancas, pontos, pedidosMudanca, lancamentos, dependencias, licoes, pedidosPrazo, ausencias, delegacoes, feedbacks,
+    pedidos, avaliacoes, fases, alocacoes, tarefas, marcos, riscos, reports, linhasBase, mudancas, pontos, pedidosMudanca, lancamentos, dependencias, licoes, pedidosPrazo, ausencias, delegacoes, feedbacks, periodos,
   };
 }
 

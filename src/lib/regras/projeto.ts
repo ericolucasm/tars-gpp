@@ -166,3 +166,40 @@ export function validarEquipeFase(alocs: { pessoaId: string; pct: number }[]): s
 export function siglaEquipe(alocs: { nome: string; pct: number }[]) {
   return alocs.map((a) => `${a.nome.trim().split(/\s+/).map((x) => x[0]).slice(0, 2).join('').toUpperCase()} ${a.pct}%`).join(' · ');
 }
+
+// ---------- Períodos de uma fase ----------
+
+export type PeriodoR = { id: string; inicioSemana: number; duracao: number };
+
+/** A fase vai do início do 1º período ao fim do último (é o que vale para o gate, o status, a linha de base e o desvio). */
+export function envelopeDosPeriodos(periodos: { inicioSemana: number; duracao: number }[]) {
+  if (!periodos.length) return null;
+  const ini = Math.min(...periodos.map((p) => p.inicioSemana));
+  const fim = Math.max(...periodos.map((p) => p.inicioSemana + p.duracao));
+  return { inicioSemana: ini, duracao: Math.max(1, fim - ini) };
+}
+
+/** Novo período ("+"): começa logo depois do fim do último, com 2 semanas. */
+export function novoPeriodo(periodos: { inicioSemana: number; duracao: number }[], duracao = 2) {
+  const env = envelopeDosPeriodos(periodos);
+  return { inicioSemana: env ? env.inicioSemana + env.duracao : 0, duracao };
+}
+
+/** Períodos em ordem de data (1º, 2º…). */
+export function ordenarPeriodos<T extends { inicioSemana: number; duracao: number }>(periodos: T[]) {
+  return periodos.slice().sort((a, b) => a.inicioSemana - b.inicioSemana || a.duracao - b.duracao);
+}
+
+/** Estende a fase até uma semana final: o último período é o que cresce (nunca diminui). */
+export function estenderUltimoPeriodo<T extends PeriodoR>(periodos: T[], fimSemana: number): T[] {
+  const ord = ordenarPeriodos(periodos);
+  const ult = ord[ord.length - 1];
+  if (!ult) return periodos;
+  const dur = Math.max(ult.duracao, fimSemana - ult.inicioSemana);
+  return periodos.map((p) => (p.id === ult.id ? { ...p, duracao: dur } : p));
+}
+
+/** Rótulo do período na tela: "1º período" (só quando a fase tem mais de um). */
+export function rotuloPeriodo(indice: number, total: number) {
+  return total > 1 ? `${indice + 1}º período` : '';
+}

@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import { s } from '@/lib/css';
 import { br } from '@/lib/regras/datas';
-import { salvarPainelFase } from '@/app/acoes/projeto';
+import { removerPeriodo, salvarPainelFase } from '@/app/acoes/projeto';
 
 type Pessoa = { id: string; nome: string; ini: string; papel: string; cap: number | null; noProjeto: boolean };
 type Marco = { id: string; faseId: string; nome: string; data: string | null; status: string };
@@ -16,8 +16,8 @@ const sMini = s('width: 28px; height: 28px; border-radius: 7px; border: 1px soli
  * Linha expandida da linha do tempo: quem atua na fase e com quanto, quem confirma o fim dela (gate) e os marcos.
  * Tudo fica em rascunho até o OK, que salva de uma vez e fecha o painel.
  */
-export function PainelFase({ fase, datas, criterio, pessoas, alocs, marcos, responsavelId, gpNome, aoFechar }: {
-  fase: { id: string; nome: string }; datas: string; criterio: string; pessoas: Pessoa[];
+export function PainelFase({ fase, periodo, datas, criterio, pessoas, alocs, marcos, responsavelId, gpNome, aoFechar }: {
+  fase: { id: string; nome: string }; periodo: { id: string; rotulo: string; total: number }; datas: string; criterio: string; pessoas: Pessoa[];
   alocs: { pessoaId: string; pct: number }[]; marcos: Marco[]; responsavelId: string | null; gpNome: string; aoFechar: (msg?: string) => void;
 }) {
   const [equipe, setEquipe] = useState(alocs);
@@ -34,7 +34,7 @@ export function PainelFase({ fase, datas, criterio, pessoas, alocs, marcos, resp
 
   function ok() {
     start(async () => {
-      const r = await salvarPainelFase(fase.id, { alocacoes: equipe, responsavelId: resp || null, marcosNovos: novos, marcosRemovidos: removidos });
+      const r = await salvarPainelFase(fase.id, periodo.id, { alocacoes: equipe, responsavelId: resp || null, marcosNovos: novos, marcosRemovidos: removidos });
       if (!r.ok) setErro(r.erro); else aoFechar(r.msg);
     });
   }
@@ -43,12 +43,12 @@ export function PainelFase({ fase, datas, criterio, pessoas, alocs, marcos, resp
     <div role="region" aria-label={`Painel da fase ${fase.nome}`}
       style={s('margin: 4px 8px 10px; padding: 16px; border-radius: 12px; border: 2px solid #6D4AFF; background: #FFFFFF; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 6px 18px rgba(38, 33, 58, 0.08)')}>
       <div style={s('display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; justify-content: space-between')}>
-        <span style={s('font-size: 15px; font-weight: 700')}>{fase.nome} <span style={s('font-size: 12px; font-weight: 500; color: #5E5770')}>· {datas}</span></span>
+        <span style={s('font-size: 15px; font-weight: 700')}>{fase.nome}{periodo.rotulo ? ` · ${periodo.rotulo}` : ''} <span style={s('font-size: 12px; font-weight: 500; color: #5E5770')}>· {datas}</span></span>
         <span style={s('font-size: 12px; color: #8A8296')}>Para mudar as datas, arraste a barra.</span>
       </div>
 
       <div style={s('display: flex; flex-direction: column; gap: 8px')}>
-        <span style={sLab}>QUEM ATUA NESTA FASE</span>
+        <span style={sLab}>{periodo.total > 1 ? 'QUEM ATUA NESTE PERÍODO' : 'QUEM ATUA NESTA FASE'}</span>
         {equipe.map((a) => {
           const x = pessoa(a.pessoaId);
           const acima = x?.cap != null && a.pct > x.cap;
@@ -78,7 +78,7 @@ export function PainelFase({ fase, datas, criterio, pessoas, alocs, marcos, resp
       </div>
 
       <div style={s('display: flex; flex-direction: column; gap: 8px; padding-top: 12px; border-top: 1px solid #EFEBE3')}>
-        <span style={sLab}>DA FASE</span>
+        <span style={sLab}>{periodo.total > 1 ? 'DA FASE (VALE PARA TODOS OS PERÍODOS)' : 'DA FASE'}</span>
         <label style={s('display: flex; flex-wrap: wrap; gap: 10px; align-items: center; font-size: 13px')}>Responsável pelo fim da fase (gate)
           <select aria-label="Responsável pelo fim da fase" value={resp} onChange={(e) => setResp(e.target.value)} style={sSel}>
             <option value="">{gpNome ? `${gpNome} (GP do projeto)` : 'GP do projeto'}</option>
@@ -102,7 +102,9 @@ export function PainelFase({ fase, datas, criterio, pessoas, alocs, marcos, resp
       </div>
 
       {erro && <span role="alert" style={s('font-size: 13px; color: #B42318')}>{erro}</span>}
-      <div style={s('display: flex; gap: 8px; justify-content: flex-end')}>
+      <div style={s('display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap')}>
+        {periodo.total > 1 && <button type="button" disabled={pend} onClick={() => { if (confirm(`Remover o ${periodo.rotulo} de ${fase.nome}? As pessoas atribuídas a ele saem junto.`)) start(async () => { const r = await removerPeriodo(periodo.id); if (!r.ok) setErro(r.erro); else aoFechar(r.msg); }); }}
+          style={s('height: 38px; padding: 0 14px; border-radius: 10px; border: 1px solid #F5D2D2; background: #FFFFFF; color: #B42318; font-size: 13px; margin-right: auto')}>Remover este período</button>}
         <button type="button" onClick={() => aoFechar()} style={s('height: 38px; padding: 0 14px; border-radius: 10px; border: 1px solid #E2DCD0; background: #FFFFFF; color: #26213A; font-size: 13px')}>Cancelar</button>
         <button type="button" disabled={pend} onClick={ok} style={s('height: 38px; padding: 0 18px; border-radius: 10px; border: 0; background: #6D4AFF; color: #FFFFFF; font-weight: 600; font-size: 13px')}>OK</button>
       </div>
