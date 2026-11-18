@@ -8,6 +8,7 @@ import { resumoFinanceiro, situacaoCusto } from './financeiro';
 import { dimCusto, dimEscopo, dimPrazo, dimRiscos, farolGeral } from './farol';
 import { nivelDoRisco, riscoAtivo, validarRisco } from './riscos';
 import { picoNoPeriodo, situacaoCapacidade, pessoasEq } from './capacidade';
+import { podeMedirBeneficio, situacaoBeneficio, validarMedicao } from './beneficios';
 import { gestorDe, timeDireto, areasSobGestao, nomeCurto, acimaDoCedido } from './pessoas';
 import { addDias, diffDias, dataPorExtenso, haQuanto, proximaSexta } from './datas';
 
@@ -250,6 +251,25 @@ describe('capacidade por período', () => {
     expect(situacaoCapacidade(50, 150)).toBe('ok');
     expect(situacaoCapacidade(10, 0)).toBe('crit');
     expect(pessoasEq(120)).toBe('1,2');
+  });
+});
+
+describe('benefícios', () => {
+  const b = (x = {}) => ({ beneficioIndicador: 'Tempo de separação', beneficioMedirEm: '2026-12-01', beneficioAtingido: null, ...x });
+  it('situação do benefício', () => {
+    expect(situacaoBeneficio(b({ beneficioIndicador: null }), '2026-12-10')).toBe('sem');
+    expect(situacaoBeneficio(b(), '2026-11-30')).toBe('aguardando');
+    expect(situacaoBeneficio(b(), '2026-12-01')).toBe('medir');
+    expect(situacaoBeneficio(b({ beneficioAtingido: 'parcial' }), '2026-12-10')).toBe('medido');
+  });
+  it('quem mede e validação', () => {
+    const i = { solicitanteId: 's', aprovadorId: 'g', gpId: 'gp' };
+    expect(['s', 'g', 'gp'].every((x) => podeMedirBeneficio(i, x, false))).toBe(true);
+    expect(podeMedirBeneficio(i, 'outro', false)).toBe(false);
+    expect(podeMedirBeneficio(i, 'outro', true)).toBe(true);
+    expect(validarMedicao({ resultado: '14 minutos', atingido: 'sim' })).toBeNull();
+    expect(validarMedicao({ resultado: '', atingido: 'sim' })).toMatch(/resultado/);
+    expect(validarMedicao({ resultado: '14 min', atingido: 'talvez' })).toMatch(/meta/);
   });
 });
 

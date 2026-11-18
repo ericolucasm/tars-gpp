@@ -11,7 +11,7 @@ import { BarraDeNavegacao, ItemMenu } from './Navegacao';
 type Item = { href: string; rotulo: string; ativo?: boolean };
 
 export type Atual =
-  | 'inicio' | 'nova' | 'area-iniciativas' | 'area-projetos' | 'area-time' | 'portfolio' | 'ciclos' | 'avaliacao' | 'projetos' | 'cadastros' | 'configuracoes' | 'relatorios' | 'pontos' | 'roadmap' | `projeto:${string}`;
+  | 'inicio' | 'nova' | 'area-iniciativas' | 'area-projetos' | 'area-time' | 'portfolio' | 'ciclos' | 'avaliacao' | 'projetos' | 'cadastros' | 'configuracoes' | 'relatorios' | 'pontos' | 'roadmap' | 'beneficios' | `projeto:${string}`;
 
 const ROTULO_PERFIL: Record<Perfil, string> = { colaborador: 'Colaborador', gestor: 'Gestor de área', gp: 'Gerente de projeto', pmo: 'PMO' };
 

@@ -23,7 +23,7 @@ const PASSOS = [
   { title: 'Você recebe a decisão', desc: 'Aprovada, no backlog ou não aprovada, sempre com o motivo.' },
 ];
 
-const VAZIO: DadosForm = { titulo: '', problema: '', resultadoEsperado: '', tipo: '', patrocinadorTexto: '', areasImpactadas: [], urgencia: 'esp', justificativaUrgencia: '', inicioDesejado: '', entregaDesejada: '', faixaCusto: 'Não sei', fornecedor: 'Não sei' };
+const VAZIO: DadosForm = { titulo: '', problema: '', resultadoEsperado: '', tipo: '', patrocinadorTexto: '', areasImpactadas: [], urgencia: 'esp', justificativaUrgencia: '', inicioDesejado: '', entregaDesejada: '', faixaCusto: 'Não sei', fornecedor: 'Não sei', beneficioIndicador: '', beneficioMeta: '', beneficioMedirEm: '' };
 
 const sSecao = s('background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 16px');
 const sNum = s('width: 24px; height: 24px; border-radius: 50%; background: #E7E0FF; color: #4B2FD1; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center');
@@ -113,6 +113,15 @@ export function FormIniciativa({ ctx, inicial, nota, editavel = true }: { ctx: C
                 <span style={sAjuda}>Se possível, com um número: tempo, custo, volume, satisfação.</span>
                 <textarea value={f.resultadoEsperado} onChange={(e) => set('resultadoEsperado', e.target.value)} rows={2} placeholder="Separar um pedido em até 15 minutos." style={area(false)} />
               </label>
+              <div role="group" aria-label="Como vamos medir" style={s('display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 12px; background: #F7F5F0')}>
+                <span style={s('font-size: 13px; font-weight: 600')}>Como vamos medir? <span style={s('font-weight: 400; color: #5E5770')}>(opcional, mas ajuda a priorizar)</span></span>
+                <span style={sAjuda}>Depois da entrega, alguém registra o resultado real e o PMO compara com o esperado.</span>
+                <div style={s('display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px')}>
+                  <label style={sLab}>Indicador<input type="text" value={f.beneficioIndicador} onChange={(e) => set('beneficioIndicador', e.target.value)} placeholder="Tempo médio de separação" style={campo(false)} /></label>
+                  <label style={sLab}>Meta<input type="text" value={f.beneficioMeta} onChange={(e) => set('beneficioMeta', e.target.value)} placeholder="Até 15 minutos" style={campo(false)} /></label>
+                  <label style={sLab}>Medir em<input type="date" value={f.beneficioMedirEm} onChange={(e) => set('beneficioMedirEm', e.target.value)} style={campo(false)} /></label>
+                </div>
+              </div>
               <div style={s('display: flex; flex-direction: column; gap: 8px')}>
                 <span style={s('font-size: 13px; font-weight: 600')}>Tipo de iniciativa *</span>
                 <div style={s('display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px')}>

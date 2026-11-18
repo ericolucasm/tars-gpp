@@ -10,6 +10,9 @@ import { TelaProjeto } from './TelaProjeto';
 import { SecaoPontos } from './SecaoPontos';
 import { Mudancas } from './Mudancas';
 import { Financeiro } from './Financeiro';
+import { CartaoBeneficio } from '@/components/Beneficio';
+import { beneficioVM } from '@/lib/beneficios-vm';
+import { s } from '@/lib/css';
 import { TIPOS_MUDANCA } from '@/lib/regras/mudancas';
 import { dinheiro } from '@/lib/regras/datas';
 import { dimensoesSemPrazo, financeiroDo, orcamentoDoProjeto } from '@/lib/visoes';
@@ -74,6 +77,13 @@ export default async function Projeto({ params, searchParams }: { params: Promis
             lancamentos={d.lancamentos.filter((l) => l.iniciativaId === ini.id).slice().reverse().map((l) => ({ id: l.id, data: br(l.data), descricao: l.descricao, valor: dinheiro(l.valor), autor: pessoa(d, l.autorId)?.nome ?? '' }))} />
         );
       })()}
+      <section id="beneficio" aria-label="Benefício esperado" style={s('background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px; scroll-margin-top: 16px')}>
+        <div style={s('display: flex; flex-direction: column; gap: 2px')}>
+          <h2 style={s('margin: 0; font-size: 18px; font-weight: 700')}>Benefício esperado</h2>
+          <span style={s('font-size: 12px; color: #5E5770')}>Como saber se o projeto deu resultado. Na data de medir, quem pediu, o gestor, o GP ou o PMO registra o resultado real.</span>
+        </div>
+        <CartaoBeneficio b={beneficioVM(d, ini, sessao.pessoa.id, ehPmo, hoje)} />
+      </section>
       <Mudancas iniciativaId={ini.id} orcamento={dinheiro(orcamentoDoProjeto(ini))} ehPmo={ehPmo} podePedir={ehPmo || ehGp}
         pedidos={d.pedidosMudanca.filter((m) => m.iniciativaId === ini.id).reverse().map((m) => ({
           id: m.id, tipo: m.tipo, tipoRotulo: TIPOS_MUDANCA[m.tipo] ?? m.tipo, descricao: m.descricao, justificativa: m.justificativa,

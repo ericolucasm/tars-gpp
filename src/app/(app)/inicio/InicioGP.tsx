@@ -7,6 +7,7 @@ import { dataDaSemana } from '@/lib/regras/projeto';
 import { gestorDe } from '@/lib/regras/pessoas';
 import { alocacaoDe, infoProjeto, nomeArea, noRaia, pessoa } from '@/lib/visoes';
 import { Barra, ItemAcao, PillFarol, Vazio } from '@/components/ui';
+import { beneficiosParaMedir } from '@/lib/beneficios-vm';
 import { Saudacao } from './Saudacao';
 
 export function InicioGP({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao; hoje: string }) {
@@ -51,6 +52,11 @@ export function InicioGP({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao; hoj
     }
   }
 
+  const aMedir = beneficiosParaMedir(d, eu.id, false, hoje);
+  if (aMedir.length) {
+    itens.push(<ItemAcao key="beneficios" href="/beneficios" numero={aMedir.length} titulo={aMedir.length === 1 ? 'Benefício para medir' : 'Benefícios para medir'}
+      sub={aMedir.slice(0, 3).map((i) => `${i.titulo.split(' para ')[0]}: ${i.beneficioIndicador}`).join(' · ')} acao="Registrar →" />);
+  }
   // Próximos 7 dias: tarefas, marcos e status
   const ate = addDias(hoje, 7);
   const eventos: { data: string; texto: string }[] = [];

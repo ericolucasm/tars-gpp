@@ -19,7 +19,7 @@ export default async function EditarIniciativa({ params }: { params: Promise<{ i
       <FormIniciativa
         ctx={contextoForm(d, sessao, hojeISO())}
         inicial={{
-          id: i.id, titulo: i.titulo, problema: i.problema, resultadoEsperado: i.resultadoEsperado, tipo: i.tipo,
+          id: i.id, titulo: i.titulo, problema: i.problema, resultadoEsperado: i.resultadoEsperado, beneficioIndicador: i.beneficioIndicador ?? '', beneficioMeta: i.beneficioMeta ?? '', beneficioMedirEm: i.beneficioMedirEm ?? '', tipo: i.tipo,
           patrocinadorTexto: i.patrocinadorTexto ?? '', areasImpactadas: i.areasImpactadas, urgencia: i.urgencia,
           justificativaUrgencia: i.justificativaUrgencia ?? '', inicioDesejado: i.inicioDesejado ?? '', entregaDesejada: i.entregaDesejada ?? '',
           faixaCusto: i.faixaCusto, fornecedor: i.fornecedor,

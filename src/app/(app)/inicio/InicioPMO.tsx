@@ -7,6 +7,7 @@ import { cicloAberto, financeiroDo, infoProjeto, listaAvaliacao, nomeArea, noRai
 import { ItemAcao, Kpi, GradeKpi, Painel, Vazio } from '@/components/ui';
 import { pontoAtrasado, pontoEsperaPor } from '@/lib/regras/pontos';
 import { riscoAtivo } from '@/lib/regras/riscos';
+import { beneficiosParaMedir } from '@/lib/beneficios-vm';
 import { Saudacao } from './Saudacao';
 import { PainelCiclo } from './PainelCiclo';
 import { BotaoCobrar } from './BotaoCobrar';
@@ -57,6 +58,11 @@ export function InicioPMO({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao; ho
     const proj = d.iniciativas.find((i) => i.id === m.iniciativaId);
     itens.push(<ItemAcao key={m.id} href={`/projetos/${m.iniciativaId}#mudancas`} numero={1} titulo={`Pedido de mudança de ${m.tipo === 'custo' ? 'custo' : 'escopo'}`}
       sub={`${proj?.titulo ?? ''} · ${pessoa(d, m.solicitanteId)?.nome ?? ''}: ${m.descricao}`} acao="Decidir →" />);
+  }
+  const aMedir = beneficiosParaMedir(d, sessao.pessoa.id, true, hoje);
+  if (aMedir.length) {
+    itens.push(<ItemAcao key="beneficios" href="/beneficios" numero={aMedir.length} titulo={aMedir.length === 1 ? 'Benefício para medir' : 'Benefícios para medir'}
+      sub={aMedir.slice(0, 3).map((i) => `${i.titulo.split(' para ')[0]}: ${i.beneficioIndicador}`).join(' · ')} acao="Registrar →" />);
   }
   const pontos = d.pontos.filter((x) => pontoEsperaPor(x, sessao.pessoa.id, true));
   if (pontos.length) {

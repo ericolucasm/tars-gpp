@@ -36,10 +36,16 @@ try {
     await p.getByPlaceholder('Reduzir o tempo de separação de pedidos').fill(t);
     await p.getByPlaceholder(/A separação de um pedido leva/).fill('Hoje não temos visibilidade dos atrasos da expedição.');
     await p.getByRole('button', { name: /Melhoria/ }).click();
+    if (t === TITULO) {
+      const medir = p.getByRole('group', { name: 'Como vamos medir' });
+      await medir.getByLabel('Indicador').fill('Pedidos expedidos com atraso por semana');
+      await medir.getByLabel('Meta').fill('Menos de 5');
+      await medir.getByLabel('Medir em').fill(new Date(Date.now() - 86400000).toISOString().slice(0, 10)); // ontem: já é hora de medir
+    }
     await p.getByRole('button', { name: 'Enviar para aprovação' }).click();
     await p.getByText('Iniciativa enviada para aprovação').waitFor();
   }
-  ok('Colaborador valida obrigatórios e envia 2 iniciativas');
+  ok('Colaborador valida obrigatórios e envia 2 iniciativas (uma com indicador e meta de benefício)');
   await p.context().close();
 
   // 2. Fernanda aprova uma e devolve a outra
@@ -219,6 +225,16 @@ try {
   await ponto.getByRole('button', { name: 'Registrar resolução' }).click();
   await p.getByRole('region', { name: 'Resolvidos recentemente' }).getByText('Contrato acionado; ambiente liberado até quarta.').waitFor();
   ok('PMO vê o ponto de atenção na Início e registra a resolução');
+  await ir(p, '/inicio');
+  await p.getByText('Benefício para medir').click();
+  await p.waitForURL(/\/beneficios$/);
+  const ben = p.getByRole('article', { name: `Benefício de ${TITULO}` });
+  await ben.getByRole('button', { name: 'Registrar resultado' }).click();
+  await ben.getByLabel(/Resultado medido/).fill('3 por semana');
+  await ben.getByRole('button', { name: 'Atingida', exact: true }).click();
+  await ben.getByRole('button', { name: 'Salvar resultado' }).click();
+  await p.getByRole('region', { name: 'Resultados registrados' }).getByText('3 por semana', { exact: false }).waitFor();
+  ok('PMO vê "Benefício para medir" na Início e registra o resultado (meta atingida)');
   await p.goto(urlProjeto, { waitUntil: 'networkidle' });
   const pedidoCusto = p.getByRole('article', { name: /Mudança de custo: Licenças adicionais do painel/ });
   await pedidoCusto.getByRole('button', { name: 'Aprovar pedido' }).click();
@@ -311,7 +327,7 @@ try {
 
   // Relatórios: cada perfil chega pelo menu e vê os relatórios dele
   const relatoriosPorPerfil = [
-    ['mariana@acme.com.br', 'pmo', ['Portfólio por etapa', 'Saúde dos projetos', 'Financeiro dos projetos', 'Matriz de riscos', 'Riscos do portfólio', 'Ciclos de planejamento', 'Demanda por área', 'Capacidade por área e mês', 'Capacidade das pessoas']],
+    ['mariana@acme.com.br', 'pmo', ['Portfólio por etapa', 'Saúde dos projetos', 'Financeiro dos projetos', 'Matriz de riscos', 'Riscos do portfólio', 'Ciclos de planejamento', 'Demanda por área', 'Benefícios', 'Capacidade por área e mês', 'Capacidade das pessoas']],
     ['fernanda.oliveira@acme.com.br', null, ['Iniciativas da área', 'Projetos da área', 'Capacidade por área e mês', 'Alocação do time']],
     ['carlos.andrade@acme.com.br', null, ['Meus projetos', 'Financeiro dos projetos', 'Riscos dos meus projetos', 'Tarefas em aberto', 'Equipe dos meus projetos']],
     ['joao.silva@acme.com.br', null, ['Minhas iniciativas', 'Minhas tarefas']],
