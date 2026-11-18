@@ -381,7 +381,7 @@ try {
   // Relatórios: cada perfil chega pelo menu e vê os relatórios dele
   const relatoriosPorPerfil = [
     ['mariana@acme.com.br', 'pmo', ['Portfólio por etapa', 'Saúde dos projetos', 'Financeiro dos projetos', 'Matriz de riscos', 'Riscos do portfólio', 'Ciclos de planejamento', 'Demanda por área', 'Dependências entre projetos', 'Benefícios', 'Lições aprendidas', 'Capacidade por área e mês', 'Capacidade das pessoas']],
-    ['fernanda.oliveira@acme.com.br', null, ['Iniciativas da área', 'Projetos da área', 'Capacidade por área e mês', 'Alocação do time']],
+    ['fernanda.oliveira@acme.com.br', null, ['Iniciativas da área', 'Projetos da área', 'Custos da área', 'Capacidade por área e mês', 'Alocação do time']],
     ['carlos.andrade@acme.com.br', null, ['Meus projetos', 'Financeiro dos projetos', 'Riscos dos meus projetos', 'Lições aprendidas', 'Tarefas em aberto', 'Equipe dos meus projetos']],
     ['joao.silva@acme.com.br', null, ['Minhas iniciativas', 'Minhas tarefas']],
   ];

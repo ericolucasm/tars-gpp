@@ -160,7 +160,7 @@ function resumoAlocacao(lista: ComAloc[]) {
 const OPC_SIT_CUSTO = com('Todas as situações', [{ valor: 'crit', rotulo: 'Estouro de orçamento' }, { valor: 'aten', rotulo: 'Previsão acima do orçado' }, { valor: 'ok', rotulo: 'Dentro do orçamento' }]);
 const ROT_CUSTO: Record<string, string> = { ok: 'Dentro', aten: 'Acima do orçado', crit: 'Estouro' };
 
-function relatorioFinanceiro(d: DadosOrg, projetos: Iniciativa[], busca: Busca, comArea: boolean, filtrosExtra: Filtro[]): Relatorio {
+function relatorioFinanceiro(d: DadosOrg, projetos: Iniciativa[], busca: Busca, comArea: boolean, filtrosExtra: Filtro[], texto?: { titulo: string; descricao: string }): Relatorio {
   const fSit = filtro(busca, 'financeiro', 'situacao', 'Situação do custo', OPC_SIT_CUSTO);
   const linhas = projetos.map((i) => ({ i, f: financeiroDo(d, i) }))
     .filter((x) => fSit.valor === TODOS || x.f.situacao === fSit.valor)
@@ -168,7 +168,7 @@ function relatorioFinanceiro(d: DadosOrg, projetos: Iniciativa[], busca: Busca, 
   const soma = (k: 'orcado' | 'realizado' | 'previsao') => linhas.reduce((s, x) => s + x.f[k], 0);
   const orcado = soma('orcado'), previsao = soma('previsao');
   return {
-    id: 'financeiro', titulo: 'Financeiro dos projetos', descricao: 'Orçado, realizado e previsão de custo no fim de cada projeto em execução ou pausado, dos maiores desvios para os menores.',
+    id: 'financeiro', titulo: texto?.titulo ?? 'Financeiro dos projetos', descricao: texto?.descricao ?? 'Orçado, realizado e previsão de custo no fim de cada projeto em execução ou pausado, dos maiores desvios para os menores.',
     filtros: [...filtrosExtra, fSit],
     resumo: [
       { rotulo: 'Orçado', valor: dinheiro(orcado) },
@@ -488,6 +488,14 @@ function relatoriosGestor(d: DadosOrg, eu: Pessoa, hoje: string, busca: Busca): 
   const fArea2 = filtro(busca, 'projetos', 'area', 'Área', opcSubarea);
   const projetos = filtraFarol(d.iniciativas.filter((i) => i.areaId && minhas.has(i.areaId) && noRaia(d, i, 'exe', 'pau') && naArea(d, i.areaId, fArea2)), fFarol2);
 
+  // Custos da área · filtros: etapa e área
+  const fEtapaF = filtro(busca, 'financeiro', 'etapa', 'Etapa', [
+    { valor: 'rodando', rotulo: 'Em execução e pausados' }, { valor: 'con', rotulo: 'Concluídos' }, { valor: 'todos', rotulo: 'Todos (inclui concluídos)' },
+  ]);
+  const fAreaF = filtro(busca, 'financeiro', 'area', 'Área', opcSubarea);
+  const etapas = fEtapaF.valor === 'con' ? ['con'] : fEtapaF.valor === 'todos' ? ['exe', 'pau', 'con'] : ['exe', 'pau'];
+  const projetosFin = d.iniciativas.filter((i) => i.areaId && minhas.has(i.areaId) && noRaia(d, i, ...etapas) && naArea(d, i.areaId, fAreaF));
+
   // 3. Time · filtro: situação
   const fSit3 = filtro(busca, 'time', 'situacao', 'Situação', OPC_SITUACAO_PESSOA);
   const time = comAlocacao(d, timeDireto(eu.id, d.pessoas, d.areas), hoje, fSit3);
@@ -510,6 +518,9 @@ function relatoriosGestor(d: DadosOrg, eu: Pessoa, hoje: string, busca: Busca): 
       filtros: temSub ? [fFarol2, fArea2] : [fFarol2],
       resumo: resumoFarol(projetos), colunas: COLUNAS_SAUDE(false), linhas: saudeProjetos(d, projetos, hoje, false), vazio: 'Nenhum projeto com esses filtros.',
     },
+    relatorioFinanceiro(d, projetosFin, busca, temSub, temSub ? [fEtapaF, fAreaF] : [fEtapaF], {
+      titulo: 'Custos da área', descricao: 'Orçado, realizado e previsão de custo no fim de todos os projetos da sua área somados, dos maiores desvios para os menores. Vermelho: estourando.',
+    }),
     relatorioCapacidadeMes(d, hoje, busca, minhas),
     {
       id: 'time', titulo: 'Alocação do time', descricao: 'Quanto cada pessoa do seu time pode ceder para projetos e quanto está alocada.',
