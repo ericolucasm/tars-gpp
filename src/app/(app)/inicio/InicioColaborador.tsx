@@ -32,7 +32,7 @@ function passo(d: DadosOrg, i: Iniciativa, hoje: string) {
   return { at: 4, alerta: false, sub: `Não aprovada${i.motivoSaida ? ` · motivo: ${i.motivoSaida}` : ''}` };
 }
 
-export function InicioColaborador({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao; hoje: string }) {
+export function InicioColaborador({ d, sessao, hoje, novidades }: { d: DadosOrg; sessao: Sessao; hoje: string; novidades?: React.ReactNode }) {
   const eu = sessao.pessoa;
   const minhas = d.iniciativas.filter((i) => i.solicitanteId === eu.id)
     .map((i) => ({ i, p: passo(d, i, hoje) }))
@@ -53,6 +53,7 @@ export function InicioColaborador({ d, sessao, hoje }: { d: DadosOrg; sessao: Se
     <>
       <Saudacao nome={eu.nome} hoje={hoje} texto={texto} />
       <CaixaUnica d={d} sessao={sessao} hoje={hoje} />
+      {novidades}
       {ciclo && (
         <Link href="/iniciativas/nova" style={s('display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 16px 18px; border-radius: 14px; background: #EFEAFE; border: 1px solid #DCD2FF; color: #26213A')}>
           <span style={s('display: flex; flex-direction: column; flex: 1; min-width: 220px')}>

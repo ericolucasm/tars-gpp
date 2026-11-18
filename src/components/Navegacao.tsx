@@ -57,20 +57,21 @@ export function BarraDeNavegacao() {
 }
 
 /** Item do menu lateral: ao clicar, já aparece como selecionado enquanto a tela carrega. */
-export function ItemMenu({ href, rotulo, ativo, estilo, estiloAtivo }: { href: string; rotulo: string; ativo?: boolean; estilo: React.CSSProperties; estiloAtivo: React.CSSProperties }) {
+export function ItemMenu({ href, rotulo, ativo, contador, estilo, estiloAtivo }: { href: string; rotulo: string; ativo?: boolean; contador?: number; estilo: React.CSSProperties; estiloAtivo: React.CSSProperties }) {
   return (
     <Link href={href} aria-current={ativo ? 'page' : undefined} className="tars-menu-item" style={{ position: 'relative', display: 'block', borderRadius: 9 }}>
-      <Conteudo rotulo={rotulo} ativo={!!ativo} estilo={estilo} estiloAtivo={estiloAtivo} />
+      <Conteudo rotulo={rotulo} ativo={!!ativo} contador={contador} estilo={estilo} estiloAtivo={estiloAtivo} />
     </Link>
   );
 }
 
-function Conteudo({ rotulo, ativo, estilo, estiloAtivo }: { rotulo: string; ativo: boolean; estilo: React.CSSProperties; estiloAtivo: React.CSSProperties }) {
+function Conteudo({ rotulo, ativo, contador, estilo, estiloAtivo }: { rotulo: string; ativo: boolean; contador?: number; estilo: React.CSSProperties; estiloAtivo: React.CSSProperties }) {
   const { pending } = useLinkStatus();
   const on = ativo || pending;
   return (
     <span style={on ? estiloAtivo : estilo}>
-      <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{rotulo}</span>
+      <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{rotulo}</span>
+      {!!contador && <span aria-label={`${contador} ${contador === 1 ? 'novidade' : 'novidades'}`} style={{ fontSize: 11, fontWeight: 700, padding: '1px 7px', borderRadius: 10, background: '#6D4AFF', color: '#FFFFFF' }}>{contador}</span>}
       <span aria-hidden style={{ fontSize: 16, lineHeight: 1, color: on ? '#6D4AFF' : '#B5AEC2', flex: '0 0 auto' }}>›</span>
     </span>
   );

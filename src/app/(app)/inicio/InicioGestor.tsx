@@ -10,7 +10,7 @@ import { ProjetosPatrocinados } from '@/components/ProjetosPatrocinados';
 import { Saudacao } from './Saudacao';
 import { CaixaUnica } from './CaixaUnica';
 
-export function InicioGestor({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao; hoje: string }) {
+export function InicioGestor({ d, sessao, hoje, novidades }: { d: DadosOrg; sessao: Sessao; hoje: string; novidades?: React.ReactNode }) {
   const eu = sessao.pessoa;
   const rep = representados(d, eu.id, hoje); // eu + gestores que me deixaram como substituto(a)
   const aprovacoes = d.iniciativas.filter((i) => noRaia(d, i, 'sol') && i.solStatus === 'aguardando_gestor' && !!i.aprovadorId && rep.has(i.aprovadorId))
@@ -43,6 +43,7 @@ export function InicioGestor({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao;
     <>
       <Saudacao nome={eu.nome} hoje={hoje} texto={texto} />
 <CaixaUnica d={d} sessao={sessao} hoje={hoje} />
+      {novidades}
       <div style={s('display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px')}>
         <Link href="/area/projetos" style={sCard}>
           <h2 style={s('margin: 0; font-size: 15px; font-weight: 700')}>Projetos da área</h2>

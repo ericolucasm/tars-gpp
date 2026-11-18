@@ -9,7 +9,7 @@ import { Saudacao } from './Saudacao';
 import { PainelCiclo } from './PainelCiclo';
 import { CaixaUnica } from './CaixaUnica';
 
-export function InicioPMO({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao; hoje: string }) {
+export function InicioPMO({ d, sessao, hoje, novidades }: { d: DadosOrg; sessao: Sessao; hoje: string; novidades?: React.ReactNode }) {
   const exe = d.iniciativas.filter((i) => noRaia(d, i, 'exe'));
   const pau = d.iniciativas.filter((i) => noRaia(d, i, 'pau'));
   const conta = (f: string) => exe.filter((i) => i.farol === f).length;
@@ -38,6 +38,7 @@ export function InicioPMO({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao; ho
         <CaixaUnica d={d} sessao={sessao} hoje={hoje} estilo="flex: 999 1 460px; min-width: 0; background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 10px" />
         {ciclos.length > 0 && <PainelCiclo ciclos={ciclos} />}
       </div>
+      {novidades}
     </>
   );
 }
