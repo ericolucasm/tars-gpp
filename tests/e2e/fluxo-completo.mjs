@@ -500,6 +500,20 @@ try {
   await p.getByRole('region', { name: 'Impacto de ceder Pedro' }).waitFor();
   await p.context().close();
   ok('Gestor com decisão parada há mais de 5 dias: aparece no muro, alerta o PMO e o leva a decidir em Minhas entregas');
+
+  // GP conclui o projeto pela página do projeto (gate com o aceite de quem pediu)
+  p = await como('carlos.andrade@acme.com.br');
+  await ir(p, `/projetos/${projId}#encerramento`);
+  const conc = p.getByRole('group', { name: 'Concluir o projeto' });
+  await conc.getByRole('button', { name: 'Concluir projeto' }).click();
+  await conc.getByRole('button', { name: 'Concluir', exact: true }).click();
+  await conc.getByText('Falta 1 critério para avançar.').waitFor(); // o servidor exige o aceite
+  await conc.getByLabel('Aceite da entrega pelo solicitante').check();
+  await conc.getByRole('button', { name: 'Concluir', exact: true }).click();
+  await p.getByText('Projeto concluído. O PMO e quem pediu foram avisados.').waitFor();
+  if (sql(`select r.chave from iniciativas i join raias r on r.id=i.raia_id where i.id='${projId}'`) !== 'con') throw new Error('Projeto não foi para Concluído');
+  await p.context().close();
+  ok('GP conclui o projeto pela página do projeto (gate exige o aceite de quem pediu)');
 } catch (e) {
   console.error('✗ FALHOU no passo', passo + 1, '\n', e.message.split('\n').slice(0, 6).join('\n'));
   process.exitCode = 1;

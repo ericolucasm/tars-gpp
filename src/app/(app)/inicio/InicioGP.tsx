@@ -10,6 +10,7 @@ import { Barra, ItemAcao, PillFarol, Vazio } from '@/components/ui';
 import { beneficiosParaMedir } from '@/lib/beneficios-vm';
 import { atrasos } from '@/lib/muro';
 import { pontoEsperaPor } from '@/lib/regras/pontos';
+import { acaoDeConclusao, prontoParaConcluir } from '@/lib/regras/esteira';
 import { Saudacao } from './Saudacao';
 
 export function InicioGP({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao; hoje: string }) {
@@ -82,6 +83,13 @@ export function InicioGP({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao; hoj
       if (!f.confirmadaEm && fim <= addDias(hoje, 7) && dataDaSemana(i.inicioProjeto!, f.inicioSemana) <= hoje) {
         itens.push(<ItemAcao key={f.id} href={`/projetos/${i.id}?fase=${f.id}`} titulo="Confirmar o fim de uma fase" sub={`${f.nome} · critério: ${f.criterioConclusao ? f.criterioConclusao.charAt(0).toLowerCase() + f.criterioConclusao.slice(1) : 'entregas da fase concluídas'}`} acao="Confirmar →" />);
       }
+    }
+  }
+
+  for (const { i, info } of infos) {
+    if (prontoParaConcluir(info.fases) && acaoDeConclusao(i, d.raias)) {
+      itens.push(<ItemAcao key={`concluir${i.id}`} href={`/projetos/${i.id}#encerramento`} titulo="Concluir o projeto"
+        sub={`${curto(i.titulo)} · todas as fases foram confirmadas. Com o aceite de quem pediu, conclua.`} acao="Concluir →" />);
     }
   }
 
