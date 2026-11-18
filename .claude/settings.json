@@ -1,14 +1,7 @@
 {
   "permissions": {
     "allow": [
-      "mcp__ClickUp__clickup_get_task",
-      "mcp__ClickUp__clickup_get_task_comments",
-      "mcp__ClickUp__clickup_filter_tasks",
-      "mcp__ClickUp__clickup_get_list",
-      "mcp__ClickUp__clickup_create_task",
-      "mcp__ClickUp__clickup_update_task",
-      "mcp__ClickUp__clickup_create_task_comment",
-      "mcp__ClickUp__clickup_add_task_link",
+      "mcp__ClickUp",
       "Bash(npm run:*)",
       "Bash(npm test:*)",
       "Bash(git push -u origin:*)",
