@@ -12,10 +12,11 @@ export const dynamic = 'force-dynamic';
 const ORDEM: Record<string, number> = { crit: 0, aten: 1, ok: 2 };
 
 export default async function Projetos() {
-  const sessao = await exigirPerfil('pmo');
+  const sessao = await exigirPerfil('pmo', 'gp');
+  const ehGp = sessao.perfil === 'gp'; // o GP vê só os projetos que gerencia
   const d = await carregarOrg(sessao.orgId);
   const hoje = hojeISO();
-  const projetos = d.iniciativas.filter((i) => i.inicioProjeto && ['exe', 'pau', 'con'].includes(chaveDaRaia(d, i.raiaId) ?? ''));
+  const projetos = d.iniciativas.filter((i) => i.inicioProjeto && ['exe', 'pau', 'con'].includes(chaveDaRaia(d, i.raiaId) ?? '') && (!ehGp || i.gpId === sessao.pessoa.id));
   const grupos: [string, typeof projetos][] = [
     ['Em execução', projetos.filter((i) => chaveDaRaia(d, i.raiaId) === 'exe').sort((a, b) => (ORDEM[a.farol ?? 'ok'] ?? 3) - (ORDEM[b.farol ?? 'ok'] ?? 3))],
     ['Pausados', projetos.filter((i) => chaveDaRaia(d, i.raiaId) === 'pau')],
@@ -24,7 +25,9 @@ export default async function Projetos() {
 
   return (
     <Shell sessao={sessao} dados={d} atual="projetos">
-      <Cabecalho trilha="Gestão / Projetos" titulo="Projetos" texto="Todos os projetos do portfólio. Abra um projeto para ver a linha do tempo, as pessoas e o status." />
+      {ehGp
+        ? <Cabecalho trilha="Meus projetos" titulo="Meus projetos" texto="Os projetos que você gerencia: em execução, pausados e concluídos. Nos concluídos, você ainda registra lições, dá o feedback da equipe e mede o benefício." />
+        : <Cabecalho trilha="Gestão / Projetos" titulo="Projetos" texto="Todos os projetos do portfólio. Abra um projeto para ver a linha do tempo, as pessoas e o status." />}
       {grupos.filter(([, l]) => l.length).map(([titulo, lista]) => (
         <section key={titulo} style={s('display: flex; flex-direction: column; gap: 12px')}>
           <h2 style={s('margin: 0; font-size: 18px; font-weight: 700')}>{titulo} <span style={s('font-size: 13px; color: #5E5770; font-weight: 500')}>({lista.length})</span></h2>
@@ -51,7 +54,7 @@ export default async function Projetos() {
           </div>
         </section>
       ))}
-      {projetos.length === 0 && <span style={s('font-size: 13px; color: #5E5770')}>Nenhum projeto ainda. Projetos nascem quando o PMO dá o play num pré-projeto.</span>}
+      {projetos.length === 0 && <span style={s('font-size: 13px; color: #5E5770')}>{ehGp ? 'Você ainda não gerencia nenhum projeto. Você vira GP quando o PMO te escolhe no play de um pré-projeto.' : 'Nenhum projeto ainda. Projetos nascem quando o PMO dá o play num pré-projeto.'}</span>}
     </Shell>
   );
 }
