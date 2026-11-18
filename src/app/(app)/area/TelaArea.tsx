@@ -4,7 +4,7 @@ import { br, hojeISO, haQuanto, mesCurto } from '@/lib/regras/datas';
 import { areasSobGestao, gestorDe, iniciais, nomeCurto, timeDireto } from '@/lib/regras/pessoas';
 
 const primeiroNome = (n: string) => n.split(' ')[0];
-import { alocacaoDe, impactoDoPedido, prioridadesDoGestor, chaveDaRaia, custoDe, infoProjeto, nomeCurtoProjeto, noRaia, pessoa, projetosDaPessoa, situacaoDoCard, TIPOS, URGENCIAS } from '@/lib/visoes';
+import { alocacaoDe, impactoDoPedido, prioridadesDoGestor, representados, chaveDaRaia, custoDe, infoProjeto, nomeCurtoProjeto, noRaia, pessoa, projetosDaPessoa, situacaoDoCard, TIPOS, URGENCIAS } from '@/lib/visoes';
 import { detalheIniciativa } from '@/lib/detalhe';
 import { Shell } from '@/components/Shell';
 import { VisaoArea, type Aba } from './VisaoArea';
@@ -21,11 +21,13 @@ export async function TelaArea({ aba }: { aba: Aba }) {
   let dir = principal;
   while (dir?.parentId) dir = d.areas.find((a) => a.id === dir!.parentId);
 
+  const rep = representados(d, eu.id, hoje); // eu + gestores que me deixaram como substituto(a)
+  const noLugar = (gestorId: string | null | undefined) => (gestorId && gestorId !== eu.id ? primeiroNome(pessoa(d, gestorId)?.nome ?? '') : null);
   const aprovacoes = d.iniciativas
-    .filter((i) => noRaia(d, i, 'sol') && i.solStatus === 'aguardando_gestor' && i.aprovadorId === eu.id)
+    .filter((i) => noRaia(d, i, 'sol') && i.solStatus === 'aguardando_gestor' && !!i.aprovadorId && rep.has(i.aprovadorId))
     .sort((a, b) => (a.enviadaEm?.getTime() ?? 0) - (b.enviadaEm?.getTime() ?? 0))
     .map((i) => ({
-      id: i.id, titulo: i.titulo, quem: pessoa(d, i.solicitanteId)?.nome ?? '', quando: haQuanto(i.enviadaEm?.toISOString(), hoje),
+      id: i.id, titulo: i.titulo, noLugarDe: noLugar(i.aprovadorId), quem: pessoa(d, i.solicitanteId)?.nome ?? '', quando: haQuanto(i.enviadaEm?.toISOString(), hoje),
       problema: i.problema, tipo: TIPOS[i.tipo]?.rotulo ?? i.tipo, urg: URGENCIAS[i.urgencia] ?? '', urgente: i.urgencia === 'urg', custo: i.faixaCusto,
       det: detalheIniciativa(d, i, hoje),
     }));
@@ -44,11 +46,12 @@ export async function TelaArea({ aba }: { aba: Aba }) {
     return { id: i.id, nome: i.titulo, tipo: projeto ? 'Projeto' : 'Iniciativa', chave: c ?? '', etapa: raia?.nome ?? '', info, farol: c === 'exe' || c === 'pau' ? i.farol : null, custo: custoDe(i), det: detalheIniciativa(d, i, hoje) };
   }).sort((a, b) => (a.tipo === b.tipo ? 0 : a.tipo === 'Projeto' ? -1 : 1));
 
-  const time = (timeDireto(eu.id, d.pessoas, d.areas)).map((p) => {
+  const daRep = [...rep].flatMap((g) => timeDireto(g, d.pessoas, d.areas).map((p) => ({ p, g })));
+  const time = daRep.filter((x, k) => daRep.findIndex((y) => y.p.id === x.p.id) === k).map(({ p, g }) => {
     const projs = projetosDaPessoa(d, p.id, hoje);
     return {
       id: p.id, nome: p.nome, ini: iniciais(p.nome),
-      papel: `${p.cargo ?? ''} · ${projs.length ? projs.map((x) => `${nomeCurtoProjeto(x.projeto.titulo)} (${x.pct}%)`).join(', ') : 'sem projetos'}`,
+      papel: `${noLugar(g) ? `Time de ${noLugar(g)} · ` : ''}${p.cargo ?? ''} · ${projs.length ? projs.map((x) => `${nomeCurtoProjeto(x.projeto.titulo)} (${x.pct}%)`).join(', ') : 'sem projetos'}`,
       cap: p.cedeAte ?? 0, aloc: alocacaoDe(d, p.id, hoje),
       ausencias: d.ausencias.filter((a) => a.pessoaId === p.id && a.fim >= hoje).map((a) => ({ id: a.id, texto: `${a.motivo}: ${br(a.inicio)} a ${br(a.fim)}`, agora: a.inicio <= hoje })),
       alocado: p.tratamento === 'f' ? 'Alocada' : p.tratamento === 'm' ? 'Alocado' : 'Alocado(a)',
@@ -57,11 +60,11 @@ export async function TelaArea({ aba }: { aba: Aba }) {
 
   const pedidos = d.pedidos.filter((x) => x.status === 'pendente').filter((x) => {
     const p = pessoa(d, x.pessoaId);
-    return p && gestorDe(p, d.areas) === eu.id;
+    return p && rep.has(gestorDe(p, d.areas) ?? '');
   }).map((x) => {
     const imp = impactoDoPedido(d, x, hoje);
     return {
-    id: x.id, quem: primeiroNome(pessoa(d, x.pessoaId)?.nome ?? ''),
+    id: x.id, quem: primeiroNome(pessoa(d, x.pessoaId)?.nome ?? ''), noLugarDe: noLugar(gestorDe(pessoa(d, x.pessoaId)!, d.areas)),
     impacto: { ...imp, meses: imp.meses.map((m) => ({ ...m, mes: mesCurto(m.de) })) },
     texto: `${d.iniciativas.find((i) => i.id === x.iniciativaId)?.titulo ?? ''} pede +${x.deltaPct}% de ${pessoa(d, x.pessoaId)?.nome ?? ''}${x.aPartirDe ? ` a partir de ${x.aPartirDe}` : ''}.`, delta: x.deltaPct,
   };
@@ -79,6 +82,11 @@ export async function TelaArea({ aba }: { aba: Aba }) {
         time={time}
         pedidos={pedidos}
         motivos={d.org.config.motivos.recusa}
+        substituicao={{
+          minhas: d.delegacoes.filter((x) => x.gestorId === eu.id && x.fim >= hoje).map((x) => ({ id: x.id, texto: `${pessoa(d, x.substitutoId)?.nome ?? ''}: ${br(x.inicio)} a ${br(x.fim)}`, agora: x.inicio <= hoje })),
+          substituindo: d.delegacoes.filter((x) => x.substitutoId === eu.id && x.inicio <= hoje && x.fim >= hoje).map((x) => `${pessoa(d, x.gestorId)?.nome ?? ''} até ${br(x.fim)}`),
+          opcoes: d.pessoas.filter((p) => p.id !== eu.id && p.perfis.includes('gestor') && !p.externo).map((p) => ({ id: p.id, nome: `${p.nome} · ${d.areas.find((a) => a.id === p.areaId)?.nome ?? ''}` })),
+        }}
         prioridades={prioridadesDoGestor(d, eu.id).map((i) => ({ id: i.id, titulo: i.titulo, etapa: noRaia(d, i, 'bkl') ? 'Backlog' : 'Aguardando o PMO', quem: pessoa(d, i.solicitanteId)?.nome ?? '', ordenada: i.prioridadeArea != null }))}
         emExecucao={daArea.filter((i) => noRaia(d, i, 'exe')).length}
         rodando={daArea.filter((i) => noRaia(d, i, 'exe', 'pau')).length}

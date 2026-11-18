@@ -450,3 +450,13 @@ export const ausencias = pgTable('ausencias', {
   registradaPor: uuid('registrada_por'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
+
+export const delegacoes = pgTable('delegacoes', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  orgId: uuid('org_id').notNull(),
+  gestorId: uuid('gestor_id').notNull().references(() => pessoas.id, { onDelete: 'cascade' }),
+  substitutoId: uuid('substituto_id').notNull().references(() => pessoas.id, { onDelete: 'cascade' }),
+  inicio: date('inicio').notNull(),
+  fim: date('fim').notNull(), // inclusive
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+});

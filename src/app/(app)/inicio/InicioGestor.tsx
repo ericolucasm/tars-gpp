@@ -4,7 +4,7 @@ import type { DadosOrg } from '@/lib/dados';
 import type { Sessao } from '@/lib/sessao';
 import { br, diffDias } from '@/lib/regras/datas';
 import { areasSobGestao, gestorDe, primeiroNome, timeDireto } from '@/lib/regras/pessoas';
-import { alocacaoDe, cicloAtual, financeiroDo, noRaia, pessoa } from '@/lib/visoes';
+import { alocacaoDe, cicloAtual, financeiroDo, noRaia, pessoa, representados } from '@/lib/visoes';
 import { ItemAcao, PillFarol, Vazio } from '@/components/ui';
 import { pontoAtrasado, pontoEsperaPor } from '@/lib/regras/pontos';
 import { beneficiosParaMedir } from '@/lib/beneficios-vm';
@@ -13,11 +13,12 @@ import { Saudacao } from './Saudacao';
 
 export function InicioGestor({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao; hoje: string }) {
   const eu = sessao.pessoa;
-  const aprovacoes = d.iniciativas.filter((i) => noRaia(d, i, 'sol') && i.solStatus === 'aguardando_gestor' && i.aprovadorId === eu.id)
+  const rep = representados(d, eu.id, hoje); // eu + gestores que me deixaram como substituto(a)
+  const aprovacoes = d.iniciativas.filter((i) => noRaia(d, i, 'sol') && i.solStatus === 'aguardando_gestor' && !!i.aprovadorId && rep.has(i.aprovadorId))
     .sort((a, b) => (a.enviadaEm?.getTime() ?? 0) - (b.enviadaEm?.getTime() ?? 0));
   const urgentes = aprovacoes.filter((i) => i.tipo === 'obr' || i.urgencia === 'urg');
   const demais = aprovacoes.filter((i) => !urgentes.includes(i));
-  const pedidos = d.pedidos.filter((p) => p.status === 'pendente' && gestorDe(pessoa(d, p.pessoaId)!, d.areas) === eu.id);
+  const pedidos = d.pedidos.filter((p) => p.status === 'pendente' && rep.has(gestorDe(pessoa(d, p.pessoaId)!, d.areas) ?? ''));
   const time = timeDireto(eu.id, d.pessoas, d.areas);
   const alocTime = time.map((p) => ({ p, aloc: alocacaoDe(d, p.id, hoje) }));
   const acima = alocTime.filter((x) => x.p.cedeAte != null && x.aloc > x.p.cedeAte);
@@ -29,6 +30,10 @@ export function InicioGestor({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao;
   if (obrig) texto += ` Uma iniciativa obrigatória espera há ${espera(obrig.enviadaEm)} ${espera(obrig.enviadaEm) === 1 ? 'dia' : 'dias'}.`;
 
   const itens: React.ReactNode[] = [];
+  for (const x of d.delegacoes.filter((y) => y.substitutoId === eu.id && y.inicio <= hoje && y.fim >= hoje)) {
+    itens.push(<ItemAcao key={`sub${x.id}`} href="/area/iniciativas" tom="roxo" titulo={`Você está substituindo ${pessoa(d, x.gestorId)?.nome ?? ''} até ${br(x.fim).slice(0, 5)}`}
+      sub="As aprovações, os pedidos de alocação e o time dele(a) aparecem junto com os seus." acao="Ver →" />);
+  }
   const minhasAreas = new Set(areasSobGestao(eu.id, d.areas));
   const estourando = d.iniciativas.filter((i) => i.areaId && minhasAreas.has(i.areaId) && noRaia(d, i, 'exe', 'pau'))
     .map((i) => ({ i, f: financeiroDo(d, i) })).filter((x) => x.f.situacao === 'crit');

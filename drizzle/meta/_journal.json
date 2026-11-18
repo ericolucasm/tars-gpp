@@ -92,6 +92,13 @@
       "when": 1795001362313,
       "tag": "0012_ausencias",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1795002149038,
+      "tag": "0013_delegacoes",
+      "breakpoints": true
     }
   ]
 }
