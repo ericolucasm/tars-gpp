@@ -1,10 +1,10 @@
 'use server';
 
-import { and, eq } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { db, schema as t } from '@/db';
 import type { Criterio } from '@/db/schema';
 import { somaPesos } from '@/lib/regras/avaliacao';
-import { statusAoReativar, subarvore } from '@/lib/regras/pessoas';
+import { motivoParaNaoExcluirArea, statusAoReativar, subarvore } from '@/lib/regras/pessoas';
 import { urlDoApp } from '@/lib/auth';
 import { contexto, executar, exigir, exigirAdminCtx } from './_ctx';
 
@@ -67,6 +67,25 @@ export async function salvarArea(f: AreaForm) {
     if (f.id) await db.update(t.areas).set(campos).where(and(eq(t.areas.id, f.id), eq(t.areas.orgId, dados.org.id)));
     else await db.insert(t.areas).values({ orgId: dados.org.id, ...campos, ordem: dados.areas.length });
     return { ok: true, msg: f.id ? 'Área atualizada.' : 'Área criada.' };
+  });
+}
+
+/** Admin exclui uma área criada por engano: só se estiver vazia (sem subáreas, pessoas nem iniciativas). */
+export async function excluirArea(areaId: string) {
+  return executar(async () => {
+    const { dados } = await ctxAdmin();
+    const area = dados.areas.find((a) => a.id === areaId);
+    exigir(area, 'Área não encontrada.');
+    const motivo = motivoParaNaoExcluirArea({
+      subareas: dados.areas.filter((a) => a.parentId === area.id).length,
+      pessoas: dados.pessoas.filter((p) => p.areaId === area.id).length,
+      iniciativas: dados.iniciativas.filter((i) => i.areaId === area.id || i.areasImpactadas.includes(area.id)).length,
+    });
+    exigir(!motivo, motivo ?? '');
+    await db.delete(t.areas).where(and(eq(t.areas.id, area.id), eq(t.areas.orgId, dados.org.id)));
+    // tira a área do público dos ciclos que a citavam
+    await db.update(t.ciclos).set({ areasPublico: sql`array_remove(${t.ciclos.areasPublico}, ${area.id}::uuid)` }).where(eq(t.ciclos.orgId, dados.org.id));
+    return { ok: true, msg: `Área ${area.nome} excluída.` };
   });
 }
 

@@ -161,6 +161,8 @@ function AbaAreas({ p, rodar, pend }: AbaProps) {
             <label style={sLab}>Nº de pessoas na área<input type="number" min={0} value={ed.headcount ?? ''} onChange={(e) => set('headcount', e.target.value === '' ? null : Number(e.target.value))} style={sIn} /></label>
           </div>
           <div style={s('display: flex; justify-content: flex-end; gap: 8px')}>
+            {ed.id && <button type="button" disabled={pend} onClick={() => { if (confirm(`Excluir a área "${ed.nome}"? Só é possível se ela estiver vazia.`)) rodar(() => A.excluirArea(ed.id!), () => setEd(null)); }}
+              style={s('height: 38px; padding: 0 14px; border-radius: 10px; border: 1px solid #F5D2D2; background: #FFFFFF; color: #B42318; font-size: 13px; margin-right: auto')}>Excluir área</button>}
             <button type="button" onClick={() => setEd(null)} style={sBtnS}>Cancelar</button>
             <button type="button" disabled={pend} onClick={() => rodar(() => A.salvarArea(ed), () => setEd(null))} style={sBtnP}>Salvar</button>
           </div>

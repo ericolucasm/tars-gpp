@@ -120,3 +120,11 @@ export function pendenciasAoDesativar(c: { projetosGp: string[]; areasResponsave
 export function podeSerGp(p: { externo: boolean; status: string } | undefined | null): boolean {
   return !!p && !p.externo && p.status !== 'inativo';
 }
+
+/** Uma área só pode ser excluída se estiver vazia: sem pessoas, sem subáreas e sem iniciativas (próprias ou impactadas). */
+export function motivoParaNaoExcluirArea(c: { pessoas: number; subareas: number; iniciativas: number }): string | null {
+  if (c.subareas) return 'Esta área tem subáreas. Mova ou exclua as subáreas antes.';
+  if (c.pessoas) return `Esta área tem ${c.pessoas} ${c.pessoas === 1 ? 'pessoa' : 'pessoas'}. Mude a área delas antes.`;
+  if (c.iniciativas) return 'Esta área tem iniciativas ou projetos no histórico. Ela não pode ser excluída, mas pode ser renomeada.';
+  return null;
+}
