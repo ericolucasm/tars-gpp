@@ -56,28 +56,33 @@ export async function Shell({ sessao, dados, atual, children, mainStyle }: { ses
   let topo: Item | null = null;
   const secoes: { titulo?: string; itens: Item[] }[] = [];
 
+  // Bloco de cima, igual em todos os perfis: o dia a dia da pessoa
+  const meuDia = [it('/inicio', 'Meu TARS', 'inicio'), it('/minhas-entregas', 'Minhas entregas', 'entregas'), it('/muro', 'Quadro de avisos', 'muro')];
+
   if (sessao.perfil === 'pmo') {
     topo = it('/iniciativas/nova', '+ Nova iniciativa', 'nova');
-    secoes.push({ itens: [it('/inicio', 'Meu TARS', 'inicio'), it('/minhas-entregas', 'Minhas entregas', 'entregas')] });
-    secoes.push({ titulo: 'GESTÃO', itens: [it('/portfolio', 'Portfólio', 'portfolio'), it('/roadmap', 'Roadmap', 'roadmap'), it('/ciclos', 'Ciclos de planejamento', 'ciclos'), it('/avaliacao', 'Avaliação e priorização', 'avaliacao'), { href: '/projetos', rotulo: 'Projetos', ativo: atual === 'projetos' || atual.startsWith('projeto:') }] });
+    secoes.push({ itens: meuDia });
+    // Gestão separada em dois blocos: o que ainda é iniciativa (entrada, ciclo, avaliação) e o que já é projeto (execução)
+    secoes.push({ titulo: 'INICIATIVAS', itens: [it('/portfolio', 'Portfólio', 'portfolio'), it('/ciclos', 'Ciclos de planejamento', 'ciclos'), it('/avaliacao', 'Avaliação e priorização', 'avaliacao')] });
+    secoes.push({ titulo: 'PROJETOS', itens: [{ href: '/projetos', rotulo: 'Projetos', ativo: atual === 'projetos' || atual.startsWith('projeto:') }, it('/roadmap', 'Roadmap', 'roadmap')] });
     if (p.admin) secoes.push({ titulo: 'CONFIGURAÇÃO', itens: [it('/cadastros', 'Cadastros', 'cadastros'), it('/configuracoes', 'Configurações', 'configuracoes')] });
   } else if (sessao.perfil === 'gestor') {
     topo = it('/iniciativas/nova', '+ Nova iniciativa', 'nova');
-    secoes.push({ itens: [it('/inicio', 'Meu TARS', 'inicio'), it('/minhas-entregas', 'Minhas entregas', 'entregas')] });
+    secoes.push({ itens: meuDia });
     secoes.push({ titulo: 'MINHA ÁREA', itens: [it('/area/iniciativas', 'Iniciativas da área', 'area-iniciativas'), it('/area/projetos', 'Projetos da área', 'area-projetos'), it('/area/time', 'Gestão do time', 'area-time')] });
   } else if (sessao.perfil === 'gp') {
-    secoes.push({ itens: [it('/inicio', 'Meu TARS', 'inicio'), it('/minhas-entregas', 'Minhas entregas', 'entregas')] });
+    secoes.push({ itens: meuDia });
     const exe = new Set(dados.raias.filter((r) => r.tipoCard === 'Projeto' && r.chave !== 'con').map((r) => r.id));
     const meus = dados.iniciativas.filter((i) => i.gpId === p.id && exe.has(i.raiaId));
     // "Todos os meus projetos" inclui pausados e concluídos; abaixo, atalhos para os que estão rodando
     secoes.push({ titulo: 'MEUS PROJETOS', itens: [{ href: '/projetos', rotulo: 'Todos os meus projetos', ativo: atual === 'projetos' || (atual.startsWith('projeto:') && !meus.some((m) => atual === `projeto:${m.id}`)) }, ...meus.map((m) => ({ href: `/projetos/${m.id}`, rotulo: nomeMenu(m.titulo), ativo: atual === `projeto:${m.id}` }))] });
   } else {
     topo = it('/iniciativas/nova', '+ Nova iniciativa', 'nova');
-    secoes.push({ itens: [it('/inicio', 'Meu TARS', 'inicio'), it('/minhas-entregas', 'Minhas entregas', 'entregas')] });
+    secoes.push({ itens: meuDia });
   }
 
   // Relatórios: em todos os perfis, numa seção própria logo depois da área de trabalho do perfil
-  const relatorios = { titulo: 'RELATÓRIOS', itens: [it('/relatorios', 'Relatórios', 'relatorios'), it('/muro', 'Muro da vergonha', 'muro')] };
+  const relatorios = { titulo: 'RELATÓRIOS', itens: [it('/relatorios', 'Relatórios', 'relatorios')] };
   if (sessao.perfil === 'pmo' && p.admin) secoes.splice(secoes.length - 1, 0, relatorios);
   else secoes.push(relatorios);
 

@@ -150,7 +150,7 @@ function doGp(d: DadosOrg, eu: Pessoa, hoje: string): ItemCaixa[] {
   const daEquipe = atrasos(d, hoje).filter((x) => x.gpId === eu.id && x.responsavelId !== eu.id);
   if (daEquipe.length) {
     res.push({ id: 'muro-equipe', papel: 'GP', href: '/muro', numero: daEquipe.length, tom: 'vermelho', titulo: 'Atrasos da equipe nos seus projetos',
-      sub: daEquipe.slice(0, 3).map((x) => `${pessoa(d, x.responsavelId)?.nome ?? ''}: ${x.titulo} (${x.diasAtraso}d)`).join(' · '), acao: 'Ver muro →' });
+      sub: daEquipe.slice(0, 3).map((x) => `${pessoa(d, x.responsavelId)?.nome ?? ''}: ${x.titulo} (${x.diasAtraso}d)`).join(' · '), acao: 'Ver quadro →' });
   }
   for (const x of d.pedidosPrazo.filter((y) => y.status === 'pendente' && d.iniciativas.some((i) => i.id === y.iniciativaId && i.gpId === eu.id))) {
     res.push({ id: `prazo${x.id}`, papel: 'GP', href: `/projetos/${x.iniciativaId}#prazos`, titulo: 'Pedido de mais prazo', sub: `${pessoa(d, x.solicitanteId)?.nome ?? ''}: ${x.motivo}`, acao: 'Decidir →', bloqueia: true });
@@ -202,13 +202,13 @@ function doPmo(d: DadosOrg, eu: Pessoa, admin: boolean, hoje: string): ItemCaixa
   const noMuro = atrasos(d, hoje);
   if (noMuro.length) {
     const n = new Set(noMuro.map((x) => x.responsavelId)).size;
-    res.push({ id: 'muro', papel: 'PMO', href: '/muro', numero: noMuro.length, tom: 'vermelho', titulo: 'Entregas atrasadas no portfólio (muro da vergonha)', sub: `${n} ${n === 1 ? 'pessoa' : 'pessoas'} com tarefas, gates ou status vencidos sem registro`, acao: 'Ver muro →' });
+    res.push({ id: 'muro', papel: 'PMO', href: '/muro', numero: noMuro.length, tom: 'vermelho', titulo: 'Entregas atrasadas no portfólio (quadro de avisos)', sub: `${n} ${n === 1 ? 'pessoa' : 'pessoas'} com tarefas, gates ou status vencidos sem registro`, acao: 'Ver quadro →' });
   }
   const paradas = noMuro.filter((x) => x.tipo === 'decisao');
   if (paradas.length) {
     const gestores = [...new Set(paradas.map((x) => x.responsavelId))].map((id) => pessoa(d, id)?.nome.split(' ')[0] ?? '');
     res.push({ id: 'decisoes', papel: 'PMO', href: '/muro', numero: paradas.length, tom: 'vermelho', titulo: paradas.length === 1 ? 'Decisão parada com gestor há mais de 5 dias' : 'Decisões paradas com gestores há mais de 5 dias',
-      sub: `${gestores.join(', ')} · aprovações, pedidos de alocação ou pontos de atenção sem resposta`, acao: 'Ver muro →' });
+      sub: `${gestores.join(', ')} · aprovações, pedidos de alocação ou pontos de atenção sem resposta`, acao: 'Ver quadro →' });
   }
   const av = listaAvaliacao(d);
   const prontas = av.itens.filter((x) => !x.comunicado && !x.decisao).length;

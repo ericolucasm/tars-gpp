@@ -20,7 +20,7 @@ export function Prazos(p: { iniciativaId: string; podeEditar: boolean; cadencia:
     <section id="prazos" aria-label="Prazos e responsáveis" style={s('background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px; scroll-margin-top: 16px')}>
       <div style={s('display: flex; flex-direction: column; gap: 2px')}>
         <h2 style={s('margin: 0; font-size: 18px; font-weight: 700')}>Prazos e responsáveis</h2>
-        <span style={s('font-size: 12px; color: #5E5770')}>Quando o status deve ser publicado e quem confirma o fim de cada fase (o gate). Para mudar o responsável de uma fase, clique na barra dela na linha do tempo. Quem passa da data sem registrar nada vai para o Muro da vergonha, com aviso para a pessoa, o GP e o gestor dela.</span>
+        <span style={s('font-size: 12px; color: #5E5770')}>Quando o status deve ser publicado e quem confirma o fim de cada fase (o gate). Para mudar o responsável de uma fase, clique na barra dela na linha do tempo. Quem passa da data sem registrar nada vai para o Quadro de avisos, com aviso para a pessoa, o GP e o gestor dela.</span>
       </div>
       {p.pedidos.length > 0 && (
         <div style={s('display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 12px; background: #FEF3DC')}>
