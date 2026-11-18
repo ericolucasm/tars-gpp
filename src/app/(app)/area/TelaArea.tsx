@@ -1,8 +1,10 @@
 import { exigirPerfil } from '@/lib/sessao';
 import { carregarOrg } from '@/lib/dados';
-import { br, hojeISO, haQuanto } from '@/lib/regras/datas';
+import { br, hojeISO, haQuanto, mesCurto } from '@/lib/regras/datas';
 import { areasSobGestao, gestorDe, iniciais, nomeCurto, timeDireto } from '@/lib/regras/pessoas';
-import { alocacaoDe, chaveDaRaia, custoDe, infoProjeto, nomeCurtoProjeto, noRaia, pessoa, projetosDaPessoa, situacaoDoCard, TIPOS, URGENCIAS } from '@/lib/visoes';
+
+const primeiroNome = (n: string) => n.split(' ')[0];
+import { alocacaoDe, impactoDoPedido, chaveDaRaia, custoDe, infoProjeto, nomeCurtoProjeto, noRaia, pessoa, projetosDaPessoa, situacaoDoCard, TIPOS, URGENCIAS } from '@/lib/visoes';
 import { detalheIniciativa } from '@/lib/detalhe';
 import { Shell } from '@/components/Shell';
 import { VisaoArea, type Aba } from './VisaoArea';
@@ -55,9 +57,14 @@ export async function TelaArea({ aba }: { aba: Aba }) {
   const pedidos = d.pedidos.filter((x) => x.status === 'pendente').filter((x) => {
     const p = pessoa(d, x.pessoaId);
     return p && gestorDe(p, d.areas) === eu.id;
-  }).map((x) => ({
-    id: x.id, texto: `${d.iniciativas.find((i) => i.id === x.iniciativaId)?.titulo ?? ''} pede +${x.deltaPct}% de ${pessoa(d, x.pessoaId)?.nome ?? ''}${x.aPartirDe ? ` a partir de ${x.aPartirDe}` : ''}.`, delta: x.deltaPct,
-  }));
+  }).map((x) => {
+    const imp = impactoDoPedido(d, x, hoje);
+    return {
+    id: x.id, quem: primeiroNome(pessoa(d, x.pessoaId)?.nome ?? ''),
+    impacto: { ...imp, meses: imp.meses.map((m) => ({ ...m, mes: mesCurto(m.de) })) },
+    texto: `${d.iniciativas.find((i) => i.id === x.iniciativaId)?.titulo ?? ''} pede +${x.deltaPct}% de ${pessoa(d, x.pessoaId)?.nome ?? ''}${x.aPartirDe ? ` a partir de ${x.aPartirDe}` : ''}.`, delta: x.deltaPct,
+  };
+  });
 
   return (
     <Shell sessao={sessao} dados={d} atual={`area-${aba}`}>

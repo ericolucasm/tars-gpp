@@ -80,6 +80,7 @@ Raias padrão, na ordem: Solicitações → Backlog → Pré-projeto → Em exec
 - **[Protótipo]** O gestor define quanto cada pessoa do time pode ceder para projetos (0–100%, passos de 10).
 - **[Protótipo]** Pessoa acima do cedido = alocação atual maior que o limite.
 - **[Protótipo]** Pedido de alocação: o gestor **cede** (o limite sobe pelo valor pedido) ou **recusa** (o GP é avisado).
+- **[Decisão V2]** **Impacto antes de ceder:** cada pedido mostra como a pessoa fica nos próximos 6 meses: carga total em projetos (pico do mês, todos os projetos em execução + o projeto que pede, mesmo antes do play, se já tiver cronograma), o que sobra para a área (100% − carga) e o limite novo (atual + pedido, até 100%). Cada mês fica em roxo (cabe no limite atual), âmbar (só cabe se ceder) ou vermelho (passa até do novo limite), com um resumo em uma frase.
 
 ## 5. Ciclos de planejamento
 

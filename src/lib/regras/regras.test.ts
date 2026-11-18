@@ -7,7 +7,7 @@ import { validarPedidoMudanca, variacaoCusto } from './mudancas';
 import { resumoFinanceiro, situacaoCusto } from './financeiro';
 import { dimCusto, dimEscopo, dimPrazo, dimRiscos, farolGeral } from './farol';
 import { nivelDoRisco, riscoAtivo, validarRisco } from './riscos';
-import { picoNoPeriodo, situacaoCapacidade, pessoasEq } from './capacidade';
+import { picoNoPeriodo, situacaoCapacidade, pessoasEq, impactoPorMes } from './capacidade';
 import { podeMedirBeneficio, situacaoBeneficio, validarMedicao } from './beneficios';
 import { situacaoDependencia } from './dependencias';
 import { balancoCusto, balancoEscopo, balancoPrazo, validarLicao } from './encerramento';
@@ -364,5 +364,17 @@ describe('datas', () => {
     expect(dataPorExtenso('2026-10-17')).toBe('Sábado, 17 de outubro');
     expect(haQuanto('2026-10-16', '2026-10-17')).toBe('ontem');
     expect(proximaSexta('2026-10-17')).toBe('2026-10-23');
+  });
+});
+
+describe('impacto de ceder uma pessoa', () => {
+  const meses = [{ de: '2026-11-01', ate: '2026-12-01' }, { de: '2026-12-01', ate: '2027-01-01' }, { de: '2027-01-01', ate: '2027-02-01' }];
+  const outro = { ini: '2026-10-01', fim: '2027-02-01', pct: 20 };
+  const proj = [{ ini: '2026-12-01', fim: '2026-12-20', pct: 40 }, { ini: '2027-01-01', fim: '2027-02-01', pct: 70 }];
+  it('mostra carga, parte do projeto e se cabe no limite', () => {
+    const r = impactoPorMes([outro, ...proj], proj, meses, 50, 70);
+    expect(r.map((x) => x.carga)).toEqual([20, 60, 90]);
+    expect(r.map((x) => x.doProjeto)).toEqual([0, 40, 70]);
+    expect(r.map((x) => x.situacao)).toEqual(['ok', 'so_com_pedido', 'acima']);
   });
 });
