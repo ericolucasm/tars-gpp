@@ -501,6 +501,22 @@ try {
   await p.context().close();
   ok('Gestor com decisão parada há mais de 5 dias: aparece no muro, alerta o PMO e o leva a decidir em Minhas entregas');
 
+  // GP: o status a publicar na Início segue a cadência combinada do projeto
+  p = await como('carlos.andrade@acme.com.br');
+  await ir(p, '/inicio');
+  const precisa = p.getByRole('region', { name: 'Precisa de você' });
+  await precisa.getByRole('link', { name: /Publicar o status da semana.*Inventário rotativo · vence/ }).waitFor();
+  const invId = sql("select id from iniciativas where titulo='Inventário rotativo'");
+  await ir(p, `/projetos/${invId}#prazos`);
+  await p.getByLabel('Frequência do status').selectOption('mensal');
+  await p.getByRole('button', { name: 'Salvar cadência' }).click();
+  await p.getByRole('button', { name: 'Salvar cadência' }).waitFor({ state: 'detached' });
+  await ir(p, '/inicio');
+  await precisa.getByRole('link', { name: /Publicar o status/ }).first().waitFor({ state: 'attached' }).catch(() => {});
+  if (await precisa.getByRole('link', { name: /Inventário rotativo · vence/ }).count()) throw new Error('Status mensal ainda cobrado nesta semana');
+  await p.context().close();
+  ok('GP: status a publicar na Início segue a cadência (mensal publicado há poucos dias não é cobrado nesta semana)');
+
   // GP conclui o projeto pela página do projeto (gate com o aceite de quem pediu)
   p = await como('carlos.andrade@acme.com.br');
   await ir(p, `/projetos/${projId}#encerramento`);

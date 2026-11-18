@@ -15,7 +15,7 @@ import { picoNoPeriodo, situacaoCapacidade, pessoasEq, impactoPorMes } from './c
 import { podeMedirBeneficio, situacaoBeneficio, validarMedicao } from './beneficios';
 import { situacaoDependencia } from './dependencias';
 import { balancoCusto, balancoEscopo, balancoPrazo, validarLicao } from './encerramento';
-import { diaDaSemana, diasDeAtraso, emNegociacao, proximoDiaSemana, proximoStatusDevido, validarPedidoPrazo } from './muro';
+import { diaDaSemana, diasDeAtraso, emNegociacao, proximoDiaSemana, proximoStatusDevido, validarPedidoPrazo, situacaoStatus, rotuloVencimentoStatus } from './muro';
 import { gestorDe, timeDireto, areasSobGestao, nomeCurto, acimaDoCedido } from './pessoas';
 import { addDias, diffDias, dataPorExtenso, haQuanto, proximaSexta } from './datas';
 
@@ -472,5 +472,24 @@ describe('feedback do GP sobre quem foi cedido', () => {
     expect(feedbackPendente('2026-11-10', '2026-11-18', false)).toBe(true);
     expect(feedbackPendente('2026-11-10', '2026-11-18', true)).toBe(false);
     expect(feedbackPendente('2026-12-10', '2026-11-18', false)).toBe(false);
+  });
+});
+
+describe('status a publicar na Início do GP (cadência)', () => {
+  it('atrasado quando o dia combinado passou; a vencer nos próximos 7 dias; senão, nada', () => {
+    expect(situacaoStatus('2026-10-16', '2026-10-17')).toBe('atrasado');
+    expect(situacaoStatus('2026-10-17', '2026-10-17')).toBe('a_vencer');
+    expect(situacaoStatus('2026-10-23', '2026-10-17')).toBe('a_vencer');
+    expect(situacaoStatus('2026-10-30', '2026-10-17')).toBeNull(); // mensal/quinzenal: ainda não é hora
+  });
+  it('mensal publicado há uma semana não cobra status nesta semana', () => {
+    const prox = proximoStatusDevido('2026-10-09', 'mensal', 5, true);
+    expect(prox).toBe('2026-11-06');
+    expect(situacaoStatus(prox, '2026-10-17')).toBeNull();
+  });
+  it('rótulo do vencimento', () => {
+    expect(rotuloVencimentoStatus('2026-10-17', '2026-10-17')).toBe('vence hoje');
+    expect(rotuloVencimentoStatus('2026-10-23', '2026-10-17')).toBe('vence sexta, 23/10');
+    expect(rotuloVencimentoStatus('2026-10-16', '2026-10-17')).toBe('venceu sexta, 16/10 (1 dia de atraso)');
   });
 });

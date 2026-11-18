@@ -2,7 +2,8 @@ import Link from 'next/link';
 import { s } from '@/lib/css';
 import type { DadosOrg } from '@/lib/dados';
 import type { Sessao } from '@/lib/sessao';
-import { addDias, br, diaCurto, proximaSexta, segundaDaSemana } from '@/lib/regras/datas';
+import { addDias, br, diaCurto } from '@/lib/regras/datas';
+import { rotuloVencimentoStatus, situacaoStatus } from '@/lib/regras/muro';
 import { dataDaSemana } from '@/lib/regras/projeto';
 import { gestorDe } from '@/lib/regras/pessoas';
 import { alocacaoDe, conflitosDeAusencia, equipeParaFeedback, dependenciasVM, infoProjeto, nomeArea, noRaia, pessoa } from '@/lib/visoes';
@@ -17,11 +18,11 @@ export function InicioGP({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao; hoj
   const eu = sessao.pessoa;
   const meus = d.iniciativas.filter((i) => i.gpId === eu.id && noRaia(d, i, 'exe'));
   const infos = meus.map((i) => ({ i, info: infoProjeto(d, i, hoje) }));
-  const sexta = proximaSexta(hoje);
-  const semanaIni = segundaDaSemana(hoje);
   const curto = (t: string) => { const k = t.indexOf(' para '); return k > 0 ? t.slice(0, k) : t; };
 
-  const devidos = infos.filter(({ info }) => !info.ultimoStatus || info.ultimoStatus.data < semanaIni);
+  // status a publicar pela cadência combinada do projeto (a mesma conta do muro e do "status atrasado")
+  const devidos = infos.map((x) => ({ ...x, sit: situacaoStatus(x.info.proximoStatus, hoje) })).filter((x) => x.sit);
+  const nomeStatus = (c: string) => (c === 'quinzenal' ? 'o status quinzenal' : c === 'mensal' ? 'o status do mês' : 'o status da semana');
   const emAtencao = meus.filter((i) => i.farol === 'aten').length;
   const criticos = meus.filter((i) => i.farol === 'crit').length;
   const partes: string[] = [];
@@ -29,8 +30,8 @@ export function InicioGP({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao; hoj
   else if (emAtencao === meus.length) partes.push(meus.length === 1 ? 'Seu projeto está em atenção.' : `Seus ${meus.length} projetos estão em atenção.`);
   else if (criticos === meus.length) partes.push(meus.length === 1 ? 'Seu projeto está crítico.' : `Seus ${meus.length} projetos estão críticos.`);
   else partes.push(`Você tem ${meus.length} ${meus.length === 1 ? 'projeto' : 'projetos'} em execução${criticos ? `, ${criticos} crítico(s)` : ''}${emAtencao ? `, ${emAtencao} em atenção` : ''}.`);
-  if (devidos.length === 1) partes.push(`O status da semana do ${curto(devidos[0].i.titulo)} vence na sexta.`);
-  else if (devidos.length > 1) partes.push(`${devidos.length} status da semana vencem na sexta.`);
+  if (devidos.length === 1) { const x = devidos[0]; const n = nomeStatus(x.i.statusCadencia); partes.push(`${n.charAt(0).toUpperCase()}${n.slice(1)} do ${curto(x.i.titulo)} ${rotuloVencimentoStatus(x.info.proximoStatus, hoje)}.`); }
+  else if (devidos.length > 1) { const atr = devidos.filter((x) => x.sit === 'atrasado').length; partes.push(`${devidos.length} status a publicar${atr ? `, ${atr} atrasado${atr > 1 ? 's' : ''}` : ' nos próximos dias'}.`); }
 
   const itens: React.ReactNode[] = [];
   const meusAtrasos = atrasos(d, hoje).filter((x) => x.responsavelId === eu.id);
@@ -64,7 +65,7 @@ export function InicioGP({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao; hoj
     itens.push(<ItemAcao key={`aus${c.ausencia.id}${c.projeto.id}${c.fase}`} href={`/projetos/${c.projeto.id}`} tom="ambar" titulo={`${c.pessoa.nome} estará ausente (${c.ausencia.motivo.toLowerCase()})`}
       sub={`${br(c.ausencia.inicio).slice(0, 5)} a ${br(c.ausencia.fim).slice(0, 5)} · alocado(a) em ${c.pct}% na fase ${c.fase} do ${curto(c.projeto.titulo)}. Replaneje ou combine a cobertura.`} acao="Ver projeto →" />);
   }
-  for (const { i } of devidos) itens.push(<ItemAcao key={`st${i.id}`} href={`/projetos/${i.id}#status`} titulo="Publicar o status da semana" sub={`${curto(i.titulo)} · vence sexta, ${br(sexta).slice(0, 5)}`} acao="Escrever →" />);
+  for (const { i, info, sit } of devidos) itens.push(<ItemAcao key={`st${i.id}`} href={`/projetos/${i.id}#status`} tom={sit === 'atrasado' ? 'vermelho' : 'roxo'} titulo={`Publicar ${nomeStatus(i.statusCadencia)}`} sub={`${curto(i.titulo)} · ${rotuloVencimentoStatus(info.proximoStatus, hoje)}`} acao="Escrever →" />);
   const atrasadas = infos.flatMap(({ i, info }) => info.atrasadas.map((t) => ({ i, t })));
   if (atrasadas.length) {
     const { i, t } = atrasadas[0];
@@ -110,7 +111,7 @@ export function InicioGP({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao; hoj
   for (const { i, info } of infos) {
     for (const t of info.tarefas) if (!t.concluida && t.prazo && t.prazo >= hoje && t.prazo <= ate) eventos.push({ data: t.prazo, texto: `${t.titulo} · ${curto(i.titulo)}` });
     for (const m of info.marcos) if (m.data && m.data >= hoje && m.data <= ate && m.status !== 'Atingido') eventos.push({ data: m.data, texto: `Marco: ${m.nome}` });
-    if (devidos.some((x) => x.i.id === i.id)) eventos.push({ data: sexta, texto: `Status da semana · ${curto(i.titulo)}` });
+    if (info.proximoStatus >= hoje && info.proximoStatus <= ate) eventos.push({ data: info.proximoStatus, texto: `${(() => { const n = nomeStatus(i.statusCadencia).slice(2); return n.charAt(0).toUpperCase() + n.slice(1); })()} · ${curto(i.titulo)}` });
   }
   eventos.sort((a, b) => a.data.localeCompare(b.data));
 
