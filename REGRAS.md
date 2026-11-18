@@ -215,3 +215,8 @@ Funcionalidades que nasceram da análise da mecânica do PMO (17/11), para o aco
 - **[Decisão V2]** Cada iniciativa pode ter um **benefício principal**: **indicador**, **meta** e **data de medir**. Ele é definido no formulário da iniciativa (bloco opcional "Como vamos medir?"), e o GP ou o PMO pode ajustá-lo na página do projeto.
 - **[Decisão V2]** Quando a data de medir chega e o resultado não foi registrado, o benefício fica em **"Hora de medir"**: aviso na Início do PMO, do gestor e do GP, e item na página **Benefícios** (`/beneficios`). Quem pediu, o gestor que aprovou, o GP ou o PMO registra o **resultado medido** e se a meta foi **atingida, parcialmente ou não**. Dá para corrigir depois.
 - **[Decisão V2]** Relatório **Benefícios** (PMO): o que cada projeto prometeu e o que entregou, ao lado da **nota de impacto** dada na avaliação, para calibrar as próximas avaliações.
+
+### Dependências entre projetos
+- **[Decisão V2]** O GP (ou o PMO) registra no projeto que ele **depende de uma entrega de outro projeto até uma data** (o que precisa receber e até quando). O GP do outro projeto é avisado, e a dependência aparece nos dois projetos ("depende de" e "dependem deste").
+- **[Decisão V2]** Situação: **entregue** (o outro projeto foi concluído); **atrasada** (a data passou e ele não foi concluído); **em risco** (o fim previsto dele é depois da data); **sem data prevista** (ainda não virou projeto); **no prazo**.
+- **[Decisão V2]** Dependências em risco ou atrasadas geram aviso na Início do PMO e dos GPs dos dois projetos. Relatório **Dependências entre projetos** (PMO).

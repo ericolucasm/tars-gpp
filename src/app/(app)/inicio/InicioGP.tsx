@@ -5,7 +5,7 @@ import type { Sessao } from '@/lib/sessao';
 import { addDias, br, diaCurto, proximaSexta, segundaDaSemana } from '@/lib/regras/datas';
 import { dataDaSemana } from '@/lib/regras/projeto';
 import { gestorDe } from '@/lib/regras/pessoas';
-import { alocacaoDe, infoProjeto, nomeArea, noRaia, pessoa } from '@/lib/visoes';
+import { alocacaoDe, dependenciasVM, infoProjeto, nomeArea, noRaia, pessoa } from '@/lib/visoes';
 import { Barra, ItemAcao, PillFarol, Vazio } from '@/components/ui';
 import { beneficiosParaMedir } from '@/lib/beneficios-vm';
 import { Saudacao } from './Saudacao';
@@ -56,6 +56,12 @@ export function InicioGP({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao; hoj
   if (aMedir.length) {
     itens.push(<ItemAcao key="beneficios" href="/beneficios" numero={aMedir.length} titulo={aMedir.length === 1 ? 'Benefício para medir' : 'Benefícios para medir'}
       sub={aMedir.slice(0, 3).map((i) => `${i.titulo.split(' para ')[0]}: ${i.beneficioIndicador}`).join(' · ')} acao="Registrar →" />);
+  }
+  for (const y of dependenciasVM(d, hoje).filter((z) => (z.situacao === 'risco' || z.situacao === 'atrasada') && (z.dep.gpId === eu.id || z.de.gpId === eu.id))) {
+    const meuLado = y.dep.gpId === eu.id ? y.dep : y.de;
+    itens.push(<ItemAcao key={`dep${y.x.id}`} href={`/projetos/${meuLado.id}#dependencias`} tom="vermelho"
+      titulo={y.dep.gpId === eu.id ? `Dependência em risco: ${y.x.descricao}` : `Outro projeto depende de você: ${y.x.descricao}`}
+      sub={`${curto(y.dep.titulo)} precisa de ${curto(y.de.titulo)} até ${br(y.x.precisaAte).slice(0, 5)}`} acao="Ver →" />);
   }
   // Próximos 7 dias: tarefas, marcos e status
   const ate = addDias(hoje, 7);
