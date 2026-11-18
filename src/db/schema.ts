@@ -460,3 +460,15 @@ export const delegacoes = pgTable('delegacoes', {
   fim: date('fim').notNull(), // inclusive
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
+
+export const feedbacks = pgTable('feedbacks', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  orgId: uuid('org_id').notNull(),
+  iniciativaId: uuid('iniciativa_id').notNull().references(() => iniciativas.id, { onDelete: 'cascade' }),
+  pessoaId: uuid('pessoa_id').notNull().references(() => pessoas.id, { onDelete: 'cascade' }),
+  autorId: uuid('autor_id').notNull(), // GP do projeto
+  nivel: text('nivel').notNull(), // superou | atendeu | abaixo
+  comentario: text('comentario').notNull().default(''),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [uniqueIndex('feedbacks_projeto_pessoa').on(t.iniciativaId, t.pessoaId)]);

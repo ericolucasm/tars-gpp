@@ -4,12 +4,13 @@ import { carregarOrg } from '@/lib/dados';
 import { br, hojeISO } from '@/lib/regras/datas';
 import { iniciais } from '@/lib/regras/pessoas';
 import { semanaHoje } from '@/lib/regras/projeto';
-import { fasesDo, linhaBaseDo, nomeArea, pessoa } from '@/lib/visoes';
+import { equipeParaFeedback, fasesDo, linhaBaseDo, nomeArea, pessoa } from '@/lib/visoes';
 import { Shell } from '@/components/Shell';
 import { TelaProjeto } from './TelaProjeto';
 import { SecaoPontos } from './SecaoPontos';
 import { Mudancas } from './Mudancas';
 import { Financeiro } from './Financeiro';
+import { Feedback } from './Feedback';
 import { Dependencias } from './Dependencias';
 import { Encerramento } from './Encerramento';
 import { Prazos } from './Prazos';
@@ -123,6 +124,11 @@ export default async function Projeto({ params, searchParams }: { params: Promis
         );
       })()}
       <SecaoPontos d={d} sessao={sessao} iniId={ini.id} hoje={hoje} />
+      <Feedback iniciativaId={ini.id} podeEditar={ehGp} equipe={equipeParaFeedback(d, ini, hoje).map((x) => ({
+        pessoaId: x.pessoa.id, nome: x.pessoa.nome, area: nomeArea(d, x.pessoa.areaId), fases: [...new Set(x.fases)].join(', '),
+        participacao: x.terminou ? `participação até ${x.fim ? br(x.fim) : '—'}` : `em andamento${x.fim ? ` até ${br(x.fim)}` : ''}`,
+        pendente: x.pendente, nivel: x.feedback?.nivel ?? null, comentario: x.feedback?.comentario ?? '',
+      }))} />
       {(() => {
         const vm = (l: (typeof d.licoes)[number]) => ({ id: l.id, tipo: l.tipo, texto: l.texto, autor: pessoa(d, l.autorId)?.nome ?? '', data: br(l.createdAt.toISOString().slice(0, 10)),
           projeto: d.iniciativas.find((i) => i.id === l.iniciativaId)?.titulo, podeRemover: ehPmo || l.autorId === sessao.pessoa.id });

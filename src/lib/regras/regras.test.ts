@@ -7,6 +7,7 @@ import { validarPedidoMudanca, variacaoCusto } from './mudancas';
 import { resumoFinanceiro, situacaoCusto } from './financeiro';
 import { dimCusto, dimEscopo, dimPrazo, dimRiscos, farolGeral } from './farol';
 import { nivelDoRisco, riscoAtivo, validarRisco } from './riscos';
+import { validarFeedback, feedbackPendente } from './feedback';
 import { substitutoAtivo, quemDecide, gestoresRepresentados, validarDelegacao } from './delegacao';
 import { diasAusente, fracaoAusente, cruza, validarAusencia } from './ausencias';
 import { validarNaoSeguir, ordenarPrioridadeArea, prazoDecisao } from './gestor';
@@ -444,5 +445,19 @@ describe('substituto do gestor', () => {
     expect(validarDelegacao({ substitutoId: 'mar', inicio: '2026-12-01', fim: '2026-12-02' }, 'fer', '2026-11-18', () => false)).toMatch(/perfil de gestor/);
     expect(validarDelegacao({ substitutoId: 'mar', inicio: '2026-12-05', fim: '2026-12-02' }, 'fer', '2026-11-18', ok)).toMatch(/fim/);
     expect(validarDelegacao({ substitutoId: 'mar', inicio: '2026-12-01', fim: '2026-12-02' }, 'fer', '2026-11-18', ok)).toBeNull();
+  });
+});
+
+describe('feedback do GP sobre quem foi cedido', () => {
+  it('abaixo do esperado exige comentário', () => {
+    expect(validarFeedback('x', '')).toMatch(/Escolha/);
+    expect(validarFeedback('abaixo', 'curto')).toMatch(/faltou/);
+    expect(validarFeedback('abaixo', 'Entregou os testes com atraso')).toBeNull();
+    expect(validarFeedback('superou', '')).toBeNull();
+  });
+  it('pendente quando a participação terminou e não há feedback', () => {
+    expect(feedbackPendente('2026-11-10', '2026-11-18', false)).toBe(true);
+    expect(feedbackPendente('2026-11-10', '2026-11-18', true)).toBe(false);
+    expect(feedbackPendente('2026-12-10', '2026-11-18', false)).toBe(false);
   });
 });

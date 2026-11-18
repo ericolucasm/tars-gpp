@@ -15,6 +15,7 @@ import { proximoStatusDevido } from './regras/muro';
 import { ordenarPrioridadeArea } from './regras/gestor';
 import { cruza, fracaoAusente } from './regras/ausencias';
 import { gestoresRepresentados, substitutoAtivo } from './regras/delegacao';
+import { feedbackPendente } from './regras/feedback';
 
 // Cálculos derivados usados por várias telas. Tudo a partir de DadosOrg (a "foto" da empresa).
 
@@ -455,4 +456,27 @@ export function representados(d: DadosOrg, pessoaId: string, hoje: string) {
 /** Quem cobra a decisão de um gestor hoje: o substituto em vigor, ou o próprio gestor. */
 export function responsavelPelaDecisao(d: DadosOrg, gestorId: string, hoje: string) {
   return substitutoAtivo(d.delegacoes, gestorId, hoje) ?? gestorId;
+}
+
+// ---------- Feedback do GP sobre quem foi cedido ----------
+
+/** Pessoas da organização que trabalharam no projeto (alocadas em alguma fase), com o fim da participação e o feedback dado. */
+export function equipeParaFeedback(d: DadosOrg, projeto: Iniciativa, hoje: string) {
+  const fases = d.fases.filter((f) => f.iniciativaId === projeto.id);
+  const concluido = noRaia(d, projeto, 'con');
+  const porPessoa = new Map<string, { fim: string | null; fases: string[] }>();
+  for (const f of fases) {
+    const fimFase = projeto.inicioProjeto ? dataDaSemana(projeto.inicioProjeto, f.inicioSemana + f.duracao) : null;
+    for (const a of d.alocacoes.filter((x) => x.faseId === f.id)) {
+      const atual = porPessoa.get(a.pessoaId) ?? { fim: null, fases: [] };
+      porPessoa.set(a.pessoaId, { fim: fimFase && (!atual.fim || fimFase > atual.fim) ? fimFase : atual.fim, fases: [...atual.fases, f.nome] });
+    }
+  }
+  return [...porPessoa.entries()].flatMap(([pessoaId, x]) => {
+    const p = d.pessoas.find((y) => y.id === pessoaId);
+    if (!p || p.externo || p.id === projeto.gpId) return [];
+    const fb = d.feedbacks.find((y) => y.iniciativaId === projeto.id && y.pessoaId === p.id) ?? null;
+    const terminou = concluido || (!!x.fim && x.fim <= hoje);
+    return [{ pessoa: p, fases: x.fases, fim: x.fim, terminou, feedback: fb, pendente: feedbackPendente(terminou ? (x.fim && x.fim <= hoje ? x.fim : hoje) : null, hoje, !!fb) }];
+  });
 }

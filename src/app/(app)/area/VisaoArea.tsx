@@ -20,7 +20,7 @@ const TEXTO: Record<Aba, string> = {
   projetos: 'Projetos da sua área que estão rodando.',
   time: 'Quanto cada pessoa do time pode ceder e os pedidos de alocação.',
 };
-type Membro = { id: string; nome: string; ini: string; papel: string; cap: number; aloc: number; alocado: string; ausencias: { id: string; texto: string; agora: boolean }[] };
+type Membro = { id: string; nome: string; ini: string; papel: string; cap: number; aloc: number; alocado: string; ausencias: { id: string; texto: string; agora: boolean }[]; feedbacks: { id: string; nivel: string; rotulo: string; comentario: string; de: string }[] };
 type Substituicao = { minhas: { id: string; texto: string; agora: boolean }[]; substituindo: string[]; opcoes: { id: string; nome: string }[] };
 type Prio = { id: string; titulo: string; etapa: string; quem: string; ordenada: boolean };
 type MesImp = { mes: string; carga: number; doProjeto: number; situacao: 'ok' | 'so_com_pedido' | 'acima' };
@@ -179,6 +179,7 @@ export function VisaoArea(p: { aba: Aba; trilha: string; nome: string; escopo: s
                   {o ? `${m.alocado} em ${m.aloc}%, acima do que você cedeu. Ajuste o limite ou converse com o GP.` : `${m.alocado} em ${m.aloc}% de ${cap}% disponíveis.`}
                 </span>
                 <Ausencias m={m} aviso={setToast} />
+                {m.feedbacks.length > 0 && <FeedbacksMembro m={m} />}
               </div>
             );
           })}
@@ -186,6 +187,26 @@ export function VisaoArea(p: { aba: Aba; trilha: string; nome: string; escopo: s
         </section>}
       </div>
     </>
+  );
+}
+
+/** Feedbacks dos GPs sobre a pessoa (só o gestor vê aqui). */
+function FeedbacksMembro({ m }: { m: Membro }) {
+  const [aberto, setAberto] = useState(false);
+  const cor: Record<string, [string, string]> = { superou: ['#E3F5EA', '#17723D'], atendeu: ['#EDEAE3', '#4A4458'], abaixo: ['#FEF3DC', '#9A5B05'] };
+  const resumo = Object.entries(m.feedbacks.reduce<Record<string, number>>((a, f) => ({ ...a, [f.rotulo]: (a[f.rotulo] ?? 0) + 1 }), {})).map(([r, n]) => `${n}× ${r.toLowerCase()}`).join(' · ');
+  return (
+    <div role="group" aria-label={`Feedbacks de ${m.nome}`} style={s('display: flex; flex-direction: column; gap: 6px')}>
+      <button type="button" aria-expanded={aberto} onClick={() => setAberto(!aberto)} style={s('align-self: flex-start; border: 0; background: transparent; padding: 0; color: #4B2FD1; font-size: 12px; font-weight: 600; cursor: pointer; text-align: left')}>
+        {aberto ? '▾' : '▸'} Feedback dos GPs ({m.feedbacks.length}): {resumo}
+      </button>
+      {aberto && m.feedbacks.map((f) => (
+        <div key={f.id} style={s('display: flex; flex-direction: column; gap: 2px; padding: 8px 10px; border-radius: 8px; background: #FAF8F4; font-size: 12px')}>
+          <span><span style={{ ...s('font-weight: 600; padding: 1px 8px; border-radius: 8px'), background: (cor[f.nivel] ?? cor.atendeu)[0], color: (cor[f.nivel] ?? cor.atendeu)[1] }}>{f.rotulo}</span> <span style={s('color: #5E5770')}>{f.de}</span></span>
+          {f.comentario && <span style={s('color: #26213A')}>“{f.comentario}”</span>}
+        </div>
+      ))}
+    </div>
   );
 }
 

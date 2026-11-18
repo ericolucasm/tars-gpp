@@ -1,6 +1,7 @@
 import { exigirPerfil } from '@/lib/sessao';
 import { carregarOrg } from '@/lib/dados';
 import { br, hojeISO, haQuanto, mesCurto } from '@/lib/regras/datas';
+import { NIVEIS_FEEDBACK } from '@/lib/regras/feedback';
 import { areasSobGestao, gestorDe, iniciais, nomeCurto, timeDireto } from '@/lib/regras/pessoas';
 
 const primeiroNome = (n: string) => n.split(' ')[0];
@@ -53,6 +54,10 @@ export async function TelaArea({ aba }: { aba: Aba }) {
       id: p.id, nome: p.nome, ini: iniciais(p.nome),
       papel: `${noLugar(g) ? `Time de ${noLugar(g)} · ` : ''}${p.cargo ?? ''} · ${projs.length ? projs.map((x) => `${nomeCurtoProjeto(x.projeto.titulo)} (${x.pct}%)`).join(', ') : 'sem projetos'}`,
       cap: p.cedeAte ?? 0, aloc: alocacaoDe(d, p.id, hoje),
+      feedbacks: d.feedbacks.filter((f) => f.pessoaId === p.id).reverse().map((f) => ({
+        id: f.id, nivel: f.nivel, rotulo: NIVEIS_FEEDBACK[f.nivel]?.rotulo ?? f.nivel, comentario: f.comentario,
+        de: `${pessoa(d, f.autorId)?.nome ?? ''} · ${nomeCurtoProjeto(d.iniciativas.find((i) => i.id === f.iniciativaId)?.titulo ?? '')} · ${br(f.updatedAt.toISOString().slice(0, 10))}`,
+      })),
       ausencias: d.ausencias.filter((a) => a.pessoaId === p.id && a.fim >= hoje).map((a) => ({ id: a.id, texto: `${a.motivo}: ${br(a.inicio)} a ${br(a.fim)}`, agora: a.inicio <= hoje })),
       alocado: p.tratamento === 'f' ? 'Alocada' : p.tratamento === 'm' ? 'Alocado' : 'Alocado(a)',
     };

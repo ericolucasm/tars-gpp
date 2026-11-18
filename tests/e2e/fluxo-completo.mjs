@@ -381,6 +381,29 @@ try {
   await p.context().close();
   ok('Gestora indica um substituto; ele vê as aprovações dela "no lugar de Fernanda"; ela cancela');
 
+  // Feedback do GP: Marina avalia a Renata (participação no CRM terminou); o gestor dela (Sérgio) vê
+  p = await como('marina.gomes@acme.com.br');
+  await ir(p, '/inicio');
+  await p.getByText(/Feedbacks? pendentes? de quem trabalhou com você/).click();
+  await p.waitForURL(/\/projetos\/.+#feedback$/);
+  const fbRen = p.getByRole('group', { name: 'Contribuição de Renata Souza' });
+  await fbRen.getByText('Feedback pendente').waitFor();
+  await fbRen.getByRole('button', { name: 'Dar feedback' }).click();
+  await fbRen.getByRole('button', { name: 'Abaixo do esperado' }).click();
+  await fbRen.getByRole('button', { name: 'Salvar feedback' }).click();
+  await fbRen.getByText(/Conte em poucas palavras o que faltou/).waitFor();
+  await fbRen.getByLabel(/Comentário para o gestor/).fill('Faltou documentar a migração dos clientes.');
+  await fbRen.getByRole('button', { name: 'Salvar feedback' }).click();
+  await fbRen.getByText('Feedback de Renata Souza registrado. O gestor da pessoa foi avisado.').waitFor();
+  await p.context().close();
+  p = await como('sergio.lima@acme.com.br');
+  await ir(p, '/area/time');
+  const fbs = p.getByRole('group', { name: 'Feedbacks de Renata Souza' });
+  await fbs.getByRole('button', { name: /Feedback dos GPs \(1\)/ }).click();
+  await fbs.getByText('“Faltou documentar a migração dos clientes.”').waitFor();
+  await p.context().close();
+  ok('GP dá feedback de quem trabalhou no projeto (abaixo do esperado exige comentário) e o gestor da pessoa vê em Gestão do time');
+
   // 9. Admin: ver como + cadastros
   p = await como('mariana@acme.com.br', 'pmo');
   await ir(p, '/inicio');
