@@ -75,6 +75,7 @@ export function InicioColaborador({ d, sessao, hoje }: { d: DadosOrg; sessao: Se
           <div key={i.id} style={{ ...s('display: flex; flex-direction: column; gap: 12px; padding: 14px; border-radius: 12px'), border: `1px solid ${p.alerta ? '#F0D9A8' : '#EFEBE3'}`, background: p.alerta ? '#FFFCF5' : '#FFFFFF' }}>
             <div style={s('display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; align-items: center')}>
               <span style={s('display: flex; flex-direction: column; gap: 2px')}><span style={s('font-size: 15px; font-weight: 600')}>{i.titulo}</span><span style={s('font-size: 12px; color: #5E5770')}>{p.sub}</span></span>
+              {i.inicioProjeto && noRaia(d, i, 'exe', 'pau', 'con') && <Link href={`/projetos/${i.id}`} style={s('height: 36px; padding: 0 14px; border-radius: 9px; border: 1px solid #DCD2FF; background: #F7F4FF; color: #4B2FD1; font-weight: 600; font-size: 13px; display: inline-flex; align-items: center')}>Acompanhar projeto →</Link>}
               {p.acao && <Link href={`/iniciativas/${i.id}/editar`} style={s('height: 36px; padding: 0 14px; border-radius: 9px; background: #6D4AFF; color: #FFFFFF; font-weight: 600; font-size: 13px; display: inline-flex; align-items: center')}>{p.acao}</Link>}
             </div>
             <Etapas etapas={PASSOS.map((n, k) => ({ nome: k === p.at && p.alerta ? 'Ajuste pedido' : n }))} atual={p.at} alerta={p.alerta} />

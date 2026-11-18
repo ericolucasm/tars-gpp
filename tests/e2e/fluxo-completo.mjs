@@ -540,6 +540,18 @@ try {
   await p.context().close();
   ok('Colaborador alocado abre o projeto pela Início em modo leitura (sem editar nem ver o financeiro) e registra uma lição');
 
+  // Quem pediu acompanha o projeto que nasceu da sua iniciativa
+  p = await como('joao.silva@acme.com.br');
+  await ir(p, '/inicio');
+  await p.getByRole('region', { name: 'Suas iniciativas' }).locator('div').filter({ hasText: TITULO }).getByRole('link', { name: 'Acompanhar projeto →' }).first().click();
+  await p.waitForURL(new RegExp(`/projetos/${projId}`));
+  await p.getByText(/VOCÊ PEDIU/).waitFor();
+  await p.getByRole('region', { name: 'Benefício esperado' }).getByText('Pedidos expedidos com atraso por semana').waitFor();
+  await p.getByRole('region', { name: 'Status publicados' }).getByText('Projeto iniciado e linha de base congelada.').waitFor();
+  if (await p.getByRole('region', { name: 'Sua parte no projeto' }).count()) throw new Error('Quem só pediu não participa do projeto');
+  await p.context().close();
+  ok('Quem pediu abre "Acompanhar projeto" e vê o andamento, os status e o benefício esperado');
+
   // GP conclui o projeto pela página do projeto (gate com o aceite de quem pediu)
   p = await como('carlos.andrade@acme.com.br');
   await ir(p, `/projetos/${projId}#encerramento`);

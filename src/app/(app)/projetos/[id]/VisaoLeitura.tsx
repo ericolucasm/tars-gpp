@@ -4,7 +4,9 @@ import type { Sessao } from '@/lib/sessao';
 import { br } from '@/lib/regras/datas';
 import { dataDaSemana, FAROL, type Farol } from '@/lib/regras/projeto';
 import { detalheIniciativa } from '@/lib/detalhe';
-import { balancoDo, fasesDo, nomeArea, noRaia, pessoa } from '@/lib/visoes';
+import { balancoDo, fasesDo, nomeArea, noRaia, participaDoProjeto, pessoa } from '@/lib/visoes';
+import { beneficioVM } from '@/lib/beneficios-vm';
+import { CartaoBeneficio } from '@/components/Beneficio';
 import { DetalheIniciativa } from '@/components/DetalheIniciativa';
 import { PillFarol } from '@/components/ui';
 import { SecaoPontos } from './SecaoPontos';
@@ -19,6 +21,8 @@ const sCartao = s('background: #FFFFFF; border: 1px solid #E2DCD0; border-radius
  */
 export function VisaoLeitura({ d, sessao, ini, hoje }: { d: DadosOrg; sessao: Sessao; ini: Iniciativa; hoje: string }) {
   const eu = sessao.pessoa.id;
+  const participa = participaDoProjeto(d, ini.id, eu);
+  const pediu = ini.solicitanteId === eu;
   const fases = fasesDo(d, ini.id);
   const faseIds = new Set(fases.map((f) => f.id));
   const gp = pessoa(d, ini.gpId);
@@ -38,16 +42,16 @@ export function VisaoLeitura({ d, sessao, ini, hoje }: { d: DadosOrg; sessao: Se
   return (
     <>
       <div style={s('display: flex; flex-direction: column; gap: 6px')}>
-        <span style={s('font-size: 12px; color: #4B2FD1; font-weight: 600; letter-spacing: 0.4px')}>PROJETO · {nomeArea(d, ini.areaId).toUpperCase()} · VOCÊ PARTICIPA</span>
+        <span style={s('font-size: 12px; color: #4B2FD1; font-weight: 600; letter-spacing: 0.4px')}>PROJETO · {nomeArea(d, ini.areaId).toUpperCase()} · {participa ? 'VOCÊ PARTICIPA' : 'VOCÊ PEDIU'}</span>
         <div style={s('display: flex; flex-wrap: wrap; gap: 10px; align-items: center')}>
           <h1 style={s('margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.3px')}>{ini.titulo}</h1>
           {noRaia(d, ini, 'exe', 'pau') && <PillFarol farol={ini.farol} />}
         </div>
         <span style={s('font-size: 13px; color: #5E5770')}>{[gp ? `GP: ${gp.nome}` : null, patro ? `Patrocinador: ${patro}` : null, raia && raia.chave !== 'exe' ? `Etapa: ${raia.nome}` : null].filter(Boolean).join(' · ')}</span>
-        <span style={s('font-size: 12px; color: #5E5770')}>Visão de leitura para quem participa do projeto. Quem planeja e altera o projeto é o GP{gp ? ` (${gp.nome})` : ''}.</span>
+        <span style={s('font-size: 12px; color: #5E5770')}>{participa ? 'Visão de leitura para quem participa do projeto.' : 'Este projeto nasceu da iniciativa que você pediu. Acompanhe o andamento por aqui.'} Quem planeja e altera o projeto é o GP{gp ? ` (${gp.nome})` : ''}.</span>
       </div>
 
-      <section aria-label="Sua parte no projeto" style={sCartao}>
+      {participa && <section aria-label="Sua parte no projeto" style={sCartao}>
         <h2 style={s('margin: 0; font-size: 18px; font-weight: 700')}>Sua parte no projeto</h2>
         {minhasAlocs.length > 0 && (
           <div style={s('display: flex; flex-direction: column; gap: 6px')}>
@@ -75,7 +79,7 @@ export function VisaoLeitura({ d, sessao, ini, hoje }: { d: DadosOrg; sessao: Se
           {minhasTarefas.length === 0 && <span style={s('font-size: 13px; color: #5E5770')}>Nenhuma tarefa sua neste projeto.</span>}
           <span style={s('font-size: 12px; color: #5E5770')}>Para concluir, pedir mais prazo ou avisar de um impedimento, use <a href="/minhas-entregas" style={s('color: #4B2FD1; font-weight: 600')}>Minhas entregas</a>.</span>
         </div>
-      </section>
+      </section>}
 
       <section aria-label="Andamento do projeto" style={sCartao}>
         <h2 style={s('margin: 0; font-size: 18px; font-weight: 700')}>Andamento</h2>
@@ -83,6 +87,16 @@ export function VisaoLeitura({ d, sessao, ini, hoje }: { d: DadosOrg; sessao: Se
         <span style={s('font-size: 13px; font-weight: 700')}>Fases</span>
         {fases.map((f) => <span key={f.id} style={s('font-size: 13px; color: #4A4458')}>{f.nome} · {datas(f)}{f.confirmadaEm ? ' · concluída' : ''}</span>)}
       </section>
+
+      {(ini.beneficioIndicador || pediu) && (
+        <section id="beneficio" aria-label="Benefício esperado" style={sCartao}>
+          <div style={s('display: flex; flex-direction: column; gap: 2px')}>
+            <h2 style={s('margin: 0; font-size: 18px; font-weight: 700')}>Benefício esperado</h2>
+            <span style={s('font-size: 12px; color: #5E5770')}>Como saber se o projeto deu resultado. {pediu ? 'Na data de medir, você (ou o GP, o gestor ou o PMO) registra o resultado real.' : ''}</span>
+          </div>
+          <CartaoBeneficio b={{ ...beneficioVM(d, ini, eu, false, hoje), href: null }} />
+        </section>
+      )}
 
       <section aria-label="Status publicados" style={sCartao}>
         <h2 style={s('margin: 0; font-size: 18px; font-weight: 700')}>Status publicados</h2>

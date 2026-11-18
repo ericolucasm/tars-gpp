@@ -516,4 +516,7 @@ describe('acesso à página do projeto', () => {
     expect(modoDoProjeto({ ...ninguem, participa: true })).toBe('leitura');
     expect(modoDoProjeto(ninguem)).toBeNull();
   });
+  it('quem pediu a iniciativa acompanha o projeto em leitura', () => {
+    expect(modoDoProjeto({ ...ninguem, solicitante: true })).toBe('leitura');
+  });
 });
