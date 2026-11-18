@@ -439,3 +439,14 @@ export const authVerification = pgTable('auth_verification', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
+
+export const ausencias = pgTable('ausencias', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  orgId: uuid('org_id').notNull(),
+  pessoaId: uuid('pessoa_id').notNull().references(() => pessoas.id, { onDelete: 'cascade' }),
+  inicio: date('inicio').notNull(),
+  fim: date('fim').notNull(), // inclusive
+  motivo: text('motivo').notNull(), // Férias | Licença | Treinamento | Outro
+  registradaPor: uuid('registrada_por'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+});

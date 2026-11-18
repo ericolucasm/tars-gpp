@@ -334,7 +334,24 @@ try {
   await ped.getByRole('button', { name: /Ceder \+10%/ }).click();
   await p.getByText(/Você cedeu \+10% de Diego Santos/).waitFor();
   ok('Gestora vê o impacto mês a mês e cede capacidade pedida pelo GP');
+  await p.getByRole('group', { name: 'Ausências de Clara Mendes' }).getByText('Férias: 01/12/2026 a 15/12/2026').waitFor();
+  const ausJoao = p.getByRole('group', { name: 'Ausências de João Silva' });
+  await ausJoao.getByRole('button', { name: '+ Registrar ausência' }).click();
+  await ausJoao.getByLabel('De').fill('2026-12-31');
+  await ausJoao.getByLabel('Até').fill('2026-12-20');
+  await ausJoao.getByRole('button', { name: 'Registrar' }).click();
+  await ausJoao.getByRole('alert').getByText(/fim precisa ser/).waitFor();
+  await ausJoao.getByLabel('De').fill('2026-12-20');
+  await ausJoao.getByLabel('Até').fill('2026-12-31');
+  await ausJoao.getByRole('button', { name: 'Registrar' }).click();
+  await p.getByText('Ausência de João Silva registrada. O GP do projeto afetado foi avisado.').waitFor();
+  await ausJoao.getByText('Férias: 20/12/2026 a 31/12/2026').waitFor();
   await p.context().close();
+  p = await como('fabio.oliveira@acme.com.br');
+  await ir(p, '/inicio');
+  await p.getByText('João Silva estará ausente (férias)').waitFor();
+  await p.context().close();
+  ok('Gestora registra férias de alguém do time (valida datas) e o GP do projeto afetado é avisado na Início');
 
   // 9. Admin: ver como + cadastros
   p = await como('mariana@acme.com.br', 'pmo');

@@ -6,6 +6,8 @@ import { s } from '@/lib/css';
 import { FAROL, type Farol } from '@/lib/regras/projeto';
 import { DetalheIniciativa, TituloExpansivel, cliqueNaLinha } from '@/components/DetalheIniciativa';
 import type { Detalhe } from '@/lib/detalhe';
+import { registrarAusencia, removerAusencia } from '@/app/acoes/ausencias';
+import { MOTIVOS_AUSENCIA } from '@/lib/regras/ausencias';
 import { aprovarComoGestor, definirCedencia, definirPrioridadeArea, devolverParaAjuste, naoSeguirComoGestor, responderPedido } from '@/app/acoes/gestor';
 
 type Aprovacao = { id: string; titulo: string; quem: string; quando: string; problema: string; tipo: string; urg: string; urgente: boolean; custo: string; det: Detalhe };
@@ -17,7 +19,7 @@ const TEXTO: Record<Aba, string> = {
   projetos: 'Projetos da sua área que estão rodando.',
   time: 'Quanto cada pessoa do time pode ceder e os pedidos de alocação.',
 };
-type Membro = { id: string; nome: string; ini: string; papel: string; cap: number; aloc: number; alocado: string };
+type Membro = { id: string; nome: string; ini: string; papel: string; cap: number; aloc: number; alocado: string; ausencias: { id: string; texto: string; agora: boolean }[] };
 type Prio = { id: string; titulo: string; etapa: string; quem: string; ordenada: boolean };
 type MesImp = { mes: string; carga: number; doProjeto: number; situacao: 'ok' | 'so_com_pedido' | 'acima' };
 type Pedido = { id: string; texto: string; delta: number; quem: string; impacto: { limiteAtual: number; limiteNovo: number; comCronograma: boolean; meses: MesImp[] } };
@@ -172,6 +174,7 @@ export function VisaoArea(p: { aba: Aba; trilha: string; nome: string; escopo: s
                 <span style={{ fontSize: 12, color: o ? '#9A5B05' : '#5E5770', fontWeight: o ? 600 : 400 }}>
                   {o ? `${m.alocado} em ${m.aloc}%, acima do que você cedeu. Ajuste o limite ou converse com o GP.` : `${m.alocado} em ${m.aloc}% de ${cap}% disponíveis.`}
                 </span>
+                <Ausencias m={m} aviso={setToast} />
               </div>
             );
           })}
@@ -179,6 +182,43 @@ export function VisaoArea(p: { aba: Aba; trilha: string; nome: string; escopo: s
         </section>}
       </div>
     </>
+  );
+}
+
+/** Ausências (férias, licenças…) de uma pessoa do time: reduzem a capacidade no período e avisam o GP. */
+function Ausencias({ m, aviso }: { m: Membro; aviso: (t: string) => void }) {
+  const [aberto, setAberto] = useState(false);
+  const [f, setF] = useState({ inicio: '', fim: '', motivo: 'Férias' });
+  const [erro, setErro] = useState('');
+  const [pend, start] = useTransition();
+  const sCampo = s('height: 34px; padding: 0 8px; border-radius: 8px; border: 1px solid #E2DCD0; font-size: 13px; color: #26213A; background: #FFFFFF');
+  return (
+    <div aria-label={`Ausências de ${m.nome}`} role="group" style={s('display: flex; flex-direction: column; gap: 6px')}>
+      <div style={s('display: flex; flex-wrap: wrap; gap: 6px; align-items: center')}>
+        {m.ausencias.map((a) => (
+          <span key={a.id} style={{ ...s('font-size: 12px; padding: 3px 4px 3px 10px; border-radius: 10px; display: inline-flex; align-items: center; gap: 4px'), background: a.agora ? '#FEF3DC' : '#EDEAE3', color: a.agora ? '#7A4A04' : '#4A4458' }}>
+            {a.agora ? 'Ausente agora · ' : ''}{a.texto}
+            <button type="button" aria-label={`Remover ausência ${a.texto}`} disabled={pend} onClick={() => start(async () => { const r = await removerAusencia(a.id); aviso(r.ok ? r.msg ?? '' : r.erro ?? ''); })} style={s('border: 0; background: transparent; color: #8A8296; font-size: 14px; padding: 0 4px; cursor: pointer')}>×</button>
+          </span>
+        ))}
+        <button type="button" onClick={() => { setAberto(!aberto); setErro(''); }} style={s('border: 0; background: transparent; color: #4B2FD1; font-size: 12px; font-weight: 600; padding: 2px 0; cursor: pointer')}>{aberto ? 'Cancelar' : '+ Registrar ausência'}</button>
+      </div>
+      {aberto && (
+        <div style={s('display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; padding: 10px; border-radius: 10px; background: #F7F5F0')}>
+          <label style={s('display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #5E5770')}>De<input type="date" value={f.inicio} onChange={(e) => setF({ ...f, inicio: e.target.value })} style={sCampo} /></label>
+          <label style={s('display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #5E5770')}>Até<input type="date" value={f.fim} onChange={(e) => setF({ ...f, fim: e.target.value })} style={sCampo} /></label>
+          <label style={s('display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #5E5770')}>Motivo
+            <select value={f.motivo} onChange={(e) => setF({ ...f, motivo: e.target.value })} style={sCampo}>{MOTIVOS_AUSENCIA.map((x) => <option key={x}>{x}</option>)}</select>
+          </label>
+          <button type="button" disabled={pend} onClick={() => start(async () => {
+            const r = await registrarAusencia(m.id, f);
+            if (!r.ok) { setErro(r.erro ?? ''); return; }
+            aviso(r.msg ?? ''); setAberto(false); setErro(''); setF({ inicio: '', fim: '', motivo: 'Férias' });
+          })} style={s('height: 34px; padding: 0 14px; border-radius: 8px; border: 0; background: #6D4AFF; color: #FFFFFF; font-weight: 600; font-size: 12px')}>Registrar</button>
+          {erro && <span role="alert" style={s('flex-basis: 100%; font-size: 12px; color: #B42318; font-weight: 600')}>{erro}</span>}
+        </div>
+      )}
+    </div>
   );
 }
 

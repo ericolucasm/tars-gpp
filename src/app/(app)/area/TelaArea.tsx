@@ -50,6 +50,7 @@ export async function TelaArea({ aba }: { aba: Aba }) {
       id: p.id, nome: p.nome, ini: iniciais(p.nome),
       papel: `${p.cargo ?? ''} · ${projs.length ? projs.map((x) => `${nomeCurtoProjeto(x.projeto.titulo)} (${x.pct}%)`).join(', ') : 'sem projetos'}`,
       cap: p.cedeAte ?? 0, aloc: alocacaoDe(d, p.id, hoje),
+      ausencias: d.ausencias.filter((a) => a.pessoaId === p.id && a.fim >= hoje).map((a) => ({ id: a.id, texto: `${a.motivo}: ${br(a.inicio)} a ${br(a.fim)}`, agora: a.inicio <= hoje })),
       alocado: p.tratamento === 'f' ? 'Alocada' : p.tratamento === 'm' ? 'Alocado' : 'Alocado(a)',
     };
   });

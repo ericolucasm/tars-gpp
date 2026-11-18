@@ -13,6 +13,7 @@ import { balancoCusto, balancoEscopo, balancoPrazo, type ItemBalanco } from './r
 import { situacaoBeneficio } from './regras/beneficios';
 import { proximoStatusDevido } from './regras/muro';
 import { ordenarPrioridadeArea } from './regras/gestor';
+import { cruza, fracaoAusente } from './regras/ausencias';
 
 // Cálculos derivados usados por várias telas. Tudo a partir de DadosOrg (a "foto" da empresa).
 
@@ -103,7 +104,7 @@ export function participaDoProjeto(d: DadosOrg, iniId: string, pessoaId: string)
 
 // ---------- Capacidade ----------
 
-type Intervalo = { ini: string; fim: string; pct: number; projeto: Iniciativa };
+type Intervalo = { ini: string; fim: string; pct: number; projeto: Iniciativa; fase: string };
 
 function intervalosDaPessoa(d: DadosOrg, pessoaId: string, hoje: string, incluir?: string): Intervalo[] {
   const exe = raiaChave(d, 'exe')?.id;
@@ -117,7 +118,7 @@ function intervalosDaPessoa(d: DadosOrg, pessoaId: string, hoje: string, incluir
     if (!f || !ini || (ini.raiaId !== exe && ini.id !== incluir) || !ini.inicioProjeto) continue;
     const fim = dataDaSemana(ini.inicioProjeto, f.inicioSemana + f.duracao);
     if (fim <= hoje) continue; // fase já terminou
-    res.push({ ini: dataDaSemana(ini.inicioProjeto, f.inicioSemana), fim, pct: a.pct, projeto: ini });
+    res.push({ ini: dataDaSemana(ini.inicioProjeto, f.inicioSemana), fim, pct: a.pct, projeto: ini, fase: f.nome });
   }
   return res;
 }
@@ -140,8 +141,10 @@ export function capacidadeDaArea(d: DadosOrg, areaId: string, meses: { de: strin
   const pessoas = d.pessoas.filter((p) => !p.externo && p.areaId && ids.has(p.areaId));
   const cedido = pessoas.reduce((s, p) => s + (p.cedeAte ?? 0), 0);
   const ivs = pessoas.map((p) => intervalosDaPessoa(d, p.id, hoje));
+  // cedido de cada mês, descontadas as ausências (férias de meio mês = metade do que a pessoa cede)
+  const cedidoMeses = meses.map((m) => Math.round(pessoas.reduce((s, p) => s + (p.cedeAte ?? 0) * (1 - fracaoAusente(d.ausencias.filter((a) => a.pessoaId === p.id), m.de, m.ate)), 0)));
   return {
-    cedido, pessoas: pessoas.length,
+    cedido, cedidoMeses, pessoas: pessoas.length,
     meses: meses.map((m) => ivs.reduce((s, iv) => s + picoNoPeriodo(iv, m.de, m.ate), 0)),
   };
 }
@@ -423,4 +426,20 @@ export function posicaoNaArea(d: DadosOrg, i: Iniciativa) {
   if (!lista.some((x) => x.prioridadeArea != null)) return null;
   const pos = lista.findIndex((x) => x.id === i.id);
   return pos < 0 ? null : { pos: pos + 1, total: lista.length, gestor: d.pessoas.find((p) => p.id === dono)?.nome ?? '' };
+}
+
+// ---------- Ausências ----------
+
+/** Ausências atuais e futuras que caem em fases onde a pessoa está alocada (projetos em execução): o GP precisa saber. */
+export function conflitosDeAusencia(d: DadosOrg, hoje: string) {
+  const res: { ausencia: (typeof d.ausencias)[number]; pessoa: Pessoa; projeto: Iniciativa; fase: string; pct: number }[] = [];
+  for (const a of d.ausencias.filter((x) => x.fim >= hoje)) {
+    const p = d.pessoas.find((x) => x.id === a.pessoaId);
+    if (!p) continue;
+    for (const iv of intervalosDaPessoa(d, a.pessoaId, hoje)) {
+      if (!cruza(a, iv.ini, iv.fim)) continue;
+      res.push({ ausencia: a, pessoa: p, projeto: iv.projeto, fase: iv.fase, pct: iv.pct });
+    }
+  }
+  return res;
 }
