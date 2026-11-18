@@ -19,7 +19,7 @@ export function contextoForm(d: DadosOrg, sessao: Sessao, hoje: string) {
     aprovadorCargo: aprov ? cargoDoAprovador(d, aprov) : 'Sem gestor acima: vai direto ao PMO',
     home: '/inicio',
     ciclo: ciclo ? { nome: ciclo.nome, ate: br(ciclo.fechamento), faltam: Math.max(0, diffDias(ciclo.fechamento, hoje)) } : null,
-    patrocinadores: d.pessoas.filter((p) => !p.externo && p.perfis.includes('patrocinador')).map((p) => ({ id: p.id, nome: p.nome, cargo: p.cargo ?? '' })),
+    patrocinadores: d.pessoas.filter((p) => !p.externo && p.status !== 'inativo' && p.perfis.includes('patrocinador')).map((p) => ({ id: p.id, nome: p.nome, cargo: p.cargo ?? '' })),
     areas: d.areas.filter((a) => a.tipo === 'Gerência' && a.id !== eu.areaId && a.nome !== 'PMO').map((a) => ({ id: a.id, nome: a.nome })),
   };
 }
