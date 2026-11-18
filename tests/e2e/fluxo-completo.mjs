@@ -89,6 +89,9 @@ try {
   p = await como('joao.silva@acme.com.br');
   await ir(p, '/inicio');
   await p.getByText('Informe quantas pessoas serão treinadas.').waitFor();
+  // Meu TARS: a devolução aparece na caixa única, em "Para fazer"
+  await p.getByRole('link', { name: 'Meu TARS' }).waitFor();
+  await p.getByRole('region', { name: 'Precisa de você' }).getByRole('group', { name: 'Para fazer' }).getByRole('link', { name: new RegExp(`Iniciativa devolvida: ${TITULO2}`) }).waitFor();
   const blocoDev = p.locator('div').filter({ hasText: TITULO2 }).filter({ has: p.getByRole('link', { name: 'Ajustar e reenviar' }) }).last();
   await blocoDev.getByRole('link', { name: 'Ajustar e reenviar' }).click();
   await p.getByText('pediu ajuste').waitFor();
@@ -701,6 +704,18 @@ try {
   await p.getByText(/Esta área tem (subáreas|\d+ pessoas?)/).waitFor();
   await p.context().close();
   ok('Admin exclui uma área vazia; área com pessoas ou subáreas não pode ser excluída');
+
+  // Meu TARS: caixa única com os itens de todos os papéis da pessoa, por prioridade
+  p = await como('fernanda.oliveira@acme.com.br');
+  await ir(p, '/inicio');
+  const caixa = p.getByRole('region', { name: 'Precisa de você' });
+  await caixa.getByText(/Tudo que depende de você/).waitFor();
+  const grupos = await caixa.getByRole('group').evaluateAll((els) => els.map((e) => e.getAttribute('aria-label')));
+  const ORDEM = ['Atrasado', 'Vence hoje', 'Alguém está esperando por você', 'Nos próximos 7 dias', 'Para fazer', 'Mais adiante', 'Para acompanhar'];
+  const idx = grupos.map((g) => ORDEM.indexOf(g));
+  if (!idx.length || idx.some((x) => x < 0) || idx.some((x, k) => k && x < idx[k - 1])) throw new Error('Grupos fora da ordem de prioridade: ' + grupos.join(', '));
+  await p.context().close();
+  ok('Meu TARS: a caixa única mostra o que depende da pessoa, agrupado na ordem de prioridade');
 } catch (e) {
   console.error('✗ FALHOU no passo', passo + 1, '\n', e.message.split('\n').slice(0, 6).join('\n'));
   process.exitCode = 1;

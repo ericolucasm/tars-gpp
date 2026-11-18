@@ -5,7 +5,7 @@ import { primeiroNome } from '@/lib/regras/pessoas';
 export function Saudacao({ nome, hoje, texto }: { nome: string; hoje: string; texto: string }) {
   return (
     <div style={s('display: flex; flex-direction: column; gap: 4px')}>
-      <span style={s('font-size: 12px; color: #5E5770')}>{dataPorExtenso(hoje)}</span>
+      <span style={s('font-size: 12px; color: #5E5770')}><strong style={s('color: #4B2FD1; letter-spacing: 0.4px')}>MEU TARS</strong> · {dataPorExtenso(hoje)}</span>
       <h1 style={s('margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.3px')}>{saudacao()}, {primeiroNome(nome)}</h1>
       <p style={s('margin: 0; font-size: 14px; color: #5E5770')}>{texto}</p>
     </div>

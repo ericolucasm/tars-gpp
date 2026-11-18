@@ -148,9 +148,17 @@ Na V1, todos os itens e números são **calculados a partir dos dados reais**:
 - **PMO:** iniciativas prontas para avaliar · projetos críticos · pedidos de mudança de linha de base · status da semana atrasados (mais de 7 dias sem status) · pré-projetos prontos para o play (prontidão) · pessoas acima do cedido.
 - **Gestor:** aprovações pendentes (obrigatórias primeiro) · pedidos de alocação · pessoas do time acima do cedido.
 - **GP:** status da semana a publicar · tarefas atrasadas · pedidos de alocação aguardando o gestor · fases a confirmar · projeto pronto para concluir (todas as fases confirmadas).
+
+> **[Decisão V2]** Desde o Meu TARS (abaixo), esses itens são reunidos numa caixa única por pessoa, com todos os papéis dela, em ordem de prioridade.
 - **Colaborador:** suas iniciativas com o passo atual · suas tarefas em projetos.
 
 > **[Decisão V1]** No protótipo, alguns números eram ilustrativos e não batiam entre telas (ex.: "13 prontas para avaliar" na tela inicial e 9 linhas na Avaliação). Na V1, todas as telas leem a mesma base, então os números do seed podem ser diferentes dos do protótipo, mas são sempre consistentes entre si.
+
+### Meu TARS (V2)
+
+- **[Decisão V2]** A Início passou a se chamar **Meu TARS** (menu e topo da tela), em todos os perfis (pedido da Mariana). Os painéis de cada perfil continuam (cartões dos projetos, números do portfólio, ciclo, projetos da área), mas o **Precisa de você** virou uma **caixa única**: tudo que depende da pessoa, em **todos os papéis dela** (o que é dela como colaborador, gestor, GP, PMO e patrocinador), sem repetir, na mesma lista, qualquer que seja o perfil ativo.
+- **[Decisão V2]** **Ordem de prioridade** (grupos, nesta ordem): **Atrasado** (já venceu) → **Vence hoje** → **Alguém está esperando por você** (decisões e respostas que travam outra pessoa: aprovações, pedidos de alocação e de prazo, pontos de atenção, mudanças, avaliação do ciclo, aceite) → **Nos próximos 7 dias** → **Para fazer** (sem data: iniciativa devolvida, rascunho, benefício para medir, feedbacks, concluir projeto) → **Mais adiante** → **Para acompanhar** (alertas sem ação direta: projetos críticos, custo, riscos, muro do time, pessoas acima do cedido). Dentro do grupo, pela data. Quando a pessoa tem mais de um papel, cada item mostra de onde veio (Você, Gestor, GP, PMO, Patrocinador).
+- **[Decisão V2]** As **entregas da própria pessoa** (tarefas, gates e status report) entram uma a uma: atrasadas e as que vencem em até 7 dias (o status, pela cadência do projeto); as demais viram uma linha "N entregas mais adiante", que leva a Minhas entregas. As decisões do gestor entram pelo bloco do gestor, com o prazo de 5 dias (§11). O antigo aviso "Você tem N entregas atrasadas" deu lugar aos itens atrasados, um a um.
 
 ## 9. Adições da V1 que não existiam no protótipo
 

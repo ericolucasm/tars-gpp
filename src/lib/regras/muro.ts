@@ -67,3 +67,12 @@ export function rotuloVencimentoStatus(proximo: string, hoje: string) {
   const n = diasDeAtraso(proximo, hoje);
   return `venceu ${dia} (${n} ${n === 1 ? 'dia' : 'dias'} de atraso)`;
 }
+
+/** Texto curto do vencimento de uma entrega: "vence hoje", "vence em 23/10" ou "venceu em 16/10 (3 dias de atraso)". */
+export function venceTextoCurto(vencimento: string, hoje: string) {
+  if (vencimento === hoje) return 'vence hoje';
+  const dm = `${vencimento.slice(8, 10)}/${vencimento.slice(5, 7)}`;
+  if (vencimento > hoje) return `vence em ${dm}`;
+  const n = diasDeAtraso(vencimento, hoje);
+  return `venceu em ${dm} (${n} ${n === 1 ? 'dia' : 'dias'} de atraso)`;
+}

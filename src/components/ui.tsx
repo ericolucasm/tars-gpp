@@ -56,13 +56,14 @@ const TOM: Record<Tom, { borda: string; fundo?: string; badgeBg: string; badgeFg
 };
 
 /** Linha da lista "Precisa de você". */
-export function ItemAcao({ href, titulo, sub, acao, numero, tom = 'roxo', badgeTom }: { href: string; titulo: string; sub: string; acao: string; numero?: number; tom?: Tom; badgeTom?: Tom }) {
+export function ItemAcao({ href, titulo, sub, acao, numero, tom = 'roxo', badgeTom, etiqueta }: { href: string; titulo: string; sub: string; acao: string; numero?: number; tom?: Tom; badgeTom?: Tom; etiqueta?: string }) {
   const t = TOM[tom];
   const b = TOM[badgeTom ?? tom];
   return (
     <Link href={href} style={{ ...s('display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: #26213A'), border: `1px solid ${t.borda}`, background: t.fundo }}>
       {numero !== undefined && <span style={{ ...s('width: 32px; height: 32px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; flex: 0 0 32px'), background: b.badgeBg, color: b.badgeFg }}>{numero}</span>}
       <span style={s('display: flex; flex-direction: column; flex: 1; min-width: 0')}><span style={s('font-size: 14px; font-weight: 600')}>{titulo}</span><span style={s('font-size: 12px; color: #5E5770')}>{sub}</span></span>
+      {etiqueta && <span style={s('font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; background: #F3F0EA; color: #5E5770; white-space: nowrap')}>{etiqueta}</span>}
       <span style={s('font-size: 13px; font-weight: 600; color: #4B2FD1; white-space: nowrap')}>{acao}</span>
     </Link>
   );
