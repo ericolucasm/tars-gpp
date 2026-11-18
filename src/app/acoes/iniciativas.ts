@@ -4,12 +4,13 @@ import { and, eq } from 'drizzle-orm';
 import { db, schema as t } from '@/db';
 import { aprovadorDe, chaveDaRaia, cicloAberto, raiaChave } from '@/lib/visoes';
 import { retiradaPermitida, validarRetirada } from '@/lib/regras/esteira';
+import { patrocinadorValido } from '@/lib/regras/pessoas';
 import { contexto, executar, exigir, notificar } from './_ctx';
 
 export type DadosForm = {
   id?: string;
   titulo: string; problema: string; resultadoEsperado: string; tipo: string;
-  patrocinadorTexto: string; areasImpactadas: string[];
+  patrocinadorTexto: string; patrocinadorId?: string; areasImpactadas: string[];
   urgencia: string; justificativaUrgencia: string;
   inicioDesejado: string; entregaDesejada: string; faixaCusto: string; fornecedor: string;
   beneficioIndicador: string; beneficioMeta: string; beneficioMedirEm: string;
@@ -30,12 +31,14 @@ export async function salvarIniciativa(f: DadosForm, enviar: boolean) {
     const sol = raiaChave(dados, 'sol');
     exigir(sol, 'A raia de solicitações não está configurada.');
 
+    const patroId = f.patrocinadorId || null;
+    exigir(!patroId || patrocinadorValido(dados.pessoas.find((p) => p.id === patroId)), 'Escolha um patrocinador da lista.');
     const aprovador = aprovadorDe(dados, eu);
     const ciclo = cicloAberto(dados);
     const agora = new Date();
     const campos = {
       titulo: f.titulo.trim(), problema: f.problema.trim(), resultadoEsperado: f.resultadoEsperado.trim(), tipo: f.tipo || 'mel',
-      patrocinadorTexto: f.patrocinadorTexto.trim() || null, areasImpactadas: f.areasImpactadas,
+      patrocinadorId: patroId, patrocinadorTexto: patroId ? null : f.patrocinadorTexto.trim() || null, areasImpactadas: f.areasImpactadas,
       urgencia: f.urgencia, justificativaUrgencia: f.urgencia === 'urg' ? f.justificativaUrgencia.trim() || null : null,
       inicioDesejado: f.inicioDesejado || null, entregaDesejada: f.entregaDesejada || null, faixaCusto: f.faixaCusto, fornecedor: f.fornecedor,
       beneficioIndicador: f.beneficioIndicador?.trim() || null, beneficioMeta: f.beneficioMeta?.trim() || null, beneficioMedirEm: /^\d{4}-\d{2}-\d{2}$/.test(f.beneficioMedirEm ?? '') ? f.beneficioMedirEm : null,
@@ -82,5 +85,20 @@ export async function retirarIniciativa(iniciativaId: string, comentario: string
     await db.insert(t.transicoes).values({ orgId: dados.org.id, iniciativaId: ini.id, acao: 'retirada_solicitante', deRaiaId: ini.raiaId, paraRaiaId: can.id, motivo: motivoSaida, ...autoria });
     if (ini.solStatus === 'aguardando_gestor') await notificar(dados.org.id, [ini.aprovadorId], `${eu.nome} retirou "${ini.titulo}": ${comentario.trim()}`, '/area/iniciativas');
     return { ok: true, msg: `“${ini.titulo}” retirada.` };
+  });
+}
+
+/** PMO indica ou troca o patrocinador (pessoa cadastrada) de uma iniciativa ou projeto. */
+export async function definirPatrocinador(iniciativaId: string, pessoaId: string) {
+  return executar(async () => {
+    const { dados, eu, ehPmo } = await contexto();
+    exigir(ehPmo, 'Apenas o PMO pode trocar o patrocinador.');
+    const ini = dados.iniciativas.find((i) => i.id === iniciativaId);
+    exigir(ini, 'Iniciativa não encontrada.');
+    const novo = pessoaId ? dados.pessoas.find((p) => p.id === pessoaId) : null;
+    exigir(!pessoaId || patrocinadorValido(novo), 'Escolha um patrocinador da lista.');
+    await db.update(t.iniciativas).set({ patrocinadorId: novo?.id ?? null, ...(novo ? { patrocinadorTexto: null } : {}), updatedAt: new Date() }).where(and(eq(t.iniciativas.id, ini.id), eq(t.iniciativas.orgId, dados.org.id)));
+    if (novo && novo.id !== ini.patrocinadorId && novo.id !== eu.id) await notificar(dados.org.id, [novo.id], `Você é o patrocinador de "${ini.titulo}".`, ini.inicioProjeto ? `/projetos/${ini.id}` : '/inicio');
+    return { ok: true, msg: novo ? `Patrocinador: ${novo.nome}.` : 'Patrocinador removido.' };
   });
 }

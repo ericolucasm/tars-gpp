@@ -41,11 +41,13 @@ try {
       await medir.getByLabel('Indicador').fill('Pedidos expedidos com atraso por semana');
       await medir.getByLabel('Meta').fill('Menos de 5');
       await medir.getByLabel('Medir em').fill(new Date(Date.now() - 86400000).toISOString().slice(0, 10)); // ontem: já é hora de medir
+      await p.getByLabel('Patrocinador', { exact: true }).selectOption({ label: 'Ricardo Moura · Diretor de operações' });
     }
     await p.getByRole('button', { name: 'Enviar para aprovação' }).click();
     await p.getByText('Iniciativa enviada para aprovação').waitFor();
   }
-  ok('Colaborador valida obrigatórios e envia 2 iniciativas (uma com indicador e meta de benefício)');
+  if (sql(`select p.nome from iniciativas i join pessoas p on p.id=i.patrocinador_id where i.titulo='${TITULO}'`) !== 'Ricardo Moura') throw new Error('Patrocinador não gravado');
+  ok('Colaborador valida obrigatórios e envia 2 iniciativas (uma com indicador e meta de benefício e patrocinador escolhido da lista)');
   await p.context().close();
 
   // 2. Fernanda aprova uma e devolve a outra
@@ -607,6 +609,16 @@ try {
   await p.waitForURL(new RegExp(`/projetos/${projId}`));
   await p.context().close();
   ok('GP abre "Todos os meus projetos" (só os dele, com os concluídos) e volta a um projeto concluído');
+
+  // PMO troca o patrocinador de um projeto
+  p = await como('mariana@acme.com.br', 'pmo');
+  await ir(p, `/projetos/${sql("select id from iniciativas where titulo='Inventário rotativo'")}`);
+  const patroBox = p.getByRole('group', { name: 'Patrocinador do projeto' });
+  await patroBox.getByLabel('Escolher patrocinador').selectOption({ label: 'Helena Castro' });
+  await patroBox.getByRole('button', { name: 'Salvar patrocinador' }).click();
+  await patroBox.getByText('Patrocinador: Helena Castro.').waitFor();
+  await p.context().close();
+  ok('PMO troca o patrocinador de um projeto por uma pessoa cadastrada');
 } catch (e) {
   console.error('✗ FALHOU no passo', passo + 1, '\n', e.message.split('\n').slice(0, 6).join('\n'));
   process.exitCode = 1;

@@ -23,7 +23,7 @@ const PASSOS = [
   { title: 'Você recebe a decisão', desc: 'Aprovada, no backlog ou não aprovada, sempre com o motivo.' },
 ];
 
-const VAZIO: DadosForm = { titulo: '', problema: '', resultadoEsperado: '', tipo: '', patrocinadorTexto: '', areasImpactadas: [], urgencia: 'esp', justificativaUrgencia: '', inicioDesejado: '', entregaDesejada: '', faixaCusto: 'Não sei', fornecedor: 'Não sei', beneficioIndicador: '', beneficioMeta: '', beneficioMedirEm: '' };
+const VAZIO: DadosForm = { titulo: '', problema: '', resultadoEsperado: '', tipo: '', patrocinadorTexto: '', patrocinadorId: '', areasImpactadas: [], urgencia: 'esp', justificativaUrgencia: '', inicioDesejado: '', entregaDesejada: '', faixaCusto: 'Não sei', fornecedor: 'Não sei', beneficioIndicador: '', beneficioMeta: '', beneficioMedirEm: '' };
 
 const sSecao = s('background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 16px');
 const sNum = s('width: 24px; height: 24px; border-radius: 50%; background: #E7E0FF; color: #4B2FD1; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center');
@@ -145,8 +145,14 @@ export function FormIniciativa({ ctx, inicial, nota, editavel = true }: { ctx: C
                 <div style={s('display: flex; flex-direction: column; gap: 6px; padding: 12px; border-radius: 10px; background: #F7F5F0')}><span style={s('font-size: 12px; color: #5E5770')}>Quem aprova primeiro</span><span style={s('font-size: 14px; font-weight: 600')}>{ctx.aprovador}</span><span style={s('font-size: 12px; color: #5E5770')}>{ctx.aprovadorCargo}</span></div>
               </div>
               <label style={sLab}>Patrocinador (opcional)
-                <span style={sAjuda}>Quem, acima da área, defende essa iniciativa?</span>
-                <input type="text" value={f.patrocinadorTexto} onChange={(e) => set('patrocinadorTexto', e.target.value)} placeholder="Nome do diretor ou executivo" style={campo(false)} />
+                <span style={sAjuda}>Quem, acima da área, defende essa iniciativa? O patrocinador acompanha o projeto e recebe os status.</span>
+                <select aria-label="Patrocinador" value={f.patrocinadorId ? f.patrocinadorId : f.patrocinadorTexto ? 'outro' : ''}
+                  onChange={(e) => { const v = e.target.value; setF((x) => ({ ...x, patrocinadorId: v && v !== 'outro' ? v : '', patrocinadorTexto: v === 'outro' ? x.patrocinadorTexto || ' ' : '' })); }} style={campo(false)}>
+                  <option value="">Ninguém ainda / não sei</option>
+                  {ctx.patrocinadores.map((p) => <option key={p.id} value={p.id}>{p.nome}{p.cargo ? ` · ${p.cargo}` : ''}</option>)}
+                  <option value="outro">Outra pessoa (digitar o nome)</option>
+                </select>
+                {!f.patrocinadorId && f.patrocinadorTexto && <input type="text" aria-label="Nome do patrocinador" value={f.patrocinadorTexto.trimStart()} onChange={(e) => set('patrocinadorTexto', e.target.value || ' ')} placeholder="Nome do diretor ou executivo" style={campo(false)} />}
               </label>
               <div style={s('display: flex; flex-direction: column; gap: 8px')}>
                 <span style={s('font-size: 13px; font-weight: 600')}>Outras áreas impactadas</span>

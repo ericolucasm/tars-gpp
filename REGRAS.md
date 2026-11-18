@@ -65,6 +65,7 @@ Raias padrão, na ordem: Solicitações → Backlog → Pré-projeto → Em exec
 - **[Decisão V1]** "Salvar rascunho" grava sem enviar. O colaborador vê o rascunho na tela inicial.
 - **[Decisão V1]** Se não houver aprovador (topo da hierarquia), a iniciativa vai direto para avaliação do PMO.
 - **[Decisão V1]** Anexos ficam para a fase 2: o campo aparece, mas ainda não funciona.
+- **[Decisão V2]** **Patrocinador escolhido da lista:** no formulário, o campo Patrocinador (opcional) lista as pessoas cadastradas com o perfil **Patrocinador** (Cadastros › Pessoas), com a opção "Outra pessoa (digitar o nome)" para quem não está cadastrado. Só o patrocinador escolhido da lista fica ligado à pessoa: é ele quem recebe os status e acompanha o projeto. Na página do projeto, o **PMO** indica ou troca o patrocinador (o novo patrocinador é avisado).
 - **[Decisão V2]** **Retirar uma iniciativa:** quem pediu pode desistir enquanto a iniciativa ainda está com ele ou com o gestor. **Rascunho** (nunca enviado): **Excluir rascunho** apaga de vez. **Devolvida** ou **aguardando o gestor**: **Retirar** pede um comentário (mín. 5 caracteres) e leva a iniciativa para **Cancelados** com o motivo "Retirada por quem pediu — comentário"; se estava com o gestor, ele é avisado e a decisão sai da fila (e do prazo de 5 dias). Na Início de quem pediu, aparece "Você retirou esta iniciativa · comentário". Depois que o gestor aprovou, a decisão é do PMO: quem pediu não retira mais por aqui.
 
 ## 4. Aprovação do gestor (menus da área)

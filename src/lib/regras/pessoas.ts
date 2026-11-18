@@ -89,3 +89,8 @@ export function subarvore(areaId: string, areas: AreaH[]): string[] {
   }
   return [...res];
 }
+
+/** Patrocinador escolhido numa iniciativa: precisa ser uma pessoa cadastrada da empresa com o perfil Patrocinador. */
+export function patrocinadorValido(p: { externo: boolean; perfis: string[] } | undefined | null): boolean {
+  return !!p && !p.externo && p.perfis.includes('patrocinador');
+}
