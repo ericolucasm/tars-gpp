@@ -5,6 +5,7 @@ import { acimaDoCedido, areasSobGestao, subarvore, timeDireto } from './regras/p
 import { rotuloDesvioCurto, FAROL, type Farol } from './regras/projeto';
 import { numerosAoVivo, rotuloEtapa, type Snapshot } from './ciclo-vm';
 import { pessoasEq, situacaoCapacidade } from './regras/capacidade';
+import { situacaoBeneficio } from './regras/beneficios';
 import { ESCALA, ESCALA_IMPACTO, STATUS_RISCO, nivelDoRisco, riscoAtivo } from './regras/riscos';
 import {
   alocacaoDe, capacidadeDaArea, chaveDaRaia, custoDe, dimensoesDo, financeiroDo, infoProjeto, proximosMeses, nomeArea, noRaia, pessoa, projetosDaPessoa, rotuloCiclo, situacaoDoCard, TIPOS,
@@ -260,6 +261,43 @@ function relatorioCapacidadeMes(d: DadosOrg, hoje: string, busca: Busca, areasPe
   };
 }
 
+// ---------- Benefícios (PMO) ----------
+
+const SIT_BEN: Record<string, [string, Tom]> = {
+  sem: ['Sem benefício definido', 'neutro'], aguardando: ['Aguardando a data', 'neutro'], medir: ['Hora de medir', 'aten'],
+  sim: ['Atingido', 'ok'], parcial: ['Parcialmente', 'aten'], nao: ['Não atingido', 'crit'],
+};
+
+function relatorioBeneficios(d: DadosOrg, hoje: string, busca: Busca): Relatorio {
+  const fSit = filtro(busca, 'beneficios', 'situacao', 'Situação', com('Todas as situações', [
+    { valor: 'medir', rotulo: 'Hora de medir' }, { valor: 'aguardando', rotulo: 'Aguardando a data' }, { valor: 'medido', rotulo: 'Medidos' }, { valor: 'sem', rotulo: 'Sem benefício definido' },
+  ]));
+  const fArea = filtro(busca, 'beneficios', 'area', 'Área', opcoesArea(d));
+  // Iniciativas que viraram (ou estão virando) projeto, com nota de impacto da avaliação
+  const base = d.iniciativas.filter((i) => noRaia(d, i, 'pre', 'exe', 'pau', 'con') && naArea(d, i.areaId, fArea));
+  const lista = base.filter((i) => fSit.valor === TODOS || situacaoBeneficio(i, hoje) === fSit.valor);
+  const medidos = base.filter((i) => i.beneficioAtingido);
+  const impacto = (i: Iniciativa) => d.avaliacoes.filter((a) => a.iniciativaId === i.id).map((a) => a.notas[0]).filter(Boolean).pop();
+  return {
+    id: 'beneficios', titulo: 'Benefícios', descricao: 'O que cada projeto prometeu e o que entregou, ao lado da nota de impacto dada na avaliação. Serve para calibrar as próximas avaliações.',
+    filtros: [fArea, fSit],
+    resumo: [
+      { rotulo: 'Com benefício definido', valor: `${base.filter((i) => i.beneficioIndicador).length} de ${base.length}` },
+      { rotulo: 'Hora de medir', valor: String(base.filter((i) => situacaoBeneficio(i, hoje) === 'medir').length), tom: base.some((i) => situacaoBeneficio(i, hoje) === 'medir') ? 'aten' : 'ok' },
+      { rotulo: 'Metas atingidas', valor: medidos.length ? `${medidos.filter((i) => i.beneficioAtingido === 'sim').length} de ${medidos.length}` : '—' },
+    ],
+    colunas: ['Iniciativa', 'Área', 'Etapa', 'Nota de impacto', 'Indicador', 'Meta', 'Medir em', 'Resultado', 'Situação'],
+    linhas: lista.map((i): Celula[] => {
+      const sit = situacaoBeneficio(i, hoje);
+      const [rot, tom] = SIT_BEN[sit === 'medido' ? i.beneficioAtingido ?? 'sim' : sit];
+      const nota = impacto(i);
+      return [i.titulo, nomeArea(d, i.areaId), nomeRaia(d, i), nota ? `${nota} de 5` : '—', i.beneficioIndicador ?? '—', i.beneficioMeta ?? '—',
+        i.beneficioMedirEm ? br(i.beneficioMedirEm) : '—', i.beneficioResultado ?? '—', { texto: rot, tom }];
+    }),
+    vazio: 'Nenhuma iniciativa com esses filtros.',
+  };
+}
+
 // ---------- PMO ----------
 
 function relatoriosPmo(d: DadosOrg, hoje: string, busca: Busca): Relatorio[] {
@@ -361,6 +399,7 @@ function relatoriosPmo(d: DadosOrg, hoje: string, busca: Busca): Relatorio[] {
       colunas: ['Área', 'Iniciativas', 'Em avaliação', 'Pré-projeto', 'Em projeto', 'Concluídas', 'Recusadas ou canceladas'],
       linhas: porArea, vazio: 'Nenhuma iniciativa com esses filtros.',
     },
+    relatorioBeneficios(d, hoje, busca),
     relatorioCapacidadeMes(d, hoje, busca),
     {
       id: 'capacidade', titulo: 'Capacidade das pessoas', descricao: 'Quanto cada pessoa pode ceder para projetos e quanto está alocada (pico nas fases que ainda vão acontecer).',

@@ -7,6 +7,7 @@ import { areasSobGestao, gestorDe, primeiroNome, timeDireto } from '@/lib/regras
 import { alocacaoDe, cicloAtual, noRaia, pessoa } from '@/lib/visoes';
 import { ItemAcao, PillFarol, Vazio } from '@/components/ui';
 import { pontoAtrasado, pontoEsperaPor } from '@/lib/regras/pontos';
+import { beneficiosParaMedir } from '@/lib/beneficios-vm';
 import { Saudacao } from './Saudacao';
 
 export function InicioGestor({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao; hoje: string }) {
@@ -37,6 +38,11 @@ export function InicioGestor({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao;
   } else if (demais.length > 1) {
     itens.push(<ItemAcao key="dem" href="/area/iniciativas" titulo={`Aprovar ${urgentes.length ? 'mais ' : ''}${demais.length} iniciativas do time`}
       sub={demais.map((i) => `${i.titulo} (${primeiroNome(pessoa(d, i.solicitanteId)?.nome ?? '')})`).join(' · ')} acao="Decidir →" />);
+  }
+  const aMedir = beneficiosParaMedir(d, eu.id, false, hoje);
+  if (aMedir.length) {
+    itens.push(<ItemAcao key="beneficios" href="/beneficios" numero={aMedir.length} titulo={aMedir.length === 1 ? 'Benefício para medir' : 'Benefícios para medir'}
+      sub={aMedir.slice(0, 3).map((i) => `${i.titulo.split(' para ')[0]}: ${i.beneficioIndicador}`).join(' · ')} acao="Registrar →" />);
   }
   const pontos = d.pontos.filter((x) => pontoEsperaPor(x, eu.id, false));
   if (pontos.length) {

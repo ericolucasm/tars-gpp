@@ -141,6 +141,14 @@ export const iniciativas = pgTable('iniciativas', {
   retomadaPrevista: date('retomada_prevista'),
   orcamentoAprovado: numeric('orcamento_aprovado', { mode: 'number' }), // orçamento do projeto; vazio = custo estimado da iniciativa
   previsaoCusto: numeric('previsao_custo', { mode: 'number' }), // quanto o GP prevê gastar até o fim; vazio = orçamento aprovado
+  // benefício principal: como medir e o resultado medido depois da entrega
+  beneficioIndicador: text('beneficio_indicador'),
+  beneficioMeta: text('beneficio_meta'),
+  beneficioMedirEm: date('beneficio_medir_em'),
+  beneficioResultado: text('beneficio_resultado'),
+  beneficioAtingido: text('beneficio_atingido'), // sim | parcial | nao
+  beneficioMedidoEm: timestamp('beneficio_medido_em', { withTimezone: true }),
+  beneficioMedidoPor: uuid('beneficio_medido_por'),
   // carimbos de tempo do fluxo
   enviadaEm: timestamp('enviada_em', { withTimezone: true }),
   aprovadaGestorEm: timestamp('aprovada_gestor_em', { withTimezone: true }),

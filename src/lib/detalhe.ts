@@ -32,6 +32,8 @@ export function detalheIniciativa(d: DadosOrg, i: Iniciativa, hoje: string): Det
     ['Fornecedor', i.fornecedor],
     ['Esforço', i.esforco ?? ''],
     ['Devolução do gestor', i.devolucaoNota ?? ''],
+    ['Como medir', i.beneficioIndicador ? `${i.beneficioIndicador} · meta: ${i.beneficioMeta ?? '—'}${i.beneficioMedirEm ? ` · medir em ${br(i.beneficioMedirEm)}` : ''}` : ''],
+    ['Resultado medido', i.beneficioResultado ? `${i.beneficioResultado} (${({ sim: 'atingido', parcial: 'parcialmente atingido', nao: 'não atingido' } as Record<string, string>)[i.beneficioAtingido ?? ''] ?? ''})` : ''],
   ]);
 
   // Andamento do projeto: só para o que já teve play (tem início de projeto)

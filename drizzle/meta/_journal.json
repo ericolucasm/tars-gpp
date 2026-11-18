@@ -50,6 +50,13 @@
       "when": 1794955340684,
       "tag": "0006_riscos_completos",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1794962182713,
+      "tag": "0007_beneficios",
+      "breakpoints": true
     }
   ]
 }

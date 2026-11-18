@@ -11,6 +11,7 @@ export type DadosForm = {
   patrocinadorTexto: string; areasImpactadas: string[];
   urgencia: string; justificativaUrgencia: string;
   inicioDesejado: string; entregaDesejada: string; faixaCusto: string; fornecedor: string;
+  beneficioIndicador: string; beneficioMeta: string; beneficioMedirEm: string;
 };
 
 /** Cria ou atualiza uma iniciativa. enviar=false grava rascunho; enviar=true manda para o gestor. */
@@ -36,6 +37,7 @@ export async function salvarIniciativa(f: DadosForm, enviar: boolean) {
       patrocinadorTexto: f.patrocinadorTexto.trim() || null, areasImpactadas: f.areasImpactadas,
       urgencia: f.urgencia, justificativaUrgencia: f.urgencia === 'urg' ? f.justificativaUrgencia.trim() || null : null,
       inicioDesejado: f.inicioDesejado || null, entregaDesejada: f.entregaDesejada || null, faixaCusto: f.faixaCusto, fornecedor: f.fornecedor,
+      beneficioIndicador: f.beneficioIndicador?.trim() || null, beneficioMeta: f.beneficioMeta?.trim() || null, beneficioMedirEm: /^\d{4}-\d{2}-\d{2}$/.test(f.beneficioMedirEm ?? '') ? f.beneficioMedirEm : null,
       cicloId: f.urgencia === 'urg' ? null : ciclo?.id ?? null,
       aprovadorId: aprovador, areaId: eu.areaId, updatedAt: agora,
     };
