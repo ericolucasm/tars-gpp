@@ -16,7 +16,7 @@ import { podeMedirBeneficio, situacaoBeneficio, validarMedicao } from './benefic
 import { situacaoDependencia } from './dependencias';
 import { balancoCusto, balancoEscopo, balancoPrazo, validarLicao } from './encerramento';
 import { diaDaSemana, diasDeAtraso, emNegociacao, proximoDiaSemana, proximoStatusDevido, validarPedidoPrazo, situacaoStatus, rotuloVencimentoStatus } from './muro';
-import { gestorDe, timeDireto, areasSobGestao, nomeCurto, acimaDoCedido, patrocinadorValido, acessoBloqueado, statusAoReativar, pendenciasAoDesativar, rotuloAtivo, podeSerGp } from './pessoas';
+import { gestorDe, timeDireto, areasSobGestao, nomeCurto, acimaDoCedido, patrocinadorValido, acessoBloqueado, statusAoReativar, pendenciasAoDesativar, rotuloAtivo, podeSerGp, motivoParaNaoExcluirArea } from './pessoas';
 import { addDias, diffDias, dataPorExtenso, haQuanto, proximaSexta } from './datas';
 
 const raia = (chave: string, ordem: number, extra: Partial<Raia> = {}): Raia => ({
@@ -576,5 +576,14 @@ describe('trocar o gerente do projeto', () => {
     expect(podeSerGp({ externo: false, status: 'inativo' })).toBe(false);
     expect(podeSerGp({ externo: true, status: 'ativo' })).toBe(false);
     expect(podeSerGp(undefined)).toBe(false);
+  });
+});
+
+describe('excluir área', () => {
+  it('só área vazia: sem subáreas, pessoas nem iniciativas', () => {
+    expect(motivoParaNaoExcluirArea({ pessoas: 0, subareas: 0, iniciativas: 0 })).toBeNull();
+    expect(motivoParaNaoExcluirArea({ pessoas: 0, subareas: 1, iniciativas: 0 })).toMatch(/subáreas/);
+    expect(motivoParaNaoExcluirArea({ pessoas: 2, subareas: 0, iniciativas: 0 })).toMatch(/2 pessoas/);
+    expect(motivoParaNaoExcluirArea({ pessoas: 0, subareas: 0, iniciativas: 3 })).toMatch(/renomeada/);
   });
 });

@@ -684,6 +684,23 @@ try {
   await p.getByText('Acesso de Diego Santos reativado.').waitFor();
   await p.context().close();
   ok('Admin desativa o acesso de quem saiu (vê as pendências), a pessoa não entra mais, e reativa');
+
+  // Admin exclui uma área vazia; área com pessoas não pode ser excluída
+  p = await como('mariana@acme.com.br', 'pmo');
+  p.on('dialog', (dl) => dl.accept());
+  await ir(p, '/cadastros?aba=areas');
+  await p.getByRole('button', { name: 'Nova área' }).click();
+  await p.getByLabel('Nome', { exact: true }).fill('Área criada por engano');
+  await p.getByRole('button', { name: 'Salvar' }).click();
+  await p.getByText('Área criada.').waitFor();
+  await p.getByRole('button', { name: /^Área criada por engano/ }).click();
+  await p.getByRole('button', { name: 'Excluir área' }).click();
+  await p.getByText('Área Área criada por engano excluída.').waitFor();
+  await p.getByRole('button', { name: /^Logística/ }).first().click();
+  await p.getByRole('button', { name: 'Excluir área' }).click();
+  await p.getByText(/Esta área tem (subáreas|\d+ pessoas?)/).waitFor();
+  await p.context().close();
+  ok('Admin exclui uma área vazia; área com pessoas ou subáreas não pode ser excluída');
 } catch (e) {
   console.error('✗ FALHOU no passo', passo + 1, '\n', e.message.split('\n').slice(0, 6).join('\n'));
   process.exitCode = 1;
