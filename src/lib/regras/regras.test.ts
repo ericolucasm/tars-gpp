@@ -15,8 +15,9 @@ import { picoNoPeriodo, situacaoCapacidade, pessoasEq, impactoPorMes } from './c
 import { podeMedirBeneficio, situacaoBeneficio, validarMedicao } from './beneficios';
 import { situacaoDependencia } from './dependencias';
 import { balancoCusto, balancoEscopo, balancoPrazo, validarLicao } from './encerramento';
-import { diaDaSemana, diasDeAtraso, emNegociacao, proximoDiaSemana, proximoStatusDevido, validarPedidoPrazo, situacaoStatus, rotuloVencimentoStatus } from './muro';
+import { diaDaSemana, diasDeAtraso, emNegociacao, proximoDiaSemana, proximoStatusDevido, validarPedidoPrazo, situacaoStatus, rotuloVencimentoStatus, venceTextoCurto } from './muro';
 import { gestorDe, timeDireto, areasSobGestao, nomeCurto, acimaDoCedido, patrocinadorValido, acessoBloqueado, statusAoReativar, pendenciasAoDesativar, rotuloAtivo, podeSerGp, motivoParaNaoExcluirArea } from './pessoas';
+import { grupoDoItem, ordenarCaixa } from './meu-tars';
 import { addDias, diffDias, dataPorExtenso, haQuanto, proximaSexta } from './datas';
 
 const raia = (chave: string, ordem: number, extra: Partial<Raia> = {}): Raia => ({
@@ -585,5 +586,31 @@ describe('excluir área', () => {
     expect(motivoParaNaoExcluirArea({ pessoas: 0, subareas: 1, iniciativas: 0 })).toMatch(/subáreas/);
     expect(motivoParaNaoExcluirArea({ pessoas: 2, subareas: 0, iniciativas: 0 })).toMatch(/2 pessoas/);
     expect(motivoParaNaoExcluirArea({ pessoas: 0, subareas: 0, iniciativas: 3 })).toMatch(/renomeada/);
+  });
+});
+
+describe('Meu TARS: prioridade da caixa única', () => {
+  const H = '2026-11-18';
+  it('atrasado, hoje, alguém esperando, semana, para fazer, mais adiante, acompanhar', () => {
+    expect(grupoDoItem({ vence: '2026-11-17' }, H)).toBe('atrasado');
+    expect(grupoDoItem({ atrasado: true }, H)).toBe('atrasado');
+    expect(grupoDoItem({ vence: H, bloqueia: true }, H)).toBe('hoje');
+    expect(grupoDoItem({ bloqueia: true, vence: '2026-12-30' }, H)).toBe('esperando');
+    expect(grupoDoItem({ vence: '2026-11-25' }, H)).toBe('semana');
+    expect(grupoDoItem({ fazer: true }, H)).toBe('fazer');
+    expect(grupoDoItem({ vence: '2026-11-26' }, H)).toBe('depois');
+    expect(grupoDoItem({}, H)).toBe('acompanhar');
+  });
+  it('ordena pelo grupo e pela data dentro do grupo', () => {
+    const r = ordenarCaixa([{ id: 'a' }, { id: 'b', vence: '2026-11-20' }, { id: 'c', vence: '2026-11-10' }, { id: 'd', vence: '2026-11-19' }, { id: 'e', bloqueia: true }], H);
+    expect(r.map((x) => x.id)).toEqual(['c', 'e', 'd', 'b', 'a']);
+  });
+});
+
+describe('texto curto do vencimento', () => {
+  it('hoje, futuro e atrasado', () => {
+    expect(venceTextoCurto('2026-11-18', '2026-11-18')).toBe('vence hoje');
+    expect(venceTextoCurto('2026-11-23', '2026-11-18')).toBe('vence em 23/11');
+    expect(venceTextoCurto('2026-11-15', '2026-11-18')).toBe('venceu em 15/11 (3 dias de atraso)');
   });
 });
