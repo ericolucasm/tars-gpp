@@ -3,11 +3,12 @@ import { exigirSessao, temPerfil } from '@/lib/sessao';
 import { carregarOrg } from '@/lib/dados';
 import { br, hojeISO } from '@/lib/regras/datas';
 import { iniciais } from '@/lib/regras/pessoas';
-import { semanaHoje } from '@/lib/regras/projeto';
-import { equipeParaFeedback, fasesDo, linhaBaseDo, nomeArea, pessoa } from '@/lib/visoes';
+import { modoDoProjeto, semanaHoje } from '@/lib/regras/projeto';
+import { equipeParaFeedback, fasesDo, linhaBaseDo, nomeArea, participaDoProjeto, pessoa } from '@/lib/visoes';
 import { Shell } from '@/components/Shell';
 import { TelaProjeto } from './TelaProjeto';
 import { SecaoPontos } from './SecaoPontos';
+import { VisaoLeitura } from './VisaoLeitura';
 import { Mudancas } from './Mudancas';
 import { Financeiro } from './Financeiro';
 import { Feedback } from './Feedback';
@@ -36,8 +37,13 @@ export default async function Projeto({ params, searchParams }: { params: Promis
   if (!ini || !ini.inicioProjeto) notFound();
   const ehPmo = temPerfil(sessao, 'pmo');
   const ehGp = ini.gpId === sessao.pessoa.id;
-  if (!ehPmo && !ehGp) redirect('/inicio');
   const hoje = hojeISO();
+  const modo = modoDoProjeto({ ehPmo, ehGp, participa: participaDoProjeto(d, ini.id, sessao.pessoa.id) });
+  if (!modo) redirect('/inicio');
+  if (modo === 'leitura') {
+    // quem participa do projeto (alocado, responsável de fase ou de tarefa) vê o projeto em modo leitura
+    return <Shell sessao={sessao} dados={d} atual={`projeto:${ini.id}`}><VisaoLeitura d={d} sessao={sessao} ini={ini} hoje={hoje} /></Shell>;
+  }
 
   const fases = fasesDo(d, ini.id);
   const faseIds = new Set(fases.map((f) => f.id));

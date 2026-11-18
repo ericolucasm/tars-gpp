@@ -140,3 +140,13 @@ export function validarEdicaoTarefa(e: { titulo: string; prazo: string; prazoAtu
   if (e.pedidoPrazoPendente && (e.prazo || null) !== e.prazoAtual) return 'Há um pedido de mais prazo para esta tarefa. Decida o pedido em Prazos e responsáveis.';
   return null;
 }
+
+/**
+ * Como a pessoa vê a página do projeto: o GP do projeto e o PMO editam; quem participa (alocado,
+ * responsável de fase ou de tarefa) vê em modo leitura; os demais não acessam.
+ */
+export function modoDoProjeto(p: { ehPmo: boolean; ehGp: boolean; participa: boolean }): 'edicao' | 'leitura' | null {
+  if (p.ehPmo || p.ehGp) return 'edicao';
+  if (p.participa) return 'leitura';
+  return null;
+}

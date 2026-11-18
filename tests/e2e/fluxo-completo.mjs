@@ -524,6 +524,22 @@ try {
   await p.context().close();
   ok('GP: status a publicar na Início segue a cadência (mensal publicado há poucos dias não é cobrado nesta semana)');
 
+  // Colaborador alocado vê o projeto em modo leitura e registra uma lição
+  p = await como('diego.santos@acme.com.br');
+  await ir(p, '/inicio');
+  const participo = p.getByRole('region', { name: 'Projetos em que você participa' });
+  await participo.getByRole('link', { name: new RegExp(TITULO) }).click();
+  await p.waitForURL(new RegExp(`/projetos/${projId}`));
+  const parte = p.getByRole('region', { name: 'Sua parte no projeto' });
+  await parte.getByText(/Iniciação · 20%/).waitFor();
+  if (await p.getByRole('button', { name: /linha de base/ }).count()) throw new Error('Participante não deveria editar a linha do tempo');
+  if (await p.getByRole('region', { name: 'Financeiro', exact: true }).count()) throw new Error('Participante não deveria ver o financeiro');
+  await p.getByLabel('Lição aprendida').fill('Combinar com a expedição os horários de coleta dos dados');
+  await p.getByRole('button', { name: 'Registrar lição' }).click();
+  await p.getByText('Combinar com a expedição os horários de coleta dos dados').waitFor();
+  await p.context().close();
+  ok('Colaborador alocado abre o projeto pela Início em modo leitura (sem editar nem ver o financeiro) e registra uma lição');
+
   // GP conclui o projeto pela página do projeto (gate com o aceite de quem pediu)
   p = await como('carlos.andrade@acme.com.br');
   await ir(p, `/projetos/${projId}#encerramento`);
