@@ -186,7 +186,7 @@ try {
   // 6b. tarefa e alocação acima do cedido gera pedido ao gestor
   await p.getByRole('tab', { name: 'Iniciação' }).click();
   await p.getByPlaceholder('Descreva a entrega').fill('Levantar indicadores atuais');
-  await p.getByRole('button', { name: 'Adicionar' }).first().click();
+  await p.getByRole('button', { name: 'Adicionar', exact: true }).first().click();
   await p.getByText('Levantar indicadores atuais').waitFor();
   await p.getByRole('button', { name: 'Editar tarefa Levantar indicadores atuais' }).click();
   const edt = p.getByRole('group', { name: 'Editar tarefa Levantar indicadores atuais' });
@@ -195,8 +195,12 @@ try {
   await edt.getByRole('button', { name: 'Salvar' }).click();
   await p.getByText('Tarefa atualizada.').first().waitFor();
   await p.getByText('Levantar indicadores atuais da expedição').waitFor();
-  await p.getByLabel('Alocar pessoa').selectOption({ label: 'Diego Santos' });
-  await p.getByRole('button', { name: 'Alocar 20%' }).click();
+  await p.getByRole('button', { name: 'Barra da fase Iniciação: clique para atribuir pessoas e configurar' }).click();
+  const painelIni = p.getByRole('region', { name: 'Painel da fase Iniciação' });
+  await painelIni.getByLabel('Atribuir pessoa').selectOption({ label: 'Diego Santos (fora do projeto)' });
+  await painelIni.getByRole('button', { name: '+ Atribuir (20%)' }).click();
+  await painelIni.getByRole('button', { name: 'OK' }).click();
+  await painelIni.waitFor({ state: 'detached' });
   await p.getByText(/Acima do cedido \(10%\)/).waitFor();
   ok('GP cadastra tarefa, edita título e prazo, e alocação acima do cedido gera pedido ao gestor');
   await p.getByLabel('Novo risco').fill('Dados da expedição incompletos');
@@ -809,6 +813,35 @@ try {
   if (sql("select count(*) from marcos where nome='Contagem piloto validada'") !== '1') throw new Error('Marco não gravado');
   await p.context().close();
   ok('Linha do tempo: clicar na barra abre o painel da fase; atribui pessoa e %, responsável e marco; OK salva, contrai e a barra mostra a equipe');
+
+  // Linha do tempo: "+" cria outro período da mesma fase, com equipe própria; dá para remover
+  p = await como('mariana@acme.com.br', 'pmo');
+  const invId3 = sql("select id from iniciativas where titulo='Inventário rotativo'");
+  await ir(p, `/projetos/${invId3}`);
+  const fasePer = sql("select f.nome from projeto_fases f join iniciativas i on i.id=f.iniciativa_id where i.titulo='Inventário rotativo' order by f.ordem limit 1");
+  await p.getByRole('button', { name: `Adicionar outro período em ${fasePer}` }).click();
+  const barra2 = p.getByRole('button', { name: `Barra da fase ${fasePer} (2º período): clique para atribuir pessoas e configurar` });
+  await barra2.waitFor();
+  await barra2.click();
+  const painel2 = p.getByRole('region', { name: `Painel da fase ${fasePer}` });
+  await painel2.getByText('QUEM ATUA NESTE PERÍODO').waitFor();
+  await painel2.getByLabel('Atribuir pessoa').selectOption({ index: 1 });
+  await painel2.getByRole('button', { name: '+ Atribuir (20%)' }).click();
+  await painel2.getByRole('button', { name: 'OK' }).click();
+  await painel2.waitFor({ state: 'detached' });
+  const nPer = () => sql(`select count(*) from fase_periodos p join projeto_fases f on f.id=p.fase_id join iniciativas i on i.id=f.iniciativa_id where i.titulo='Inventário rotativo' and f.nome='${fasePer}'`);
+  if (nPer() !== '2') throw new Error('Fase deveria ter 2 períodos');
+  if (sql(`select count(*) from alocacoes a join fase_periodos p on p.id=a.periodo_id join projeto_fases f on f.id=p.fase_id join iniciativas i on i.id=f.iniciativa_id where i.titulo='Inventário rotativo' and f.nome='${fasePer}' and p.inicio_semana=(select max(p2.inicio_semana) from fase_periodos p2 where p2.fase_id=f.id)`) !== '1') throw new Error('Alocação não ficou no 2º período');
+  // a fase vai até o fim do 2º período (envelope)
+  if (sql(`select (f.inicio_semana + f.duracao) = (select max(p.inicio_semana + p.duracao) from fase_periodos p where p.fase_id=f.id) from projeto_fases f join iniciativas i on i.id=f.iniciativa_id where i.titulo='Inventário rotativo' and f.nome='${fasePer}'`) !== 't') throw new Error('Envelope da fase errado');
+  p.on('dialog', (dl) => dl.accept());
+  await barra2.click();
+  await painel2.getByRole('button', { name: 'Remover este período' }).click();
+  await painel2.waitFor({ state: 'detached' });
+  await barra2.waitFor({ state: 'detached' });
+  if (nPer() !== '1') throw new Error('Período não foi removido');
+  await p.context().close();
+  ok('Linha do tempo: o "+" cria outro período da mesma fase (equipe própria, a fase vai até o fim do último) e dá para removê-lo');
 } catch (e) {
   console.error('✗ FALHOU no passo', passo + 1, '\n', e.message.split('\n').slice(0, 6).join('\n'));
   process.exitCode = 1;

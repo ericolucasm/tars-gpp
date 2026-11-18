@@ -225,12 +225,23 @@ export const mudancasBase = pgTable('mudancas_base', {
   decididoEm: timestamp('decidido_em', { withTimezone: true }),
 });
 
+// Períodos de uma fase: a mesma fase pode acontecer em mais de um momento da linha do tempo (ex.: dois levantamentos de
+// requisitos), cada um com as suas datas e a sua equipe. A fase guarda o envelope (do início do 1º ao fim do último período).
+export const fasePeriodos = pgTable('fase_periodos', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  faseId: uuid('fase_id').notNull().references(() => projetoFases.id, { onDelete: 'cascade' }),
+  inicioSemana: integer('inicio_semana').notNull(),
+  duracao: integer('duracao').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [index('fase_periodos_fase').on(t.faseId)]);
+
 export const alocacoes = pgTable('alocacoes', {
   id: uuid('id').primaryKey().defaultRandom(),
   faseId: uuid('fase_id').notNull().references(() => projetoFases.id, { onDelete: 'cascade' }),
+  periodoId: uuid('periodo_id').notNull().references(() => fasePeriodos.id, { onDelete: 'cascade' }), // em que período da fase a pessoa atua
   pessoaId: uuid('pessoa_id').notNull(),
   pct: integer('pct').notNull(),
-}, (t) => [uniqueIndex('alocacoes_fase_pessoa').on(t.faseId, t.pessoaId)]);
+}, (t) => [uniqueIndex('alocacoes_periodo_pessoa').on(t.periodoId, t.pessoaId)]);
 
 export const tarefas = pgTable('tarefas', {
   id: uuid('id').primaryKey().defaultRandom(),

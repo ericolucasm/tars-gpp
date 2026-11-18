@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { notaFinal, custoReferencia, ordenarPorNota, podeComunicar } from './avaliacao';
 import { acoesDoCard, acaoDeConclusao, prontoParaConcluir, retiradaPermitida, validarRetirada, validarGate, podeConfirmar, type Raia } from './esteira';
-import { desvio, farolSugerido, statusDaFase, fasesDoModelo, mesesDaLinha, descreverMudanca, progresso, reordenar, ordemValida, validarEdicaoTarefa, modoDoProjeto, validarEquipeFase, siglaEquipe } from './projeto';
+import { desvio, farolSugerido, statusDaFase, fasesDoModelo, mesesDaLinha, descreverMudanca, progresso, reordenar, ordemValida, validarEdicaoTarefa, modoDoProjeto, validarEquipeFase, siglaEquipe, envelopeDosPeriodos, novoPeriodo, ordenarPeriodos, estenderUltimoPeriodo, rotuloPeriodo } from './projeto';
 import { podeResolverPonto, pontoEsperaPor, pontoAtrasado } from './pontos';
 import { validarPedidoMudanca, variacaoCusto } from './mudancas';
 import { resumoFinanceiro, situacaoCusto } from './financeiro';
@@ -680,5 +680,27 @@ describe('painel da fase: equipe', () => {
   it('resumo na barra', () => {
     expect(siglaEquipe([{ nome: 'Diego Santos', pct: 50 }, { nome: 'Renata Souza', pct: 20 }])).toBe('DS 50% · RS 20%');
     expect(siglaEquipe([])).toBe('');
+  });
+});
+
+describe('períodos de uma fase', () => {
+  const P = [{ id: 'b', inicioSemana: 10, duracao: 3 }, { id: 'a', inicioSemana: 2, duracao: 2 }];
+  it('a fase vai do início do 1º ao fim do último período', () => {
+    expect(envelopeDosPeriodos(P)).toEqual({ inicioSemana: 2, duracao: 11 });
+    expect(envelopeDosPeriodos([])).toBeNull();
+  });
+  it('novo período começa depois do último, com 2 semanas', () => {
+    expect(novoPeriodo(P)).toEqual({ inicioSemana: 13, duracao: 2 });
+    expect(novoPeriodo([])).toEqual({ inicioSemana: 0, duracao: 2 });
+  });
+  it('ordena por data e estende só o último (nunca encolhe)', () => {
+    expect(ordenarPeriodos(P).map((p) => p.id)).toEqual(['a', 'b']);
+    expect(estenderUltimoPeriodo(P, 16).find((p) => p.id === 'b')?.duracao).toBe(6);
+    expect(estenderUltimoPeriodo(P, 11).find((p) => p.id === 'b')?.duracao).toBe(3);
+    expect(estenderUltimoPeriodo(P, 16).find((p) => p.id === 'a')?.duracao).toBe(2);
+  });
+  it('rótulo só quando há mais de um período', () => {
+    expect(rotuloPeriodo(0, 1)).toBe('');
+    expect(rotuloPeriodo(1, 2)).toBe('2º período');
   });
 });

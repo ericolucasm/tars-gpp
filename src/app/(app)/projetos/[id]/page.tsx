@@ -72,7 +72,8 @@ export default async function Projeto({ params, searchParams }: { params: Promis
           base: linhaBaseDo(d, ini.id),
           biblioteca: d.fasesBiblioteca.map((b) => ({ id: b.id, nome: b.nome, dur: b.duracaoSemanas })),
           tarefas: d.tarefas.filter((t) => t.iniciativaId === ini.id).map((t) => ({ id: t.id, faseId: t.faseId, titulo: t.titulo, responsavelId: t.responsavelId, prazo: t.prazo, concluida: t.concluida })),
-          alocs: d.alocacoes.filter((a) => faseIds.has(a.faseId)).map((a) => ({ faseId: a.faseId, pessoaId: a.pessoaId, pct: a.pct })),
+          alocs: d.alocacoes.filter((a) => faseIds.has(a.faseId)).map((a) => ({ faseId: a.faseId, periodoId: a.periodoId, pessoaId: a.pessoaId, pct: a.pct })),
+          periodos: d.periodos.filter((x) => faseIds.has(x.faseId)).map((x) => ({ id: x.id, faseId: x.faseId, inicioSemana: x.inicioSemana, duracao: x.duracao })),
           pessoas: d.pessoas.filter((p) => p.status === 'ativo' || alocIds.has(p.id)).map((p) => ({
             id: p.id, nome: p.nome, ini: iniciais(p.nome), papel: [p.cargo, p.externo ? null : nomeArea(d, p.areaId)].filter(Boolean).join(' · '), cap: p.externo ? null : p.cedeAte, noProjeto: alocIds.has(p.id) || p.id === ini.gpId,
           })),

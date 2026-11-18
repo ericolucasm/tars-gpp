@@ -31,8 +31,8 @@ export function VisaoLeitura({ d, sessao, ini, hoje }: { d: DadosOrg; sessao: Se
   const gp = pessoa(d, ini.gpId);
   const patro = pessoa(d, ini.patrocinadorId)?.nome ?? ini.patrocinadorTexto;
   const raia = d.raias.find((r) => r.id === ini.raiaId);
-  const datas = (f: (typeof fases)[number]) => `${br(dataDaSemana(ini.inicioProjeto!, f.inicioSemana)).slice(0, 5)} a ${br(dataDaSemana(ini.inicioProjeto!, f.inicioSemana + f.duracao)).slice(0, 5)}`;
-  const minhasAlocs = d.alocacoes.filter((a) => a.pessoaId === eu && faseIds.has(a.faseId)).map((a) => ({ a, f: fases.find((f) => f.id === a.faseId)! }));
+  const datas = (f: { inicioSemana: number; duracao: number }) => `${br(dataDaSemana(ini.inicioProjeto!, f.inicioSemana)).slice(0, 5)} a ${br(dataDaSemana(ini.inicioProjeto!, f.inicioSemana + f.duracao)).slice(0, 5)}`;
+  const minhasAlocs = d.alocacoes.filter((a) => a.pessoaId === eu && faseIds.has(a.faseId)).map((a) => ({ a, f: fases.find((f) => f.id === a.faseId)!, per: d.periodos.find((x) => x.id === a.periodoId) }));
   const minhasFases = fases.filter((f) => f.responsavelId === eu);
   const minhasTarefas = d.tarefas.filter((t) => t.iniciativaId === ini.id && t.responsavelId === eu).sort((a, b) => Number(a.concluida) - Number(b.concluida) || (a.prazo ?? '9').localeCompare(b.prazo ?? '9'));
   const reports = d.reports.filter((r) => r.iniciativaId === ini.id).sort((a, b) => b.data.localeCompare(a.data)).slice(0, 5);
@@ -62,7 +62,7 @@ export function VisaoLeitura({ d, sessao, ini, hoje }: { d: DadosOrg; sessao: Se
         {minhasAlocs.length > 0 && (
           <div style={s('display: flex; flex-direction: column; gap: 6px')}>
             <span style={s('font-size: 13px; font-weight: 700')}>Onde você está alocado(a)</span>
-            {minhasAlocs.map(({ a, f }) => <span key={f.id} style={s('font-size: 13px; color: #4A4458')}>{f.nome} · {a.pct}% · {datas(f)}</span>)}
+            {minhasAlocs.map(({ a, f, per }) => <span key={a.id} style={s('font-size: 13px; color: #4A4458')}>{f.nome} · {a.pct}% · {datas(per ?? f)}</span>)}
           </div>
         )}
         {minhasFases.length > 0 && (

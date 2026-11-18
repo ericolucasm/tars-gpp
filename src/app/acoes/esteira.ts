@@ -7,6 +7,7 @@ import { fasesDoModelo } from '@/lib/regras/projeto';
 import { segundaDaSemana } from '@/lib/regras/datas';
 import { chaveDaRaia } from '@/lib/visoes';
 import { contexto, executar, exigir, notificar } from './_ctx';
+import { criarPeriodosIniciais } from './_periodos';
 
 type Extras = { gpId?: string; modeloId?: string; inicio?: string; motivo?: string; retomada?: string };
 
@@ -79,7 +80,7 @@ export async function moverCard(input: { iniciativaId: string; tipo: TipoAcao; p
         const novas = fasesDoModelo(bib);
         await db.transaction(async (tx) => {
           await tx.delete(t.projetoFases).where(eq(t.projetoFases.iniciativaId, ini.id));
-          if (novas.length) await tx.insert(t.projetoFases).values(novas.map((f) => ({ ...f, iniciativaId: ini.id })));
+          if (novas.length) await criarPeriodosIniciais(tx, await tx.insert(t.projetoFases).values(novas.map((f) => ({ ...f, iniciativaId: ini.id }))).returning());
           if (!gp.perfis.includes('gp')) await tx.update(t.pessoas).set({ perfis: [...gp.perfis, 'gp'] }).where(eq(t.pessoas.id, gp.id));
         });
         await notificar(dados.org.id, [gp.id], `Você é o gerente do projeto "${ini.titulo}". O cronograma começou.`, `/projetos/${ini.id}`);

@@ -112,6 +112,7 @@ type Intervalo = { ini: string; fim: string; pct: number; projeto: Iniciativa; f
 function intervalosDaPessoa(d: DadosOrg, pessoaId: string, hoje: string, incluir?: string): Intervalo[] {
   const exe = raiaChave(d, 'exe')?.id;
   const faseMap = idx(d.fases);
+  const perMap = idx(d.periodos);
   const iniMap = idx(d.iniciativas);
   const res: Intervalo[] = [];
   for (const a of d.alocacoes) {
@@ -119,9 +120,10 @@ function intervalosDaPessoa(d: DadosOrg, pessoaId: string, hoje: string, incluir
     const f = faseMap.get(a.faseId);
     const ini = f && iniMap.get(f.iniciativaId);
     if (!f || !ini || (ini.raiaId !== exe && ini.id !== incluir) || !ini.inicioProjeto) continue;
-    const fim = dataDaSemana(ini.inicioProjeto, f.inicioSemana + f.duracao);
-    if (fim <= hoje) continue; // fase já terminou
-    res.push({ ini: dataDaSemana(ini.inicioProjeto, f.inicioSemana), fim, pct: a.pct, projeto: ini, fase: f.nome });
+    const janela = perMap.get(a.periodoId) ?? f; // a pessoa pesa só nas semanas do período em que atua
+    const fim = dataDaSemana(ini.inicioProjeto, janela.inicioSemana + janela.duracao);
+    if (fim <= hoje) continue; // período já terminou
+    res.push({ ini: dataDaSemana(ini.inicioProjeto, janela.inicioSemana), fim, pct: a.pct, projeto: ini, fase: f.nome });
   }
   return res;
 }
@@ -467,10 +469,11 @@ export function equipeParaFeedback(d: DadosOrg, projeto: Iniciativa, hoje: strin
   const concluido = noRaia(d, projeto, 'con');
   const porPessoa = new Map<string, { fim: string | null; fases: string[] }>();
   for (const f of fases) {
-    const fimFase = projeto.inicioProjeto ? dataDaSemana(projeto.inicioProjeto, f.inicioSemana + f.duracao) : null;
     for (const a of d.alocacoes.filter((x) => x.faseId === f.id)) {
+      const janela = d.periodos.find((x) => x.id === a.periodoId) ?? f; // a participação termina no fim do período em que a pessoa atua
+      const fimPer = projeto.inicioProjeto ? dataDaSemana(projeto.inicioProjeto, janela.inicioSemana + janela.duracao) : null;
       const atual = porPessoa.get(a.pessoaId) ?? { fim: null, fases: [] };
-      porPessoa.set(a.pessoaId, { fim: fimFase && (!atual.fim || fimFase > atual.fim) ? fimFase : atual.fim, fases: [...atual.fases, f.nome] });
+      porPessoa.set(a.pessoaId, { fim: fimPer && (!atual.fim || fimPer > atual.fim) ? fimPer : atual.fim, fases: atual.fases.includes(f.nome) ? atual.fases : [...atual.fases, f.nome] });
     }
   }
   return [...porPessoa.entries()].flatMap(([pessoaId, x]) => {
