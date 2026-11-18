@@ -12,13 +12,16 @@ import { Mudancas } from './Mudancas';
 import { Financeiro } from './Financeiro';
 import { Dependencias } from './Dependencias';
 import { Encerramento } from './Encerramento';
+import { Prazos } from './Prazos';
+import { diasDeAtraso } from '@/lib/regras/muro';
+import { dataDaSemana } from '@/lib/regras/projeto';
 import { ROTULO_DEP, TOM_DEP } from '@/lib/regras/dependencias';
 import { CartaoBeneficio } from '@/components/Beneficio';
 import { beneficioVM } from '@/lib/beneficios-vm';
 import { s } from '@/lib/css';
 import { TIPOS_MUDANCA } from '@/lib/regras/mudancas';
 import { dinheiro } from '@/lib/regras/datas';
-import { balancoDo, dependenciasVM, dimensoesSemPrazo, financeiroDo, noRaia, orcamentoDoProjeto } from '@/lib/visoes';
+import { balancoDo, dependenciasVM, infoProjeto, dimensoesSemPrazo, financeiroDo, noRaia, orcamentoDoProjeto } from '@/lib/visoes';
 
 export const dynamic = 'force-dynamic';
 
@@ -72,6 +75,18 @@ export default async function Projeto({ params, searchParams }: { params: Promis
           faseInicial: fase && faseIds.has(fase) ? fase : '',
         }}
       />
+      {(() => {
+        const info = infoProjeto(d, ini, hoje);
+        return (
+          <Prazos iniciativaId={ini.id} podeEditar={ehPmo || ehGp} cadencia={ini.statusCadencia} dia={ini.statusDia} proximoStatus={br(info.proximoStatus)} statusAtrasado={info.statusAtrasado}
+            fases={fases.map((f) => { const gate = dataDaSemana(ini.inicioProjeto!, f.inicioSemana + f.duracao); return { id: f.id, nome: f.nome, gate: br(gate), responsavelId: f.responsavelId, confirmada: !!f.confirmadaEm, atraso: f.confirmadaEm ? 0 : diasDeAtraso(gate, hoje) }; })}
+            pessoas={d.pessoas.filter((x) => !x.externo && (x.status === 'ativo' || alocIds.has(x.id))).map((x) => ({ id: x.id, nome: x.nome }))}
+            pedidos={d.pedidosPrazo.filter((x) => x.iniciativaId === ini.id && x.status === 'pendente').map((x) => ({
+              id: x.id, alvo: x.tipo === 'tarefa' ? `a tarefa "${d.tarefas.find((tf) => tf.id === x.alvoId)?.titulo ?? ''}"` : `a fase ${d.fases.find((f) => f.id === x.alvoId)?.nome ?? ''}`,
+              quem: pessoa(d, x.solicitanteId)?.nome ?? '', de: x.prazoAtual ? br(x.prazoAtual) : '—', para: br(x.novoPrazo), motivo: x.motivo,
+            }))} />
+        );
+      })()}
       {(() => {
         const f = financeiroDo(d, ini);
         return (

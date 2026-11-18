@@ -8,7 +8,7 @@ export const TIPOS_PONTO: Record<string, string> = { impedimento: 'Impedimento',
 export function podeResolverPonto(p: PontoRegra, pessoaId: string, ehPmo: boolean) {
   if (p.status !== 'aberto') return false;
   if (ehPmo || p.abertoPor === pessoaId) return true;
-  return p.destino === 'gestor' && p.destinatarioId === pessoaId;
+  return p.destino !== 'pmo' && p.destinatarioId === pessoaId; // gestor escolhido ou GP do projeto
 }
 
 /** O ponto está esperando por esta pessoa (para o "Precisa de você")? */

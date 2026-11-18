@@ -11,6 +11,7 @@ import { picoNoPeriodo, situacaoCapacidade, pessoasEq } from './capacidade';
 import { podeMedirBeneficio, situacaoBeneficio, validarMedicao } from './beneficios';
 import { situacaoDependencia } from './dependencias';
 import { balancoCusto, balancoEscopo, balancoPrazo, validarLicao } from './encerramento';
+import { diaDaSemana, diasDeAtraso, emNegociacao, proximoDiaSemana, proximoStatusDevido, validarPedidoPrazo } from './muro';
 import { gestorDe, timeDireto, areasSobGestao, nomeCurto, acimaDoCedido } from './pessoas';
 import { addDias, diffDias, dataPorExtenso, haQuanto, proximaSexta } from './datas';
 
@@ -302,6 +303,31 @@ describe('encerramento', () => {
     expect(validarLicao({ tipo: 'funcionou', texto: 'Reunião semanal com o fornecedor evitou atrasos' })).toBeNull();
     expect(validarLicao({ tipo: 'outro', texto: 'Reunião semanal com o fornecedor' })).toMatch(/funcionou/);
     expect(validarLicao({ tipo: 'melhorar', texto: 'curto' })).toMatch(/frase/);
+  });
+});
+
+describe('muro: prazos e atrasos', () => {
+  it('dias da semana', () => {
+    expect(diaDaSemana('2026-11-20')).toBe(5); // sexta
+    expect(diaDaSemana('2026-11-22')).toBe(7); // domingo
+    expect(proximoDiaSemana('2026-11-18', 5)).toBe('2026-11-20');
+    expect(proximoDiaSemana('2026-11-20', 5)).toBe('2026-11-20');
+  });
+  it('próximo status devido pela cadência', () => {
+    expect(proximoStatusDevido('2026-11-13', 'semanal', 5, true)).toBe('2026-11-20'); // publicou sexta → próxima sexta
+    expect(proximoStatusDevido('2026-11-13', 'quinzenal', 5, true)).toBe('2026-11-27');
+    expect(proximoStatusDevido('2026-11-13', 'mensal', 5, true)).toBe('2026-12-11');
+    expect(proximoStatusDevido('2026-11-16', 'semanal', 5, false)).toBe('2026-11-27'); // play na segunda: 1º status na sexta da semana seguinte
+  });
+  it('atraso, negociação e validação do pedido de prazo', () => {
+    expect(diasDeAtraso('2026-11-20', '2026-11-20')).toBe(0);
+    expect(diasDeAtraso('2026-11-20', '2026-11-23')).toBe(3);
+    expect(emNegociacao([{ tipo: 'tarefa', alvoId: 'x', status: 'pendente' }], 'tarefa', 'x')).toBe(true);
+    expect(emNegociacao([{ tipo: 'tarefa', alvoId: 'x', status: 'recusado' }], 'tarefa', 'x')).toBe(false);
+    expect(validarPedidoPrazo({ novoPrazo: '2026-12-01', motivo: 'Fornecedor atrasou a entrega' }, '2026-11-20', '2026-11-18')).toBeNull();
+    expect(validarPedidoPrazo({ novoPrazo: '2026-11-10', motivo: 'Fornecedor atrasou' }, '2026-11-20', '2026-11-18')).toMatch(/passado/);
+    expect(validarPedidoPrazo({ novoPrazo: '2026-11-19', motivo: 'Fornecedor atrasou' }, '2026-11-20', '2026-11-18')).toMatch(/depois do atual/);
+    expect(validarPedidoPrazo({ novoPrazo: '2026-12-01', motivo: 'x' }, null, '2026-11-18')).toMatch(/Explique/);
   });
 });
 

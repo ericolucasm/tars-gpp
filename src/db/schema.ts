@@ -149,6 +149,9 @@ export const iniciativas = pgTable('iniciativas', {
   beneficioAtingido: text('beneficio_atingido'), // sim | parcial | nao
   beneficioMedidoEm: timestamp('beneficio_medido_em', { withTimezone: true }),
   beneficioMedidoPor: uuid('beneficio_medido_por'),
+  // cadência do status report (muro): semanal | quinzenal | mensal, no dia da semana (1 = segunda … 5 = sexta)
+  statusCadencia: text('status_cadencia').notNull().default('semanal'),
+  statusDia: integer('status_dia').notNull().default(5),
   // carimbos de tempo do fluxo
   enviadaEm: timestamp('enviada_em', { withTimezone: true }),
   aprovadaGestorEm: timestamp('aprovada_gestor_em', { withTimezone: true }),
@@ -197,6 +200,7 @@ export const projetoFases = pgTable('projeto_fases', {
   ordem: integer('ordem').notNull().default(0),
   criterioConclusao: text('criterio_conclusao').notNull().default(''),
   confirmadaEm: timestamp('confirmada_em', { withTimezone: true }),
+  responsavelId: uuid('responsavel_id'), // quem confirma o fim da fase (o gate) na data
 });
 
 export type FaseBase = { id: string; nome: string; inicioSemana: number; duracao: number };
@@ -367,6 +371,23 @@ export const licoes = pgTable('licoes', {
   texto: text('texto').notNull(),
   autorId: uuid('autor_id'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+// Pedido de mais prazo de quem é responsável por uma tarefa ou por uma fase (o GP decide).
+export const pedidosPrazo = pgTable('pedidos_prazo', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  orgId: uuid('org_id').notNull(),
+  iniciativaId: uuid('iniciativa_id').notNull().references(() => iniciativas.id, { onDelete: 'cascade' }),
+  tipo: text('tipo').notNull(), // tarefa | fase
+  alvoId: uuid('alvo_id').notNull(), // id da tarefa ou da fase
+  prazoAtual: date('prazo_atual'),
+  novoPrazo: date('novo_prazo').notNull(),
+  motivo: text('motivo').notNull(),
+  status: text('status').notNull().default('pendente'), // pendente | aprovado | recusado
+  solicitanteId: uuid('solicitante_id'),
+  decididoPor: uuid('decidido_por'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  decididoEm: timestamp('decidido_em', { withTimezone: true }),
 });
 
 // ---------- Login (Better Auth) ----------

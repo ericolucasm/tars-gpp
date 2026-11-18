@@ -145,7 +145,11 @@ export async function decidirMudancaBase(mudancaId: string, aprovar: boolean) {
 
 export async function confirmarFimFase(faseId: string) {
   return executar(async () => {
-    const { fase } = await ctxFase(faseId);
+    const ctx0 = await contexto();
+    const f0 = ctx0.dados.fases.find((x) => x.id === faseId);
+    exigir(f0, 'Fase não encontrada.');
+    // o responsável da fase confirma o gate; GP e PMO também podem
+    const fase = f0.responsavelId === ctx0.eu.id ? f0 : (await ctxFase(faseId)).fase;
     await db.update(t.projetoFases).set({ confirmadaEm: fase.confirmadaEm ? null : new Date() }).where(eq(t.projetoFases.id, faseId));
   });
 }
