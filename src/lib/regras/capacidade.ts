@@ -23,3 +23,17 @@ export function situacaoCapacidade(alocado: number, cedido: number): 'ok' | 'ate
 export function pessoasEq(pct: number) {
   return (pct / 100).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 }
+
+export type MesImpacto = { de: string; carga: number; doProjeto: number; situacao: 'ok' | 'so_com_pedido' | 'acima' };
+
+/**
+ * Impacto de ceder uma pessoa, mês a mês: a carga total (pico de alocação no mês, todos os projetos),
+ * quanto disso é do projeto que pede, e se cabe no limite atual, só com o pedido ou nem com ele.
+ */
+export function impactoPorMes(todos: Intervalo[], doProjeto: Intervalo[], meses: { de: string; ate: string }[], limiteAtual: number, limiteNovo: number): MesImpacto[] {
+  return meses.map((m) => {
+    const carga = picoNoPeriodo(todos, m.de, m.ate);
+    const situacao = carga > limiteNovo ? 'acima' : carga > limiteAtual ? 'so_com_pedido' : 'ok';
+    return { de: m.de, carga, doProjeto: picoNoPeriodo(doProjeto, m.de, m.ate), situacao };
+  });
+}

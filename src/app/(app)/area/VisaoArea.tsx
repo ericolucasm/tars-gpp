@@ -18,7 +18,8 @@ const TEXTO: Record<Aba, string> = {
   time: 'Quanto cada pessoa do time pode ceder e os pedidos de alocação.',
 };
 type Membro = { id: string; nome: string; ini: string; papel: string; cap: number; aloc: number; alocado: string };
-type Pedido = { id: string; texto: string; delta: number };
+type MesImp = { mes: string; carga: number; doProjeto: number; situacao: 'ok' | 'so_com_pedido' | 'acima' };
+type Pedido = { id: string; texto: string; delta: number; quem: string; impacto: { limiteAtual: number; limiteNovo: number; comCronograma: boolean; meses: MesImp[] } };
 
 export function VisaoArea(p: { aba: Aba; trilha: string; nome: string; escopo: string; aprovacoes: Aprovacao[]; linhas: Linha[]; time: Membro[]; pedidos: Pedido[]; emExecucao: number; rodando: number }) {
   const [toast, setToast] = useState('');
@@ -114,6 +115,7 @@ export function VisaoArea(p: { aba: Aba; trilha: string; nome: string; escopo: s
             <div key={x.id} style={s('padding: 12px; border-radius: 12px; background: #FEF3DC; display: flex; flex-direction: column; gap: 8px')}>
               <span style={s('font-size: 13px; font-weight: 600; color: #6B3F03')}>Pedido de alocação</span>
               <span style={s('font-size: 13px; color: #4A3205')}>{x.texto}</span>
+              <ImpactoPedido quem={x.quem} imp={x.impacto} />
               <div style={s('display: flex; gap: 8px; justify-content: flex-end')}>
                 <button type="button" disabled={pend} onClick={() => rodar(() => responderPedido(x.id, false))} style={s('height: 34px; padding: 0 12px; border-radius: 9px; border: 1px solid #E8CF9C; background: #FFFFFF; color: #4A3205; font-size: 12px')}>Recusar</button>
                 <button type="button" disabled={pend} onClick={() => rodar(() => responderPedido(x.id, true))} style={s('height: 34px; padding: 0 12px; border-radius: 9px; border: 0; background: #6D4AFF; color: #FFFFFF; font-weight: 600; font-size: 12px')}>Ceder +{x.delta}%</button>
@@ -150,6 +152,37 @@ export function VisaoArea(p: { aba: Aba; trilha: string; nome: string; escopo: s
         </section>}
       </div>
     </>
+  );
+}
+
+/** Como a pessoa fica mês a mês se o gestor ceder: carga total, parte do projeto e o que sobra para a área. */
+function ImpactoPedido({ quem, imp }: { quem: string; imp: Pedido['impacto'] }) {
+  const acima = imp.meses.filter((m) => m.situacao === 'acima');
+  const soCom = imp.meses.filter((m) => m.situacao === 'so_com_pedido');
+  const resumo = acima.length
+    ? `Mesmo cedendo, ${quem} fica acima do novo limite em ${acima.map((m) => m.mes).join(', ')} (pico de ${Math.max(...acima.map((m) => m.carga))}%). Vale conversar com o GP.`
+    : soCom.length
+      ? `Sem ceder, ${quem} fica acima do limite em ${soCom.map((m) => m.mes).join(', ')}. Cedendo, cabe em todos os meses.`
+      : `${quem} cabe no limite atual em todos os meses.`;
+  const cor = { ok: '#6D4AFF', so_com_pedido: '#C27A0A', acima: '#B42318' };
+  return (
+    <section aria-label={`Impacto de ceder ${quem}`} style={s('background: #FFFFFF; border: 1px solid #E8CF9C; border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px')}>
+      <span style={s('font-size: 12px; font-weight: 600; color: #4A3205')}>Se ceder: limite de {quem} vai de {imp.limiteAtual}% para {imp.limiteNovo}%</span>
+      <div style={s('display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px')}>
+        {imp.meses.map((m) => (
+          <div key={m.mes} title={`${m.mes}: ${m.carga}% em projetos (${m.doProjeto}% deste projeto) · fica na área ${Math.max(0, 100 - m.carga)}%`} style={s('display: flex; flex-direction: column; gap: 3px; font-size: 11px; color: #5E5770; min-width: 0')}>
+            <span style={s('font-weight: 600; color: #26213A')}>{m.mes}</span>
+            <div style={s('height: 36px; border-radius: 4px; background: #EFEBE3; position: relative; overflow: hidden')}>
+              <div style={{ ...s('position: absolute; left: 0; right: 0; border-top: 1px dashed #8A8296'), bottom: `${imp.limiteNovo}%` }} />
+              <div style={{ ...s('position: absolute; left: 0; right: 0; bottom: 0'), height: `${Math.min(100, m.carga)}%`, background: cor[m.situacao], opacity: 0.85 }} />
+            </div>
+            <span style={{ fontWeight: 700, color: m.situacao === 'ok' ? '#26213A' : cor[m.situacao] }}>{m.carga}%</span>
+            <span>área {Math.max(0, 100 - m.carga)}%</span>
+          </div>
+        ))}
+      </div>
+      <span style={s('font-size: 12px; color: #4A3205')}>{resumo}{imp.comCronograma ? '' : ' O projeto ainda não tem cronograma com essa pessoa, então os meses mostram só a carga atual.'}</span>
+    </section>
   );
 }
 

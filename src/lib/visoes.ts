@@ -2,7 +2,7 @@ import type { Ciclo, DadosOrg, Iniciativa, Pessoa, ProjetoFase } from './dados';
 import { addDias, br, brCurto, diffDias, haQuanto, nomeMes } from './regras/datas';
 import { dataDaSemana, desvio, fimDoPlano, progresso, statusDaFase, tarefaAtrasada, type Fase } from './regras/projeto';
 import { acimaDoCedido, gestorDe, nomeCurto, subarvore } from './regras/pessoas';
-import { picoNoPeriodo } from './regras/capacidade';
+import { impactoPorMes, picoNoPeriodo } from './regras/capacidade';
 import { custoReferencia, notaFinal } from './regras/avaliacao';
 import { resumoFinanceiro } from './regras/financeiro';
 import { dimCusto, dimEscopo, dimPrazo, dimRiscos, type Dimensao } from './regras/farol';
@@ -104,7 +104,7 @@ export function participaDoProjeto(d: DadosOrg, iniId: string, pessoaId: string)
 
 type Intervalo = { ini: string; fim: string; pct: number; projeto: Iniciativa };
 
-function intervalosDaPessoa(d: DadosOrg, pessoaId: string, hoje: string): Intervalo[] {
+function intervalosDaPessoa(d: DadosOrg, pessoaId: string, hoje: string, incluir?: string): Intervalo[] {
   const exe = raiaChave(d, 'exe')?.id;
   const faseMap = idx(d.fases);
   const iniMap = idx(d.iniciativas);
@@ -113,7 +113,7 @@ function intervalosDaPessoa(d: DadosOrg, pessoaId: string, hoje: string): Interv
     if (a.pessoaId !== pessoaId) continue;
     const f = faseMap.get(a.faseId);
     const ini = f && iniMap.get(f.iniciativaId);
-    if (!f || !ini || ini.raiaId !== exe || !ini.inicioProjeto) continue;
+    if (!f || !ini || (ini.raiaId !== exe && ini.id !== incluir) || !ini.inicioProjeto) continue;
     const fim = dataDaSemana(ini.inicioProjeto, f.inicioSemana + f.duracao);
     if (fim <= hoje) continue; // fase já terminou
     res.push({ ini: dataDaSemana(ini.inicioProjeto, f.inicioSemana), fim, pct: a.pct, projeto: ini });
@@ -154,6 +154,21 @@ export function proximosMeses(hoje: string, n: number) {
     const ate = `${Math.floor((t + 1) / 12)}-${String(((t + 1) % 12) + 1).padStart(2, '0')}-01`;
     return { de, ate };
   });
+}
+
+/**
+ * Impacto de um pedido de alocação para o gestor decidir: limite atual e novo, e mês a mês (6 meses)
+ * a carga total da pessoa, a parte do projeto que pede e o que sobra para a operação da área.
+ * O projeto que pede entra mesmo antes do play, se já tiver cronograma.
+ */
+export function impactoDoPedido(d: DadosOrg, pedido: { iniciativaId: string; pessoaId: string; deltaPct: number }, hoje: string) {
+  const p = d.pessoas.find((x) => x.id === pedido.pessoaId);
+  const limiteAtual = p?.cedeAte ?? 0;
+  const limiteNovo = Math.min(100, limiteAtual + pedido.deltaPct);
+  const todos = intervalosDaPessoa(d, pedido.pessoaId, hoje, pedido.iniciativaId);
+  const doProjeto = todos.filter((x) => x.projeto.id === pedido.iniciativaId);
+  const meses = impactoPorMes(todos, doProjeto, proximosMeses(hoje, 6), limiteAtual, limiteNovo);
+  return { limiteAtual, limiteNovo, comCronograma: doProjeto.length > 0, meses };
 }
 
 /** Projetos em que a pessoa está alocada, com o % da fase atual (ou da próxima): "Roteirização (20%)". */

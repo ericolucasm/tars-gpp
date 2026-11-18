@@ -311,9 +311,10 @@ try {
   await p.waitForURL(/\/area\/time$/);
   ok('Gestora navega pelos três menus da área e abre o detalhe de um projeto');
   const ped = p.locator('#capacidade > div').filter({ hasText: 'Diego Santos' }).first();
+  await ped.getByRole('region', { name: 'Impacto de ceder Diego' }).getByText(/limite de Diego vai de \d+% para \d+%/).waitFor();
   await ped.getByRole('button', { name: /Ceder \+10%/ }).click();
   await p.getByText(/Você cedeu \+10% de Diego Santos/).waitFor();
-  ok('Gestora cede capacidade pedida pelo GP');
+  ok('Gestora vê o impacto mês a mês e cede capacidade pedida pelo GP');
   await p.context().close();
 
   // 9. Admin: ver como + cadastros
