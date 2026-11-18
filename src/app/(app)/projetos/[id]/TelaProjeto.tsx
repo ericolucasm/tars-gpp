@@ -7,8 +7,10 @@ import { desvio as calcDesvio, fimDoPlano, FAROL, mesesDaLinha, reordenar, rotul
 import * as A from '@/app/acoes/projeto';
 import { dimPrazo, farolGeral, type Dimensao } from '@/lib/regras/farol';
 import { RiscosFase, rkEstilo, type RiscoVM } from './RiscosFase';
+import { PainelFase } from './PainelFase';
+import { siglaEquipe } from '@/lib/regras/projeto';
 
-type FaseVM = Fase & { criterio: string; confirmada: string | null };
+type FaseVM = Fase & { criterio: string; confirmada: string | null; responsavelId: string | null };
 type Props = {
   id: string; titulo: string; cabecalho: string; patrocinio: string; farol: Farol;
   inicio: string; inicioLabel: string; hoje: string; semanaHoje: number;
@@ -41,6 +43,7 @@ export function TelaProjeto({ p }: { p: Props }) {
   const [fases, setFases] = useState<FaseVM[]>(p.fases);
   const [drag, setDrag] = useState<{ id: string; modo: 'mover' | 'redim'; x0: number; s0: number; d0: number } | null>(null);
   const [sel, setSel] = useState(p.faseInicial);
+  const [aberta, setAberta] = useState(''); // fase com o painel aberto (linha expandida)
   const [farol, setFarol] = useState<Farol>(p.farol);
   const [aviso, setAviso] = useState('');
   const [pend, start] = useTransition();
@@ -97,7 +100,7 @@ export function TelaProjeto({ p }: { p: Props }) {
       const nd = Math.max(1, drag.d0 + dw); if (nd !== f.duracao) moveu.current = true; return { ...f, duracao: nd };
     }));
   }
-  function onUp() {
+  function onUp(e?: React.PointerEvent) {
     if (vdrag) {
       const ids = fases.map((f) => f.id);
       setVdrag(null);
@@ -108,6 +111,7 @@ export function TelaProjeto({ p }: { p: Props }) {
     const f = fases.find((x) => x.id === drag.id);
     setDrag(null);
     if (f && moveu.current) rodar(() => A.moverFase(f.id, f.inicioSemana, f.duracao));
+    else if (f && e?.type === 'pointerup') { setAberta(aberta === f.id ? '' : f.id); setSel(f.id); } // clique sem arrastar: abre o painel da fase
     moveu.current = false;
   }
 
@@ -172,7 +176,7 @@ export function TelaProjeto({ p }: { p: Props }) {
 
       <section aria-label="Linha do tempo" style={s('background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px')}>
         <div style={s('display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center')}>
-          <div style={s('display: flex; flex-direction: column; gap: 2px')}><h2 style={s('margin: 0; font-size: 18px; font-weight: 700')}>Linha do tempo</h2><span style={s('font-size: 12px; color: #5E5770')}>{p.base ? 'Linha de base congelada. Mudanças agora geram desvio.' : 'Gerada a partir do modelo e das datas da iniciativa. Arraste as barras e congele a linha de base.'} Use ⠿ ou as setas para reordenar as fases.</span></div>
+          <div style={s('display: flex; flex-direction: column; gap: 2px')}><h2 style={s('margin: 0; font-size: 18px; font-weight: 700')}>Linha do tempo</h2><span style={s('font-size: 12px; color: #5E5770')}>{p.base ? 'Linha de base congelada. Mudanças agora geram desvio.' : 'Gerada a partir do modelo e das datas da iniciativa. Arraste as barras e congele a linha de base.'} Clique numa barra para atribuir pessoas e configurar a fase. Use ⠿ ou as setas para reordenar.</span></div>
           <div style={s('display: flex; flex-wrap: wrap; gap: 8px')}>
             <button type="button" disabled={pend} onClick={() => rodar(() => A.recriarDoModelo(p.id))} style={s('height: 38px; padding: 0 14px; border-radius: 10px; border: 1px solid #E2DCD0; background: #FFFFFF; color: #26213A; font-size: 13px')}>Recriar a partir do modelo</button>
             <button type="button" disabled={pend} onClick={() => rodar(() => A.congelarLinhaBase(p.id), true)} style={s('height: 38px; padding: 0 14px; border-radius: 10px; border: 0; background: #6D4AFF; color: #FFFFFF; font-weight: 600; font-size: 13px')}>{p.base ? 'Atualizar linha de base' : 'Congelar linha de base'}</button>
@@ -192,13 +196,15 @@ export function TelaProjeto({ p }: { p: Props }) {
               const base = p.base?.find((b) => b.id === f.id);
               const on = sel === f.id;
               const arrastando = drag?.id === f.id;
+              const equipe = siglaEquipe(p.alocs.filter((a) => a.faseId === f.id).map((a) => ({ nome: p.pessoas.find((x) => x.id === a.pessoaId)?.nome ?? '', pct: a.pct })));
               return (
-                <div key={f.id} style={{ ...s('display: flex; border-bottom: 1px solid #F3F0EA'), background: subindo ? '#EFEAFE' : on ? '#F6F3FF' : '#FFFFFF', boxShadow: subindo ? '0 2px 10px rgba(38, 33, 58, 0.15)' : 'none', position: 'relative', zIndex: subindo ? 1 : 0 }}>
+                <div key={f.id}>
+                <div style={{ ...s('display: flex; border-bottom: 1px solid #F3F0EA'), background: subindo ? '#EFEAFE' : on ? '#F6F3FF' : '#FFFFFF', boxShadow: subindo ? '0 2px 10px rgba(38, 33, 58, 0.15)' : 'none', position: 'relative', zIndex: subindo ? 1 : 0 }}>
                   <div style={{ ...s('padding: 6px 4px 6px 6px; display: flex; align-items: center; gap: 4px; box-sizing: border-box'), flex: `0 0 ${COL}px` }}>
                     <span role="img" aria-label={`Arrastar ${f.nome} para cima ou para baixo`} title="Arraste para reordenar"
                       onPointerDown={(e) => { e.preventDefault(); setVdrag({ id: f.id, y0: e.clientY, ordem0: fases.map((x) => x.id) }); }}
                       style={{ ...s('width: 20px; height: 32px; display: flex; align-items: center; justify-content: center; color: #8A8296; font-size: 14px; touch-action: none; flex: 0 0 20px'), cursor: subindo ? 'grabbing' : 'grab' }}>⠿</span>
-                    <button type="button" aria-pressed={on} onClick={() => setSel(on ? '' : f.id)} style={s('flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; border: 0; background: transparent; padding: 4px 0; text-align: left; color: #26213A')}>
+                    <button type="button" aria-pressed={on} aria-expanded={aberta === f.id} onClick={() => { setSel(on && aberta === f.id ? '' : f.id); setAberta(aberta === f.id ? '' : f.id); }} style={s('flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; border: 0; background: transparent; padding: 4px 0; text-align: left; color: #26213A')}>
                       <span style={s('font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px')}>{f.nome}</span>
                       <span style={{ fontSize: 11, color: st === 'Em andamento' ? '#4B2FD1' : '#6E6780' }}>{st}{f.confirmada ? ' · confirmada' : ''}</span>
                     </button>
@@ -209,12 +215,22 @@ export function TelaProjeto({ p }: { p: Props }) {
                   <div style={{ ...s('position: relative; height: 52px'), flex: `0 0 ${semanas * W}px`, backgroundImage: 'linear-gradient(to right, #F3F0EA 1px, transparent 1px)', backgroundSize: `${W}px 52px` }}>
                     <div style={{ ...s('position: absolute; top: 0; bottom: 0; width: 2px; background: #B42318; opacity: 0.6'), left: p.semanaHoje * W }} />
                     {base && <div style={{ ...s('position: absolute; top: 40px; height: 4px; border-radius: 2px; background: #B8AFA0'), left: base.inicioSemana * W + 2, width: base.duracao * W - 4 }} />}
-                    <div onPointerDown={(e) => { e.preventDefault(); moveu.current = false; setDrag({ id: f.id, modo: 'mover', x0: e.clientX, s0: f.inicioSemana, d0: f.duracao }); }}
+                    <div role="button" tabIndex={0} aria-label={`Barra da fase ${f.nome}: clique para atribuir pessoas e configurar`} title={equipe ? `${f.nome} · ${equipe}` : `${f.nome} · clique para atribuir pessoas`}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setAberta(aberta === f.id ? '' : f.id); setSel(f.id); } }}
+                      onPointerDown={(e) => { e.preventDefault(); moveu.current = false; setDrag({ id: f.id, modo: 'mover', x0: e.clientX, s0: f.inicioSemana, d0: f.duracao }); }}
                       style={{ ...s('position: absolute; top: 9px; height: 26px; border-radius: 7px; color: #FFFFFF; display: flex; align-items: center; padding-left: 8px; box-sizing: border-box; touch-action: none'), left: f.inicioSemana * W + 2, width: f.duracao * W - 4, background: st === 'Concluída' ? '#9C8CF0' : '#6D4AFF', cursor: arrastando ? 'grabbing' : 'grab', boxShadow: arrastando || on ? '0 0 0 3px #CFC4FF' : 'none' }}>
-                      <span style={s('font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1')}>{f.duracao} {f.duracao === 1 ? 'semana' : 'semanas'} · {br(dataSemana(f.inicioSemana)).slice(0, 5)}</span>
+                      <span style={s('font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1')}>{f.duracao} {f.duracao === 1 ? 'semana' : 'semanas'} · {br(dataSemana(f.inicioSemana)).slice(0, 5)}{equipe ? ` · ${equipe}` : ''}</span>
                       <span aria-hidden="true" onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); moveu.current = false; setDrag({ id: f.id, modo: 'redim', x0: e.clientX, s0: f.inicioSemana, d0: f.duracao }); }} style={s('width: 10px; align-self: stretch; cursor: ew-resize; display: flex; align-items: center; justify-content: center')}><span style={s('width: 2px; height: 14px; border-radius: 1px; background: rgba(255,255,255,0.7)')} /></span>
                     </div>
                   </div>
+                </div>
+                {aberta === f.id && (
+                  <div style={{ position: 'sticky', left: 0, width: 980, maxWidth: 'calc(100vw - 96px)', background: '#F6F3FF', borderBottom: '1px solid #F3F0EA', userSelect: 'text' }} onPointerDown={(e) => e.stopPropagation()}>
+                    <PainelFase key={f.id} fase={f} datas={datasDe(f)} criterio={f.criterio} pessoas={p.pessoas} alocs={p.alocs.filter((a) => a.faseId === f.id).map((a) => ({ pessoaId: a.pessoaId, pct: a.pct }))}
+                      marcos={p.marcos.filter((m) => m.faseId === f.id)} responsavelId={f.responsavelId} gpNome={p.pessoas.find((x) => x.id === p.gpId)?.nome ?? ''}
+                      aoFechar={(msg) => { setAberta(''); if (msg) setAviso(msg); }} />
+                  </div>
+                )}
                 </div>
               );
             })}

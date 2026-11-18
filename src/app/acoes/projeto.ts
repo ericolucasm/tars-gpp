@@ -2,7 +2,7 @@
 
 import { and, eq, inArray } from 'drizzle-orm';
 import { db, schema as t } from '@/db';
-import { dataDaSemana, descreverMudanca, desvio, fasesDoModelo, ordemValida, rotuloDesvio, validarEdicaoTarefa, type Fase } from '@/lib/regras/projeto';
+import { dataDaSemana, descreverMudanca, desvio, fasesDoModelo, ordemValida, rotuloDesvio, validarEdicaoTarefa, validarEquipeFase, type Fase } from '@/lib/regras/projeto';
 import { gestorDe } from '@/lib/regras/pessoas';
 import { nivelDoRisco, validarRisco } from '@/lib/regras/riscos';
 import { br, nomeMes } from '@/lib/regras/datas';
@@ -258,6 +258,42 @@ export async function removerAlocacao(faseId: string, pessoaId: string) {
     const { fase } = await ctxFase(faseId);
     await db.delete(t.alocacoes).where(and(eq(t.alocacoes.faseId, faseId), eq(t.alocacoes.pessoaId, pessoaId)));
     await sincronizarPedido(fase.iniciativaId, pessoaId);
+  });
+}
+
+/**
+ * Painel da fase (linha expandida da linha do tempo): salva de uma vez a equipe (pessoas e %), o responsável pelo fim
+ * da fase e os marcos novos ou removidos. Quem passar do que o gestor cede gera (ou atualiza) o pedido de alocação.
+ */
+export async function salvarPainelFase(faseId: string, p: {
+  alocacoes: { pessoaId: string; pct: number }[]; responsavelId: string | null;
+  marcosNovos: { nome: string; data: string }[]; marcosRemovidos: string[];
+}) {
+  return executar(async () => {
+    const { fase, dados, ini } = await ctxFase(faseId);
+    const erro = validarEquipeFase(p.alocacoes);
+    exigir(!erro, erro ?? '');
+    exigir(p.alocacoes.every((a) => dados.pessoas.some((x) => x.id === a.pessoaId)), 'Pessoa inválida.');
+    exigir(!p.responsavelId || dados.pessoas.some((x) => x.id === p.responsavelId && !x.externo), 'Responsável inválido.');
+    exigir(p.marcosNovos.every((m) => m.nome.trim()), 'Dê um nome ao marco.');
+    exigir(p.marcosRemovidos.every((id) => dados.marcos.some((m) => m.id === id && m.faseId === faseId)), 'Marco não encontrado.');
+    const atuais = dados.alocacoes.filter((a) => a.faseId === faseId);
+    const novos = new Map(p.alocacoes.map((a) => [a.pessoaId, a.pct]));
+    const afetados = new Set<string>();
+    for (const a of atuais) if (!novos.has(a.pessoaId)) { await db.delete(t.alocacoes).where(eq(t.alocacoes.id, a.id)); afetados.add(a.pessoaId); }
+    for (const [pessoaId, pct] of novos) {
+      if (atuais.find((a) => a.pessoaId === pessoaId)?.pct === pct) continue;
+      await db.insert(t.alocacoes).values({ faseId, pessoaId, pct }).onConflictDoUpdate({ target: [t.alocacoes.faseId, t.alocacoes.pessoaId], set: { pct } });
+      afetados.add(pessoaId);
+    }
+    for (const pessoaId of afetados) await sincronizarPedido(fase.iniciativaId, pessoaId);
+    if ((p.responsavelId || null) !== (fase.responsavelId ?? null)) {
+      await db.update(t.projetoFases).set({ responsavelId: p.responsavelId || null }).where(eq(t.projetoFases.id, faseId));
+      if (p.responsavelId) await notificar(dados.org.id, [p.responsavelId], `Você é responsável pela fase ${fase.nome} de ${ini.titulo}.`, '/minhas-entregas');
+    }
+    if (p.marcosNovos.length) await db.insert(t.marcos).values(p.marcosNovos.map((m) => ({ faseId, nome: m.nome.trim(), data: m.data || null, status: 'Previsto' })));
+    for (const id of p.marcosRemovidos) await db.delete(t.marcos).where(eq(t.marcos.id, id));
+    return { ok: true, msg: `Fase ${fase.nome} atualizada.` };
   });
 }
 

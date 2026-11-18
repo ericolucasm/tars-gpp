@@ -785,6 +785,30 @@ try {
   await concl.getByText('Preparar a reunião com a DevHouse').waitFor();
   await p.context().close();
   ok('Meu TARS: a pessoa cria uma tarefa pessoal (entra na prioridade pela data), anota e conclui');
+
+  // Linha do tempo: clicar na barra expande o painel da fase (pessoas e %, responsável, marcos); OK salva e contrai
+  p = await como('mariana@acme.com.br', 'pmo');
+  await ir(p, `/projetos/${sql("select id from iniciativas where titulo='Inventário rotativo'")}`);
+  const fase1 = sql("select f.nome from projeto_fases f join iniciativas i on i.id=f.iniciativa_id where i.titulo='Inventário rotativo' order by f.ordem limit 1");
+  await p.getByRole('button', { name: `Barra da fase ${fase1}: clique para atribuir pessoas e configurar` }).click();
+  const painel = p.getByRole('region', { name: `Painel da fase ${fase1}` });
+  await painel.getByLabel('Atribuir pessoa').selectOption({ label: 'Bruno Reis (fora do projeto)' });
+  await painel.getByRole('button', { name: '+ Atribuir (20%)' }).click();
+  await painel.getByRole('button', { name: 'Aumentar Bruno Reis' }).click();
+  await painel.getByRole('button', { name: 'Aumentar Bruno Reis' }).click();
+  await painel.getByRole('group', { name: 'Alocação de Bruno Reis' }).getByText('40%', { exact: true }).waitFor();
+  await painel.getByRole('group', { name: 'Alocação de Bruno Reis' }).getByText(/vai pedir aprovação ao gestor/).waitFor(); // Bruno cede 30%
+  await painel.getByLabel('Responsável pelo fim da fase').selectOption({ label: 'Bruno Reis' });
+  await painel.getByLabel('Nome do marco').fill('Contagem piloto validada');
+  await painel.getByRole('button', { name: '+ Marco' }).click();
+  await painel.getByRole('button', { name: 'OK' }).click();
+  await p.getByText(`Fase ${fase1} atualizada.`).first().waitFor();
+  await painel.waitFor({ state: 'detached' });
+  await p.getByRole('button', { name: `Barra da fase ${fase1}: clique para atribuir pessoas e configurar` }).getByText(/BR 40%/).waitFor();
+  if (sql(`select p.nome from projeto_fases f join pessoas p on p.id=f.responsavel_id join iniciativas i on i.id=f.iniciativa_id where i.titulo='Inventário rotativo' and f.nome='${fase1}'`) !== 'Bruno Reis') throw new Error('Responsável da fase não gravado');
+  if (sql("select count(*) from marcos where nome='Contagem piloto validada'") !== '1') throw new Error('Marco não gravado');
+  await p.context().close();
+  ok('Linha do tempo: clicar na barra abre o painel da fase; atribui pessoa e %, responsável e marco; OK salva, contrai e a barra mostra a equipe');
 } catch (e) {
   console.error('✗ FALHOU no passo', passo + 1, '\n', e.message.split('\n').slice(0, 6).join('\n'));
   process.exitCode = 1;

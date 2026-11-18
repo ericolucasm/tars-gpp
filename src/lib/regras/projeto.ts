@@ -150,3 +150,19 @@ export function modoDoProjeto(p: { ehPmo: boolean; ehGp: boolean; participa: boo
   if (p.participa || p.solicitante || p.patrocinador) return 'leitura';
   return null;
 }
+
+// ---------- Painel da fase (linha expandida na linha do tempo) ----------
+
+/** Equipe de uma fase: cada pessoa uma vez só, de 10% a 100%, em passos de 10%. */
+export function validarEquipeFase(alocs: { pessoaId: string; pct: number }[]): string | null {
+  const ids = alocs.map((a) => a.pessoaId);
+  if (ids.some((id) => !id)) return 'Escolha a pessoa.';
+  if (new Set(ids).size !== ids.length) return 'A mesma pessoa aparece duas vezes nesta fase.';
+  if (alocs.some((a) => !Number.isInteger(a.pct) || a.pct < 10 || a.pct > 100 || a.pct % 10 !== 0)) return 'Use percentuais de 10% a 100%, de 10 em 10.';
+  return null;
+}
+
+/** Resumo da equipe que aparece na barra da fase: "DS 50% · RS 20%". */
+export function siglaEquipe(alocs: { nome: string; pct: number }[]) {
+  return alocs.map((a) => `${a.nome.trim().split(/\s+/).map((x) => x[0]).slice(0, 2).join('').toUpperCase()} ${a.pct}%`).join(' · ');
+}

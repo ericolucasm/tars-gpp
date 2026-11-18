@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { notaFinal, custoReferencia, ordenarPorNota, podeComunicar } from './avaliacao';
 import { acoesDoCard, acaoDeConclusao, prontoParaConcluir, retiradaPermitida, validarRetirada, validarGate, podeConfirmar, type Raia } from './esteira';
-import { desvio, farolSugerido, statusDaFase, fasesDoModelo, mesesDaLinha, descreverMudanca, progresso, reordenar, ordemValida, validarEdicaoTarefa, modoDoProjeto } from './projeto';
+import { desvio, farolSugerido, statusDaFase, fasesDoModelo, mesesDaLinha, descreverMudanca, progresso, reordenar, ordemValida, validarEdicaoTarefa, modoDoProjeto, validarEquipeFase, siglaEquipe } from './projeto';
 import { podeResolverPonto, pontoEsperaPor, pontoAtrasado } from './pontos';
 import { validarPedidoMudanca, variacaoCusto } from './mudancas';
 import { resumoFinanceiro, situacaoCusto } from './financeiro';
@@ -665,5 +665,20 @@ describe('Meu TARS: tarefas pessoais e anotações', () => {
     expect(tarefaPessoalVisivel(null, '2026-11-18')).toBe(true);
     expect(tarefaPessoalVisivel('2026-11-11', '2026-11-18')).toBe(true);
     expect(tarefaPessoalVisivel('2026-11-10', '2026-11-18')).toBe(false);
+  });
+});
+
+describe('painel da fase: equipe', () => {
+  it('cada pessoa uma vez, de 10% a 100% em passos de 10', () => {
+    expect(validarEquipeFase([{ pessoaId: 'a', pct: 50 }, { pessoaId: 'b', pct: 20 }])).toBeNull();
+    expect(validarEquipeFase([])).toBeNull();
+    expect(validarEquipeFase([{ pessoaId: 'a', pct: 50 }, { pessoaId: 'a', pct: 20 }])).toMatch(/duas vezes/);
+    expect(validarEquipeFase([{ pessoaId: 'a', pct: 5 }])).toMatch(/10%/);
+    expect(validarEquipeFase([{ pessoaId: 'a', pct: 55 }])).toMatch(/10 em 10/);
+    expect(validarEquipeFase([{ pessoaId: '', pct: 50 }])).toMatch(/Escolha/);
+  });
+  it('resumo na barra', () => {
+    expect(siglaEquipe([{ nome: 'Diego Santos', pct: 50 }, { nome: 'Renata Souza', pct: 20 }])).toBe('DS 50% · RS 20%');
+    expect(siglaEquipe([])).toBe('');
   });
 });

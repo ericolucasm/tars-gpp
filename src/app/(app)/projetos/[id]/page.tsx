@@ -68,7 +68,7 @@ export default async function Projeto({ params, searchParams }: { params: Promis
         p={{
           id: ini.id, titulo: ini.titulo, cabecalho: cab, patrocinio: patroTxt, farol: (ini.farol ?? 'ok') as 'ok' | 'aten' | 'crit',
           inicio: ini.inicioProjeto, inicioLabel: br(ini.inicioProjeto), hoje, semanaHoje: semanaHoje(ini.inicioProjeto, hoje),
-          fases: fases.map((f) => ({ id: f.id, nome: f.nome, inicioSemana: f.inicioSemana, duracao: f.duracao, criterio: f.criterioConclusao, confirmada: f.confirmadaEm ? br(f.confirmadaEm.toISOString().slice(0, 10)) : null })),
+          fases: fases.map((f) => ({ id: f.id, nome: f.nome, inicioSemana: f.inicioSemana, duracao: f.duracao, criterio: f.criterioConclusao, confirmada: f.confirmadaEm ? br(f.confirmadaEm.toISOString().slice(0, 10)) : null, responsavelId: f.responsavelId })),
           base: linhaBaseDo(d, ini.id),
           biblioteca: d.fasesBiblioteca.map((b) => ({ id: b.id, nome: b.nome, dur: b.duracaoSemanas })),
           tarefas: d.tarefas.filter((t) => t.iniciativaId === ini.id).map((t) => ({ id: t.id, faseId: t.faseId, titulo: t.titulo, responsavelId: t.responsavelId, prazo: t.prazo, concluida: t.concluida })),
