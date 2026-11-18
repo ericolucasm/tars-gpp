@@ -131,6 +131,7 @@ export const iniciativas = pgTable('iniciativas', {
   devolucaoNota: text('devolucao_nota'),
   situacao: text('situacao'),
   prioridade: text('prioridade'), // Alta | Média | Baixa
+  prioridadeArea: integer('prioridade_area'), // ordem dada pelo gestor (1 = mais importante) enquanto espera o PMO
   progressoGates: jsonb('progresso_gates').$type<Record<string, boolean[]>>().notNull().default({}),
   // campos de projeto
   gpId: uuid('gp_id'),

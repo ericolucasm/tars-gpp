@@ -4,7 +4,7 @@ import { eq } from 'drizzle-orm';
 import { db, schema as t } from '@/db';
 import { gestorDe } from '@/lib/regras/pessoas';
 import { validarNaoSeguir } from '@/lib/regras/gestor';
-import { noRaia, pessoa, raiaChave } from '@/lib/visoes';
+import { noRaia, pessoa, prioridadesDoGestor, raiaChave } from '@/lib/visoes';
 import { contexto, executar, exigir, notificar } from './_ctx';
 
 /** Gestor aprova a iniciativa do time e ela segue para o PMO. */
@@ -57,6 +57,19 @@ export async function naoSeguirComoGestor(iniciativaId: string, motivo: string, 
     await db.insert(t.transicoes).values({ orgId: dados.org.id, iniciativaId: ini.id, acao: 'nao_seguir_gestor', deRaiaId: ini.raiaId, paraRaiaId: can.id, motivo: motivoSaida, ...autoria });
     await notificar(dados.org.id, [ini.solicitanteId], `${eu.nome} decidiu não seguir com "${ini.titulo}". Motivo: ${motivoSaida}`, '/inicio');
     return { ok: true, msg: `“${ini.titulo}” arquivada. ${pessoa(dados, ini.solicitanteId)?.nome ?? 'O solicitante'} vai ver o motivo.` };
+  });
+}
+
+/** Gestor define a ordem de prioridade das iniciativas da área que esperam o PMO (a lista inteira, da 1ª à última). */
+export async function definirPrioridadeArea(ids: string[]) {
+  return executar(async () => {
+    const { dados, eu } = await contexto();
+    const minhas = prioridadesDoGestor(dados, eu.id).map((i) => i.id);
+    exigir(ids.length === minhas.length && new Set(ids).size === ids.length && ids.every((id) => minhas.includes(id)), 'A lista mudou enquanto você ordenava. Recarregue a página e tente de novo.');
+    await db.transaction(async (tx) => {
+      for (const [k, id] of ids.entries()) await tx.update(t.iniciativas).set({ prioridadeArea: k + 1 }).where(eq(t.iniciativas.id, id));
+    });
+    return { ok: true, msg: 'Prioridade da área atualizada. O PMO vê essa ordem na Avaliação.' };
   });
 }
 

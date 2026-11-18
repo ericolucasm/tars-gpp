@@ -6,7 +6,7 @@ import { s } from '@/lib/css';
 import { FAROL, type Farol } from '@/lib/regras/projeto';
 import { DetalheIniciativa, TituloExpansivel, cliqueNaLinha } from '@/components/DetalheIniciativa';
 import type { Detalhe } from '@/lib/detalhe';
-import { aprovarComoGestor, definirCedencia, devolverParaAjuste, naoSeguirComoGestor, responderPedido } from '@/app/acoes/gestor';
+import { aprovarComoGestor, definirCedencia, definirPrioridadeArea, devolverParaAjuste, naoSeguirComoGestor, responderPedido } from '@/app/acoes/gestor';
 
 type Aprovacao = { id: string; titulo: string; quem: string; quando: string; problema: string; tipo: string; urg: string; urgente: boolean; custo: string; det: Detalhe };
 type Linha = { id: string; nome: string; tipo: string; chave: string; etapa: string; info: string; farol: string | null; det: Detalhe };
@@ -18,10 +18,11 @@ const TEXTO: Record<Aba, string> = {
   time: 'Quanto cada pessoa do time pode ceder e os pedidos de alocação.',
 };
 type Membro = { id: string; nome: string; ini: string; papel: string; cap: number; aloc: number; alocado: string };
+type Prio = { id: string; titulo: string; etapa: string; quem: string; ordenada: boolean };
 type MesImp = { mes: string; carga: number; doProjeto: number; situacao: 'ok' | 'so_com_pedido' | 'acima' };
 type Pedido = { id: string; texto: string; delta: number; quem: string; impacto: { limiteAtual: number; limiteNovo: number; comCronograma: boolean; meses: MesImp[] } };
 
-export function VisaoArea(p: { aba: Aba; trilha: string; nome: string; escopo: string; aprovacoes: Aprovacao[]; linhas: Linha[]; time: Membro[]; pedidos: Pedido[]; motivos: string[]; emExecucao: number; rodando: number }) {
+export function VisaoArea(p: { aba: Aba; trilha: string; nome: string; escopo: string; aprovacoes: Aprovacao[]; linhas: Linha[]; time: Membro[]; pedidos: Pedido[]; motivos: string[]; prioridades: Prio[]; emExecucao: number; rodando: number }) {
   const [toast, setToast] = useState('');
   const [devolvendo, setDevolvendo] = useState<string | null>(null);
   const [nota, setNota] = useState('');
@@ -130,6 +131,8 @@ export function VisaoArea(p: { aba: Aba; trilha: string; nome: string; escopo: s
         {p.aprovacoes.length === 0 && <div style={s('border: 1px dashed #D6CFC2; border-radius: 12px; padding: 18px; font-size: 13px; color: #5E5770; text-align: center')}>Tudo em dia. Nenhuma iniciativa aguardando você.</div>}
       </section>}
 
+      {p.aba === 'iniciativas' && <PrioridadeArea itens={p.prioridades} aviso={setToast} />}
+
       <div style={s('display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start')}>
         {p.aba !== 'time' && <TabelaArea aberta={aberta} setAberta={setAberta} titulo={p.aba === 'iniciativas' ? 'Iniciativas da área no portfólio' : 'Projetos da área'} linhas={p.aba === 'iniciativas' ? iniciativas : projetos}
           vazio={p.aba === 'iniciativas' ? 'Nenhuma iniciativa da área no portfólio ainda.' : 'Nenhum projeto da área rodando agora.'} />}
@@ -176,6 +179,48 @@ export function VisaoArea(p: { aba: Aba; trilha: string; nome: string; escopo: s
         </section>}
       </div>
     </>
+  );
+}
+
+/** O gestor ordena as iniciativas da área que esperam o PMO; a ordem aparece para o PMO na Avaliação. */
+function PrioridadeArea({ itens, aviso }: { itens: Prio[]; aviso: (m: string) => void }) {
+  const [ordem, setOrdem] = useState(itens.map((i) => i.id));
+  const [pend, start] = useTransition();
+  useEffect(() => setOrdem(itens.map((i) => i.id)), [itens]);
+  const porId = new Map(itens.map((i) => [i.id, i]));
+  const mover = (k: number, dir: -1 | 1) => {
+    const nova = ordem.slice();
+    [nova[k], nova[k + dir]] = [nova[k + dir], nova[k]];
+    setOrdem(nova);
+    start(async () => { const r = await definirPrioridadeArea(nova); aviso(r.ok ? r.msg ?? '' : r.erro ?? ''); });
+  };
+  if (itens.length === 0) return null;
+  const nenhuma = !itens.some((i) => i.ordenada);
+  const sSeta = s('width: 30px; height: 30px; border-radius: 8px; border: 1px solid #E2DCD0; background: #FFFFFF; font-size: 13px; padding: 0');
+  return (
+    <section aria-label="Prioridade da área" style={s('background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 10px')}>
+      <div style={s('display: flex; flex-direction: column; gap: 2px')}>
+        <h2 style={s('margin: 0; font-size: 18px; font-weight: 700')}>Prioridade da área</h2>
+        <span style={s('font-size: 12px; color: #5E5770')}>Ordene o que você aprovou e ainda espera o PMO: a 1ª é a mais importante para a área. O PMO vê essa ordem na Avaliação.{nenhuma ? ' Você ainda não ordenou: por enquanto vale a ordem de chegada.' : ''}</span>
+      </div>
+      <ol style={s('margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px')}>
+        {ordem.map((id, k) => {
+          const i = porId.get(id);
+          if (!i) return null;
+          return (
+            <li key={id} style={s('display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid #EFEBE3; border-radius: 10px')}>
+              <span style={s('width: 34px; font-size: 15px; font-weight: 700; color: #4B2FD1')}>{k + 1}ª</span>
+              <span style={s('display: flex; flex-direction: column; flex: 1; min-width: 0')}>
+                <span style={s('font-size: 14px; font-weight: 600')}>{i.titulo}</span>
+                <span style={s('font-size: 12px; color: #5E5770')}>{i.quem} · {i.etapa}</span>
+              </span>
+              <button type="button" aria-label={`Subir ${i.titulo}`} disabled={pend || k === 0} onClick={() => mover(k, -1)} style={{ ...sSeta, color: k === 0 ? '#D6CFC2' : '#26213A' }}>↑</button>
+              <button type="button" aria-label={`Descer ${i.titulo}`} disabled={pend || k === ordem.length - 1} onClick={() => mover(k, 1)} style={{ ...sSeta, color: k === ordem.length - 1 ? '#D6CFC2' : '#26213A' }}>↓</button>
+            </li>
+          );
+        })}
+      </ol>
+    </section>
   );
 }
 

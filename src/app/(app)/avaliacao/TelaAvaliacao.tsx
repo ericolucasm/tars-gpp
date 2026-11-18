@@ -12,7 +12,7 @@ import { comunicarDecisoes, darNota, decidir, definirMotivoRecusa } from '@/app/
 type Dec = 'pre' | 'bkl' | 'rec' | null;
 type Linha = {
   id: string; titulo: string; area: string; tipo: string; custo: number; custoLabel: string; obrigatoria: boolean; notas: number[]; decisao: Dec; motivoRecusa: string | null; comunicado: boolean;
-  editavel: boolean; situacao: string; det: Detalhe; areasImpactadas: string[];
+  editavel: boolean; situacao: string; det: Detalhe; areasImpactadas: string[]; prioridadeArea: string | null;
 };
 type Props = {
   capacidade: { id: string; nome: string; cedido: number; folga: number }[];
@@ -158,7 +158,7 @@ export function TelaAvaliacao(p: Props) {
                       style={s('border: 0; background: transparent; padding: 0; text-align: left; font-size: 14px; font-weight: 600; color: #26213A; display: flex; gap: 6px; align-items: baseline')}>
                       <span aria-hidden style={s('font-size: 10px; color: #6D4AFF')}>{aberto ? '▾' : '▸'}</span>{r.titulo}
                     </button>
-                    <span style={s('font-size: 12px; color: #5E5770')}>{r.area} · {r.tipo} · {r.custoLabel}</span>
+                    <span style={s('font-size: 12px; color: #5E5770')}>{r.area} · {r.tipo} · {r.custoLabel}{r.prioridadeArea && <> · <strong style={s('color: #4B2FD1; font-weight: 600')} title="Ordem definida pelo gestor da área">prioridade da área: {r.prioridadeArea}</strong></>}</span>
                     {r.obrigatoria && <span style={s('font-size: 11px; font-weight: 600; color: #7A4A04')}>Obrigatória: entra independente da nota</span>}
                     {r.editavel && r.comunicado && <span style={s('font-size: 11px; font-weight: 600; color: #5E5770')}>Decisão já comunicada</span>}
                     {!r.editavel && <span style={s('font-size: 11px; font-weight: 600; color: #5E5770')}>{r.situacao || 'Fora da mesa do PMO'} · só consulta</span>}

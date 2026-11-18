@@ -1,0 +1,1 @@
+ALTER TABLE "iniciativas" ADD COLUMN "prioridade_area" integer;

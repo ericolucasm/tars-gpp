@@ -7,7 +7,7 @@ import { validarPedidoMudanca, variacaoCusto } from './mudancas';
 import { resumoFinanceiro, situacaoCusto } from './financeiro';
 import { dimCusto, dimEscopo, dimPrazo, dimRiscos, farolGeral } from './farol';
 import { nivelDoRisco, riscoAtivo, validarRisco } from './riscos';
-import { validarNaoSeguir } from './gestor';
+import { validarNaoSeguir, ordenarPrioridadeArea } from './gestor';
 import { picoNoPeriodo, situacaoCapacidade, pessoasEq, impactoPorMes } from './capacidade';
 import { podeMedirBeneficio, situacaoBeneficio, validarMedicao } from './beneficios';
 import { situacaoDependencia } from './dependencias';
@@ -387,5 +387,13 @@ describe('gestor: não seguir com a iniciativa', () => {
     expect(validarNaoSeguir('Outro', 'Já coberto por outro projeto', motivos)).toMatch(/motivo/);
     expect(validarNaoSeguir('Fora da estratégia atual', '  ok ', motivos)).toMatch(/Explique/);
     expect(validarNaoSeguir('Fora da estratégia atual', 'Já coberto por outro projeto', motivos)).toBeNull();
+  });
+});
+
+describe('gestor: prioridade da área', () => {
+  it('ordenadas primeiro, depois as sem ordem pelas mais antigas', () => {
+    const x = (id: string, p: number | null, dia: string) => ({ id, prioridadeArea: p, enviadaEm: new Date(dia) });
+    const r = ordenarPrioridadeArea([x('a', null, '2026-10-02'), x('b', 2, '2026-10-01'), x('c', null, '2026-09-01'), x('d', 1, '2026-10-05')]);
+    expect(r.map((i) => i.id)).toEqual(['d', 'b', 'c', 'a']);
   });
 });

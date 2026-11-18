@@ -12,6 +12,7 @@ import { situacaoDependencia } from './regras/dependencias';
 import { balancoCusto, balancoEscopo, balancoPrazo, type ItemBalanco } from './regras/encerramento';
 import { situacaoBeneficio } from './regras/beneficios';
 import { proximoStatusDevido } from './regras/muro';
+import { ordenarPrioridadeArea } from './regras/gestor';
 
 // Cálculos derivados usados por várias telas. Tudo a partir de DadosOrg (a "foto" da empresa).
 
@@ -396,3 +397,30 @@ export function proximosDias(hoje: string, n: number) {
 }
 
 export { br, brCurto };
+
+// ---------- Prioridade da área (gestor ordena o que espera o PMO) ----------
+
+/** Iniciativa esperando decisão do PMO: aprovada pelo gestor (aguardando PMO) ou no backlog. */
+export function esperaPmo(d: DadosOrg, i: Iniciativa) {
+  return (noRaia(d, i, 'sol') && i.solStatus === 'aguardando_pmo') || noRaia(d, i, 'bkl');
+}
+
+/** Quem ordena a iniciativa: o gestor que a aprovou ou, se não houver, o responsável da área dela. */
+export function donoDaPrioridade(d: DadosOrg, i: Iniciativa) {
+  return i.aprovadorId ?? d.areas.find((a) => a.id === i.areaId)?.responsavelId ?? null;
+}
+
+/** As iniciativas que um gestor ordena, já na ordem dele. */
+export function prioridadesDoGestor(d: DadosOrg, gestorId: string) {
+  return ordenarPrioridadeArea(d.iniciativas.filter((i) => esperaPmo(d, i) && donoDaPrioridade(d, i) === gestorId));
+}
+
+/** Posição da iniciativa na ordem do gestor dela (para o PMO): 2 de 4, segundo Fernanda. Null se o gestor não ordenou nada. */
+export function posicaoNaArea(d: DadosOrg, i: Iniciativa) {
+  const dono = donoDaPrioridade(d, i);
+  if (!dono) return null;
+  const lista = prioridadesDoGestor(d, dono);
+  if (!lista.some((x) => x.prioridadeArea != null)) return null;
+  const pos = lista.findIndex((x) => x.id === i.id);
+  return pos < 0 ? null : { pos: pos + 1, total: lista.length, gestor: d.pessoas.find((p) => p.id === dono)?.nome ?? '' };
+}
