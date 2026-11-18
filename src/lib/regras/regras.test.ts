@@ -18,6 +18,7 @@ import { balancoCusto, balancoEscopo, balancoPrazo, validarLicao } from './encer
 import { diaDaSemana, diasDeAtraso, emNegociacao, proximoDiaSemana, proximoStatusDevido, validarPedidoPrazo, situacaoStatus, rotuloVencimentoStatus, venceTextoCurto } from './muro';
 import { gestorDe, timeDireto, areasSobGestao, nomeCurto, acimaDoCedido, patrocinadorValido, acessoBloqueado, statusAoReativar, pendenciasAoDesativar, rotuloAtivo, podeSerGp, motivoParaNaoExcluirArea } from './pessoas';
 import { grupoDoItem, ordenarCaixa } from './meu-tars';
+import { grupoNovidade, podeMarcarLida } from './novidades';
 import { addDias, diffDias, dataPorExtenso, haQuanto, proximaSexta } from './datas';
 
 const raia = (chave: string, ordem: number, extra: Partial<Raia> = {}): Raia => ({
@@ -612,5 +613,19 @@ describe('texto curto do vencimento', () => {
     expect(venceTextoCurto('2026-11-18', '2026-11-18')).toBe('vence hoje');
     expect(venceTextoCurto('2026-11-23', '2026-11-18')).toBe('vence em 23/11');
     expect(venceTextoCurto('2026-11-15', '2026-11-18')).toBe('venceu em 15/11 (3 dias de atraso)');
+  });
+});
+
+describe('Meu TARS: novidades', () => {
+  it('agrupa por data', () => {
+    const H = '2026-11-18';
+    expect(grupoNovidade('2026-11-18', H)).toBe('Hoje');
+    expect(grupoNovidade('2026-11-17', H)).toBe('Ontem');
+    expect(grupoNovidade('2026-11-11', H)).toBe('Nos últimos 7 dias');
+    expect(grupoNovidade('2026-11-10', H)).toBe('Antes');
+  });
+  it('só a própria pessoa marca como lida (no ver como, não)', () => {
+    expect(podeMarcarLida({ realId: 'a', pessoaId: 'a' })).toBe(true);
+    expect(podeMarcarLida({ realId: 'admin', pessoaId: 'a' })).toBe(false);
   });
 });

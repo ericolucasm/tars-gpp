@@ -4,11 +4,12 @@ import { iniciais, rotuloAdministrador, rotuloGestorCurto } from '@/lib/regras/p
 import type { Sessao, Perfil } from '@/lib/sessao';
 import type { DadosOrg } from '@/lib/dados';
 import { VerComo } from './VerComo';
+import { naoLidas } from '@/lib/novidades';
 import { BarraDeNavegacao, ItemMenu } from './Navegacao';
 
 // Moldura comum: barra "ver como" (admin ou quem tem mais de um perfil), menu lateral por perfil e conteúdo.
 
-type Item = { href: string; rotulo: string; ativo?: boolean };
+type Item = { href: string; rotulo: string; ativo?: boolean; contador?: number };
 
 export type Atual =
   | 'inicio' | 'nova' | 'area-iniciativas' | 'area-projetos' | 'area-time' | 'portfolio' | 'ciclos' | 'avaliacao' | 'projetos' | 'cadastros' | 'configuracoes' | 'relatorios' | 'pontos' | 'roadmap' | 'beneficios' | 'entregas' | 'muro' | `projeto:${string}`;
@@ -48,9 +49,10 @@ function gruposVerComo(sessao: Sessao) {
   ];
 }
 
-export function Shell({ sessao, dados, atual, children, mainStyle }: { sessao: Sessao; dados: DadosOrg; atual: Atual; children: React.ReactNode; mainStyle?: string }) {
+export async function Shell({ sessao, dados, atual, children, mainStyle }: { sessao: Sessao; dados: DadosOrg; atual: Atual; children: React.ReactNode; mainStyle?: string }) {
   const p = sessao.pessoa;
-  const it = (href: string, rotulo: string, chave: Atual): Item => ({ href, rotulo, ativo: atual === chave });
+  const novas = await naoLidas(sessao.orgId, p.id); // avisos não lidos: contador no Meu TARS
+  const it = (href: string, rotulo: string, chave: Atual): Item => ({ href, rotulo, ativo: atual === chave, ...(chave === 'inicio' && novas ? { contador: novas } : {}) });
   let topo: Item | null = null;
   const secoes: { titulo?: string; itens: Item[] }[] = [];
 
@@ -103,7 +105,7 @@ export function Shell({ sessao, dados, atual, children, mainStyle }: { sessao: S
           <div key={i} style={s('display: contents')}>
             {sec.titulo && <span style={sSecao}>{sec.titulo}</span>}
             {sec.itens.map((x) => (
-              <ItemMenu key={x.href} href={x.href} rotulo={x.rotulo} ativo={x.ativo} estilo={sItem} estiloAtivo={sItemAtivo} />
+              <ItemMenu key={x.href} href={x.href} rotulo={x.rotulo} ativo={x.ativo} contador={x.contador} estilo={sItem} estiloAtivo={sItemAtivo} />
             ))}
           </div>
         ))}

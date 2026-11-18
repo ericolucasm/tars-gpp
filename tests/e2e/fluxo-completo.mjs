@@ -258,7 +258,7 @@ try {
   // 7. PMO aprova a mudança de linha de base
   p = await como('mariana@acme.com.br', 'pmo');
   await ir(p, '/inicio');
-  await p.getByText('Pedido para alterar linha de base').click();
+  await p.getByRole('region', { name: 'Precisa de você' }).getByText('Pedido para alterar linha de base').click();
   await p.getByRole('button', { name: 'Aprovar mudança' }).click();
   await p.getByText('Mudança aprovada. A nova linha de base vale a partir de agora.').waitFor();
   ok('PMO vê o pedido na tela inicial e aprova a mudança');
@@ -272,7 +272,7 @@ try {
   await p.getByRole('region', { name: 'Resolvidos recentemente' }).getByText('Contrato acionado; ambiente liberado até quarta.').waitFor();
   ok('PMO vê o ponto de atenção na Início e registra a resolução');
   await ir(p, '/inicio');
-  await p.getByText('Benefício para medir').click();
+  await p.getByRole('region', { name: 'Precisa de você' }).getByText('Benefício para medir').click();
   await p.waitForURL(/\/beneficios$/);
   const ben = p.getByRole('article', { name: `Benefício de ${TITULO}` });
   await ben.getByRole('button', { name: 'Registrar resultado' }).click();
@@ -361,7 +361,7 @@ try {
   await p.context().close();
   p = await como('fabio.oliveira@acme.com.br');
   await ir(p, '/inicio');
-  await p.getByText('João Silva estará ausente (férias)').waitFor();
+  await p.getByRole('region', { name: 'Precisa de você' }).getByText('João Silva estará ausente (férias)').waitFor();
   await p.context().close();
   ok('Gestora registra férias de alguém do time (valida datas) e o GP do projeto afetado é avisado na Início');
 
@@ -396,7 +396,7 @@ try {
   // Feedback do GP: Marina avalia a Renata (participação no CRM terminou); o gestor dela (Sérgio) vê
   p = await como('marina.gomes@acme.com.br');
   await ir(p, '/inicio');
-  await p.getByText(/Feedbacks? pendentes? de quem trabalhou com você/).click();
+  await p.getByRole('region', { name: 'Precisa de você' }).getByText(/Feedbacks? pendentes? de quem trabalhou com você/).click();
   await p.waitForURL(/\/projetos\/.+#feedback$/);
   const fbRen = p.getByRole('group', { name: 'Contribuição de Renata Souza' });
   await fbRen.getByText('Feedback pendente').waitFor();
@@ -491,7 +491,7 @@ try {
   await p.context().close();
   p = await como('fabio.oliveira@acme.com.br');
   await ir(p, '/inicio');
-  await p.getByText('Pedido de mais prazo').click();
+  await p.getByRole('region', { name: 'Precisa de você' }).getByText('Pedido de mais prazo').click();
   await p.getByRole('group', { name: /Pedido de prazo: a tarefa "Testar app de roteirização com 3 motoristas"/ }).getByRole('button', { name: 'Aprovar prazo' }).click();
   await p.getByText('Prazo estendido.').waitFor();
   await p.context().close();
@@ -501,7 +501,7 @@ try {
   await p.getByRole('region', { name: 'Muro: Marina Gomes' }).waitFor();
   await p.getByRole('region', { name: 'Muro: Marcos Teixeira' }).getByText('Responder o pedido de +20% de Pedro Lima').waitFor();
   await ir(p, '/inicio');
-  await p.getByText(/Decis(ão|ões) parada(s)? com gestor(es)? há mais de 5 dias/).waitFor();
+  await p.getByRole('region', { name: 'Precisa de você' }).getByText(/Decis(ão|ões) parada(s)? com gestor(es)? há mais de 5 dias/).waitFor();
   await p.context().close();
   ok('Muro: colaborador pede mais prazo em Minhas entregas, GP aprova na página do projeto, PMO vê o muro');
   p = await como('marcos.teixeira@acme.com.br');
@@ -716,6 +716,25 @@ try {
   if (!idx.length || idx.some((x) => x < 0) || idx.some((x, k) => k && x < idx[k - 1])) throw new Error('Grupos fora da ordem de prioridade: ' + grupos.join(', '));
   await p.context().close();
   ok('Meu TARS: a caixa única mostra o que depende da pessoa, agrupado na ordem de prioridade');
+
+  // Meu TARS: novidades (avisos) com histórico; abrir marca como lida; "marcar todas"
+  p = await como('joao.silva@acme.com.br');
+  await ir(p, '/inicio');
+  const nov = p.getByRole('region', { name: 'Novidades' });
+  await nov.getByText(/\d+ novas?/).waitFor();
+  await p.getByRole('navigation', { name: 'Menu principal' }).getByLabel(/\d+ novidades?/).waitFor(); // contador no menu
+  const primeiro = nov.getByRole('link').filter({ has: p.getByLabel('não lida', { exact: true }) }).first();
+  const textoAviso = (await primeiro.innerText()).split('\n')[0].trim();
+  await Promise.all([p.waitForResponse((r) => r.url().includes('/novidades/abrir/')), primeiro.click()]);
+  await p.waitForLoadState('networkidle');
+  await ir(p, '/novidades');
+  const hist = p.getByRole('region', { name: 'Histórico de novidades' });
+  await hist.getByRole('link').filter({ hasText: textoAviso }).first().getByLabel('lida', { exact: true }).waitFor();
+  await p.getByRole('button', { name: 'Marcar todas como lidas' }).click();
+  await p.getByRole('button', { name: 'Marcar todas como lidas' }).waitFor({ state: 'detached' });
+  if (await hist.getByLabel('não lida', { exact: true }).count()) throw new Error('Ainda há avisos não lidos');
+  await p.context().close();
+  ok('Meu TARS: novidades com contador no menu; abrir um aviso marca como lido e leva ao lugar certo; histórico e "marcar todas"');
 } catch (e) {
   console.error('✗ FALHOU no passo', passo + 1, '\n', e.message.split('\n').slice(0, 6).join('\n'));
   process.exitCode = 1;

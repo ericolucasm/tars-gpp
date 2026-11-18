@@ -10,7 +10,7 @@ import { ProjetosPatrocinados } from '@/components/ProjetosPatrocinados';
 import { Saudacao } from './Saudacao';
 import { CaixaUnica } from './CaixaUnica';
 
-export function InicioGP({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao; hoje: string }) {
+export function InicioGP({ d, sessao, hoje, novidades }: { d: DadosOrg; sessao: Sessao; hoje: string; novidades?: React.ReactNode }) {
   const eu = sessao.pessoa;
   const meus = d.iniciativas.filter((i) => i.gpId === eu.id && noRaia(d, i, 'exe'));
   const infos = meus.map((i) => ({ i, info: infoProjeto(d, i, hoje) }));
@@ -68,6 +68,7 @@ export function InicioGP({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao; hoj
           ))}
         </section>
       </div>
+      {novidades}
       <ProjetosPatrocinados d={d} pessoaId={eu.id} hoje={hoje} />
     </>
   );
