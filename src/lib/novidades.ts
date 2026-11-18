@@ -20,3 +20,9 @@ export async function naoLidas(orgId: string, pessoaId: string): Promise<number>
     .where(and(eq(t.notificacoes.orgId, orgId), eq(t.notificacoes.pessoaId, pessoaId), eq(t.notificacoes.lida, false)));
   return Number(r?.n ?? 0);
 }
+
+/** Plano pessoal da pessoa para os itens da caixa (Meu TARS). */
+export async function planosDe(orgId: string, pessoaId: string) {
+  const rows = await db.select().from(t.planosPessoais).where(and(eq(t.planosPessoais.orgId, orgId), eq(t.planosPessoais.pessoaId, pessoaId)));
+  return new Map(rows.map((r) => [r.itemId, { plano: r.plano, planejadoEm: r.planejadoEm, adiadoAte: r.adiadoAte }]));
+}

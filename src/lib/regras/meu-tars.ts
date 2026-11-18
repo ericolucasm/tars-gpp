@@ -37,3 +37,32 @@ export function ordenarCaixa<T extends Prioridade>(itens: T[], hoje: string): (T
     .sort((a, b) => ordem.get(a.grupo)! - ordem.get(b.grupo)! || (a.vence ?? '9999').localeCompare(b.vence ?? '9999') || a.i - b.i)
     .map(({ i: _i, ...x }) => x as T & { grupo: GrupoCaixa });
 }
+
+// ---------- Planejamento pessoal (só a própria pessoa vê) ----------
+
+export type PlanoPessoal = { plano: string | null; planejadoEm: string | null; adiadoAte: string | null };
+export type PlanoEfetivo = 'hoje' | 'semana' | 'depois' | 'adiado' | null;
+
+const segunda = (iso: string) => { const d = new Date(`${iso}T12:00:00Z`); const w = (d.getUTCDay() + 6) % 7; return addDias(iso, -w); };
+
+/**
+ * Onde o item fica hoje, pelo plano da pessoa: adiado até uma data (some até lá) → "hoje" (só no dia em que planejou;
+ * no dia seguinte, se ainda for a mesma semana, vira "esta semana") → "esta semana" (só naquela semana) → "depois".
+ * Fora disso, o item volta para o seu grupo de prioridade normal.
+ */
+export function planoEfetivo(p: PlanoPessoal | undefined, hoje: string): PlanoEfetivo {
+  if (!p) return null;
+  if (p.adiadoAte && p.adiadoAte > hoje) return 'adiado';
+  const mesmaSemana = !!p.planejadoEm && segunda(p.planejadoEm) === segunda(hoje);
+  if (p.plano === 'hoje') return p.planejadoEm === hoje ? 'hoje' : mesmaSemana ? 'semana' : null;
+  if (p.plano === 'semana') return mesmaSemana ? 'semana' : null;
+  if (p.plano === 'depois') return 'depois';
+  return null;
+}
+
+export function validarAdiamento(ate: string, hoje: string): string | null {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(ate)) return 'Escolha a data do lembrete.';
+  if (ate <= hoje) return 'O lembrete precisa ser para depois de hoje.';
+  if (ate > addDias(hoje, 365)) return 'Escolha uma data dentro de um ano.';
+  return null;
+}

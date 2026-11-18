@@ -162,6 +162,9 @@ Na V1, todos os itens e números são **calculados a partir dos dados reais**:
 
 - **[Decisão V2]** **Novidades:** os avisos que o TARS manda para a pessoa (aprovações, devoluções, pedidos, conclusões, trocas…) aparecem no Meu TARS, logo abaixo do Precisa de você, com os não lidos em destaque (até 5), e o menu **Meu TARS** mostra quantos não lidos há. **Abrir** um aviso marca como lido e leva ao lugar certo. **Marcar todas como lidas** limpa o contador. O **histórico** fica guardado (página Novidades, os 200 mais recentes, agrupados em Hoje, Ontem, Nos últimos 7 dias e Antes). No **"ver como"**, o admin vê os avisos da pessoa escolhida, mas não muda o que ela leu ou não.
 
+- **[Decisão V2]** **Planejar o dia e a semana** (Meu TARS): cada item da caixa tem **Planejar…**, com as opções **Fazer hoje**, **Esta semana**, **Deixar para depois** e **Lembrar em…** (adiar até uma data, até um ano à frente). Os itens planejados sobem para **Meu plano para hoje** e **Meu plano para esta semana**, no topo da caixa. O "hoje" vale só naquele dia: no dia seguinte, se ainda for a mesma semana, vira "esta semana"; a "semana" vale até domingo. Depois disso, o item volta ao grupo normal de prioridade. **Deixar para depois** e **Adiados** ficam recolhidos no fim da caixa; o adiado volta sozinho na data do lembrete.
+- **[Decisão V2]** O plano é **pessoal**: só a própria pessoa vê e muda. Ele **não muda nenhum prazo oficial**: uma tarefa atrasada continua no muro mesmo deixada para depois, e o próprio item avisa "continua atrasado no muro". O **PMO não vê** o planejamento das pessoas (decisão da Mariana). No "ver como", o admin vê o plano da pessoa, mas não muda.
+
 ## 9. Adições da V1 que não existiam no protótipo
 
 Itens que o protótipo sugeria mas não desenhava. Todos usam o mesmo visual:

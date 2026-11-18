@@ -17,7 +17,7 @@ import { situacaoDependencia } from './dependencias';
 import { balancoCusto, balancoEscopo, balancoPrazo, validarLicao } from './encerramento';
 import { diaDaSemana, diasDeAtraso, emNegociacao, proximoDiaSemana, proximoStatusDevido, validarPedidoPrazo, situacaoStatus, rotuloVencimentoStatus, venceTextoCurto } from './muro';
 import { gestorDe, timeDireto, areasSobGestao, nomeCurto, acimaDoCedido, patrocinadorValido, acessoBloqueado, statusAoReativar, pendenciasAoDesativar, rotuloAtivo, podeSerGp, motivoParaNaoExcluirArea } from './pessoas';
-import { grupoDoItem, ordenarCaixa } from './meu-tars';
+import { grupoDoItem, ordenarCaixa, planoEfetivo, validarAdiamento } from './meu-tars';
 import { grupoNovidade, podeMarcarLida } from './novidades';
 import { addDias, diffDias, dataPorExtenso, haQuanto, proximaSexta } from './datas';
 
@@ -627,5 +627,27 @@ describe('Meu TARS: novidades', () => {
   it('só a própria pessoa marca como lida (no ver como, não)', () => {
     expect(podeMarcarLida({ realId: 'a', pessoaId: 'a' })).toBe(true);
     expect(podeMarcarLida({ realId: 'admin', pessoaId: 'a' })).toBe(false);
+  });
+});
+
+describe('Meu TARS: planejamento pessoal', () => {
+  const H = '2026-11-18'; // quarta
+  it('hoje vale só no dia; no dia seguinte da mesma semana vira "esta semana"; na outra semana volta ao normal', () => {
+    expect(planoEfetivo({ plano: 'hoje', planejadoEm: H, adiadoAte: null }, H)).toBe('hoje');
+    expect(planoEfetivo({ plano: 'hoje', planejadoEm: '2026-11-17', adiadoAte: null }, H)).toBe('semana');
+    expect(planoEfetivo({ plano: 'hoje', planejadoEm: '2026-11-13', adiadoAte: null }, H)).toBeNull();
+    expect(planoEfetivo({ plano: 'semana', planejadoEm: '2026-11-16', adiadoAte: null }, H)).toBe('semana');
+    expect(planoEfetivo({ plano: 'semana', planejadoEm: '2026-11-14', adiadoAte: null }, H)).toBeNull();
+    expect(planoEfetivo({ plano: 'depois', planejadoEm: '2026-10-01', adiadoAte: null }, H)).toBe('depois');
+    expect(planoEfetivo(undefined, H)).toBeNull();
+  });
+  it('adiado some até a data e volta no dia', () => {
+    expect(planoEfetivo({ plano: null, planejadoEm: H, adiadoAte: '2026-11-20' }, H)).toBe('adiado');
+    expect(planoEfetivo({ plano: null, planejadoEm: H, adiadoAte: '2026-11-20' }, '2026-11-20')).toBeNull();
+  });
+  it('lembrete precisa ser depois de hoje e dentro de um ano', () => {
+    expect(validarAdiamento('2026-11-18', H)).toMatch(/depois de hoje/);
+    expect(validarAdiamento('2026-11-19', H)).toBeNull();
+    expect(validarAdiamento('2028-01-01', H)).toMatch(/um ano/);
   });
 });
