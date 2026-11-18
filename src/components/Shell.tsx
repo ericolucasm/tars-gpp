@@ -67,7 +67,8 @@ export function Shell({ sessao, dados, atual, children, mainStyle }: { sessao: S
     secoes.push({ itens: [it('/inicio', 'Início', 'inicio'), it('/minhas-entregas', 'Minhas entregas', 'entregas')] });
     const exe = new Set(dados.raias.filter((r) => r.tipoCard === 'Projeto' && r.chave !== 'con').map((r) => r.id));
     const meus = dados.iniciativas.filter((i) => i.gpId === p.id && exe.has(i.raiaId));
-    secoes.push({ titulo: 'MEUS PROJETOS', itens: meus.map((m) => ({ href: `/projetos/${m.id}`, rotulo: nomeMenu(m.titulo), ativo: atual === `projeto:${m.id}` })) });
+    // "Todos os meus projetos" inclui pausados e concluídos; abaixo, atalhos para os que estão rodando
+    secoes.push({ titulo: 'MEUS PROJETOS', itens: [{ href: '/projetos', rotulo: 'Todos os meus projetos', ativo: atual === 'projetos' || (atual.startsWith('projeto:') && !meus.some((m) => atual === `projeto:${m.id}`)) }, ...meus.map((m) => ({ href: `/projetos/${m.id}`, rotulo: nomeMenu(m.titulo), ativo: atual === `projeto:${m.id}` }))] });
   } else {
     topo = it('/iniciativas/nova', '+ Nova iniciativa', 'nova');
     secoes.push({ itens: [it('/inicio', 'Início', 'inicio'), it('/minhas-entregas', 'Minhas entregas', 'entregas')] });

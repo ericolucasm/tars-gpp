@@ -530,6 +530,19 @@ try {
   if (sql(`select r.chave from iniciativas i join raias r on r.id=i.raia_id where i.id='${projId}'`) !== 'con') throw new Error('Projeto não foi para Concluído');
   await p.context().close();
   ok('GP conclui o projeto pela página do projeto (gate exige o aceite de quem pediu)');
+
+  // GP: "Todos os meus projetos" mostra só os dele, inclusive os concluídos
+  p = await como('carlos.andrade@acme.com.br');
+  await ir(p, '/inicio');
+  await p.getByRole('link', { name: 'Todos os meus projetos' }).click();
+  await p.getByRole('heading', { name: 'Meus projetos', level: 1 }).waitFor();
+  await p.locator('section').filter({ has: p.getByRole('heading', { name: /Concluídos/ }) }).getByText(TITULO).waitFor();
+  await p.getByText('Inventário rotativo').first().waitFor();
+  if (await p.getByText('Roteirização de entregas').count()) throw new Error('GP vê projeto de outro GP');
+  await p.getByRole('link', { name: new RegExp(TITULO) }).click();
+  await p.waitForURL(new RegExp(`/projetos/${projId}`));
+  await p.context().close();
+  ok('GP abre "Todos os meus projetos" (só os dele, com os concluídos) e volta a um projeto concluído');
 } catch (e) {
   console.error('✗ FALHOU no passo', passo + 1, '\n', e.message.split('\n').slice(0, 6).join('\n'));
   process.exitCode = 1;

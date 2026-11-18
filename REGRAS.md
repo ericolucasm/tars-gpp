@@ -146,6 +146,7 @@ Na V1, todos os itens e números são **calculados a partir dos dados reais**:
 Itens que o protótipo sugeria mas não desenhava. Todos usam o mesmo visual:
 
 - **Lista de Projetos** (menu PMO › Projetos): o protótipo apontava para um projeto só.
+- **[Decisão V2] Todos os meus projetos** (menu do GP, no topo de MEUS PROJETOS): a mesma lista de Projetos, só com os projetos que a pessoa gerencia, em execução, pausados e concluídos. Os atalhos abaixo continuam só com os que estão rodando. Serve para voltar a um projeto concluído (lições, feedback da equipe, benefício).
 - **Filtro "Todas as áreas"** do portfólio passou a funcionar.
 - **Números clicáveis do ciclo** (painel da direita na Início do PMO e tela Ciclos): Recebidas, Aguardando gestor, Prontas para avaliar e Fora do ciclo levam à Avaliação já filtrada por aquele status e ciclo. Só nos ciclos em andamento: nos encerrados os números são a foto do fechamento e não viram lista.
 - **Faixa de decisão da mudança de linha de base** na página do projeto (PMO aprova ou recusa).
