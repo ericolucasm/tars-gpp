@@ -40,6 +40,12 @@ export function InicioPMO({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao; ho
     itens.push(<ItemAcao key="muro" href="/muro" numero={noMuro.length} tom="vermelho" titulo="Entregas atrasadas no portfólio (muro da vergonha)"
       sub={`${pessoasNoMuro} ${pessoasNoMuro === 1 ? 'pessoa' : 'pessoas'} com tarefas, gates ou status vencidos sem registro`} acao="Ver muro →" />);
   }
+  const paradas = noMuro.filter((x) => x.tipo === 'decisao');
+  if (paradas.length) {
+    const gestores = [...new Set(paradas.map((x) => x.responsavelId))].map((id) => pessoa(d, id)?.nome.split(' ')[0] ?? '');
+    itens.push(<ItemAcao key="decisoes" href="/muro" numero={paradas.length} tom="vermelho" titulo={paradas.length === 1 ? 'Decisão parada com gestor há mais de 5 dias' : 'Decisões paradas com gestores há mais de 5 dias'}
+      sub={`${gestores.join(', ')} · aprovações, pedidos de alocação ou pontos de atenção sem resposta`} acao="Ver muro →" />);
+  }
   const av = listaAvaliacao(d);
   const prontas = av.itens.filter((x) => !x.comunicado && !x.decisao).length;
   if (prontas) itens.push(<ItemAcao key="av" href="/avaliacao" numero={prontas} titulo={prontas === 1 ? 'Iniciativa pronta para avaliar' : 'Iniciativas prontas para avaliar'} sub={`Já aprovadas pelos gestores${av.ciclo ? ` no ciclo ${av.ciclo.ano}` : ''}`} acao="Avaliar →" />);

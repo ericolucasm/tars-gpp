@@ -419,8 +419,19 @@ try {
   await ir(p, '/muro');
   await p.getByRole('heading', { name: 'Muro da vergonha', level: 1 }).waitFor();
   await p.getByRole('region', { name: 'Muro: Marina Gomes' }).waitFor();
+  await p.getByRole('region', { name: 'Muro: Marcos Teixeira' }).getByText('Responder o pedido de +20% de Pedro Lima').waitFor();
+  await ir(p, '/inicio');
+  await p.getByText(/Decis(ão|ões) parada(s)? com gestor(es)? há mais de 5 dias/).waitFor();
   await p.context().close();
   ok('Muro: colaborador pede mais prazo em Minhas entregas, GP aprova na página do projeto, PMO vê o muro');
+  p = await como('marcos.teixeira@acme.com.br');
+  await ir(p, '/minhas-entregas');
+  const dec = p.getByRole('article', { name: 'Decisão do gestor: Responder o pedido de +20% de Pedro Lima' });
+  await dec.getByRole('link', { name: 'Decidir' }).click();
+  await p.waitForURL(/\/area\/time$/);
+  await p.getByRole('region', { name: 'Impacto de ceder Pedro' }).waitFor();
+  await p.context().close();
+  ok('Gestor com decisão parada há mais de 5 dias: aparece no muro, alerta o PMO e o leva a decidir em Minhas entregas');
 } catch (e) {
   console.error('✗ FALHOU no passo', passo + 1, '\n', e.message.split('\n').slice(0, 6).join('\n'));
   process.exitCode = 1;

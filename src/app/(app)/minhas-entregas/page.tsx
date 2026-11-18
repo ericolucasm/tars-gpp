@@ -20,6 +20,7 @@ export default async function MinhasEntregas() {
     atrasada: e.diasAtraso > 0, emNegociacao: e.emNegociacao,
     faseId: e.tipo === 'fase' ? e.id : e.tipo === 'tarefa' ? d.tarefas.find((t) => t.id === e.id)?.faseId ?? null : null,
     linkStatus: e.tipo === 'status' ? `/projetos/${e.iniciativaId}#status` : null,
+    link: e.link ?? null,
   });
   const atrasadas = minhas.filter((e) => e.diasAtraso > 0);
   const proximas = minhas.filter((e) => e.diasAtraso === 0 && e.vencimento <= addDias(hoje, 14));
@@ -33,7 +34,7 @@ export default async function MinhasEntregas() {
   );
   return (
     <Shell sessao={sessao} dados={d} atual="entregas">
-      <Cabecalho trilha="Minhas entregas" titulo="Minhas entregas" texto="Tudo que tem data e é seu: tarefas, fins de fase (gates) e status report. Conclua, peça mais prazo ou avise do impedimento ou risco antes da data: assim você não vai para o Muro da vergonha." />
+      <Cabecalho trilha="Minhas entregas" titulo="Minhas entregas" texto="Tudo que tem data e é seu: tarefas, fins de fase (gates), status report e, para gestores, as decisões esperando você. Conclua, peça mais prazo ou avise do impedimento ou risco antes da data: assim você não vai para o Muro da vergonha." />
       {bloco('Atrasadas', atrasadas, 'Nada atrasado. 👏')}
       {bloco('Próximos 14 dias', proximas, 'Nada vencendo nas próximas duas semanas.')}
       {depois.length > 0 && bloco('Mais adiante', depois)}

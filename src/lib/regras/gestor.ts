@@ -1,5 +1,7 @@
 // Regras das decisões do gestor de área.
 
+import { addDias } from './datas';
+
 /** "Não seguir" com uma iniciativa exige um motivo da lista e um comentário para o solicitante. Devolve o erro, ou null se estiver ok. */
 export function validarNaoSeguir(motivo: string, comentario: string, motivos: string[]): string | null {
   if (!motivos.includes(motivo)) return 'Escolha o motivo.';
@@ -14,4 +16,12 @@ export function ordenarPrioridadeArea<T extends { prioridadeArea: number | null;
     if (pa !== pb) return pa - pb;
     return (a.enviadaEm?.getTime() ?? 0) - (b.enviadaEm?.getTime() ?? 0);
   });
+}
+
+/** Prazo para o gestor decidir (aprovação, pedido de alocação, ponto de atenção): dias corridos desde que chegou. */
+export const PRAZO_DECISAO_DIAS = 5;
+
+/** Até quando o gestor tem para decidir: o prazo pedido (ponto de atenção com prazo) ou 5 dias depois de chegar. */
+export function prazoDecisao(chegouEm: string, prazoPedido?: string | null) {
+  return prazoPedido ?? addDias(chegouEm, PRAZO_DECISAO_DIAS);
 }
