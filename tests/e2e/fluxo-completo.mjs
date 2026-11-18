@@ -329,7 +329,7 @@ try {
 
   // Ao clicar num menu, a barra de carregamento aparece na hora e some quando a tela nova chega
   await p.route('**/portfolio*', async (r) => { await new Promise((ok) => setTimeout(ok, 1500)); await r.continue(); });
-  await p.getByRole('link', { name: 'Portfólio' }).click();
+  await p.getByRole('navigation', { name: 'Menu principal' }).getByRole('link', { name: 'Portfólio' }).click();
   await p.getByRole('progressbar', { name: 'Carregando' }).waitFor({ timeout: 1000 });
   await p.waitForURL(/\/portfolio$/);
   await p.getByRole('progressbar', { name: 'Carregando' }).waitFor({ state: 'detached' });
@@ -375,6 +375,32 @@ try {
     await p.context().close();
   }
   ok('Relatórios: os quatro perfis abrem pelo menu; PMO e GP filtram (farol, tarefas atrasadas) e limpam os filtros');
+
+  // Muro da vergonha: o responsável pede mais prazo em Minhas entregas, o GP aprova; o PMO vê o muro
+  const novoPrazo = new Date(Date.now() + 20 * 86400000).toISOString().slice(0, 10);
+  p = await como('joao.silva@acme.com.br');
+  await ir(p, '/inicio');
+  await p.getByRole('navigation', { name: 'Menu principal' }).getByRole('link', { name: 'Minhas entregas' }).click();
+  await p.waitForURL(/\/minhas-entregas$/);
+  const tarefaJoao = p.getByRole('article', { name: 'Tarefa: Testar app de roteirização com 3 motoristas' });
+  await tarefaJoao.getByRole('button', { name: 'Pedir mais prazo' }).click();
+  await tarefaJoao.getByLabel('Novo prazo').fill(novoPrazo);
+  await tarefaJoao.getByLabel('Por quê').fill('Motoristas só disponíveis depois do inventário');
+  await tarefaJoao.getByRole('button', { name: 'Enviar ao GP' }).click();
+  await tarefaJoao.getByText(/Prazo em negociação/).waitFor();
+  await p.context().close();
+  p = await como('fabio.oliveira@acme.com.br');
+  await ir(p, '/inicio');
+  await p.getByText('Pedido de mais prazo').click();
+  await p.getByRole('group', { name: /Pedido de prazo: a tarefa "Testar app de roteirização com 3 motoristas"/ }).getByRole('button', { name: 'Aprovar prazo' }).click();
+  await p.getByText('Prazo estendido.').waitFor();
+  await p.context().close();
+  p = await como('mariana@acme.com.br', 'pmo');
+  await ir(p, '/muro');
+  await p.getByRole('heading', { name: 'Muro da vergonha', level: 1 }).waitFor();
+  await p.getByRole('region', { name: 'Muro: Marina Gomes' }).waitFor();
+  await p.context().close();
+  ok('Muro: colaborador pede mais prazo em Minhas entregas, GP aprova na página do projeto, PMO vê o muro');
 } catch (e) {
   console.error('✗ FALHOU no passo', passo + 1, '\n', e.message.split('\n').slice(0, 6).join('\n'));
   process.exitCode = 1;

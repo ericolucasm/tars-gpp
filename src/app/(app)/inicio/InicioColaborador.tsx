@@ -6,6 +6,7 @@ import { addDias, br, haDias, haQuanto, segundaDaSemana } from '@/lib/regras/dat
 import { primeiroNome } from '@/lib/regras/pessoas';
 import { chaveDaRaia, cicloAberto, nomeArea, noRaia, pessoa } from '@/lib/visoes';
 import { Etapas, Vazio } from '@/components/ui';
+import { atrasos } from '@/lib/muro';
 import { Saudacao, frase } from './Saudacao';
 
 const PASSOS = ['Enviada', 'Gestor', 'Avaliação do PMO', 'Decisão'];
@@ -46,6 +47,17 @@ export function InicioColaborador({ d, sessao, hoje }: { d: DadosOrg; sessao: Se
   return (
     <>
       <Saudacao nome={eu.nome} hoje={hoje} texto={texto} />
+      {(() => {
+        const meus = atrasos(d, hoje).filter((x) => x.responsavelId === eu.id);
+        if (!meus.length) return null;
+        return (
+          <Link href="/minhas-entregas" style={s('display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 14px 18px; border-radius: 14px; background: #FDE8E8; border: 1px solid #F5D2D2; color: #B42318')}>
+            <strong style={s('font-size: 14px')}>{meus.length === 1 ? 'Você tem uma entrega atrasada' : `Você tem ${meus.length} entregas atrasadas`}</strong>
+            <span style={s('font-size: 13px; flex: 1')}>{meus.slice(0, 3).map((x) => x.titulo).join(' · ')}. Conclua, peça mais prazo ou avise o GP.</span>
+            <span style={s('font-size: 13px; font-weight: 700')}>Resolver →</span>
+          </Link>
+        );
+      })()}
       {ciclo && (
         <Link href="/iniciativas/nova" style={s('display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 16px 18px; border-radius: 14px; background: #EFEAFE; border: 1px solid #DCD2FF; color: #26213A')}>
           <span style={s('display: flex; flex-direction: column; flex: 1; min-width: 220px')}>

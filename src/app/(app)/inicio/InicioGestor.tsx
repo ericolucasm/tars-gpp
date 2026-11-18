@@ -8,6 +8,7 @@ import { alocacaoDe, cicloAtual, noRaia, pessoa } from '@/lib/visoes';
 import { ItemAcao, PillFarol, Vazio } from '@/components/ui';
 import { pontoAtrasado, pontoEsperaPor } from '@/lib/regras/pontos';
 import { beneficiosParaMedir } from '@/lib/beneficios-vm';
+import { atrasos } from '@/lib/muro';
 import { Saudacao } from './Saudacao';
 
 export function InicioGestor({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao; hoje: string }) {
@@ -28,6 +29,18 @@ export function InicioGestor({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao;
   if (obrig) texto += ` Uma iniciativa obrigatória espera há ${espera(obrig.enviadaEm)} ${espera(obrig.enviadaEm) === 1 ? 'dia' : 'dias'}.`;
 
   const itens: React.ReactNode[] = [];
+  const meusAtrasos = atrasos(d, hoje).filter((x) => x.responsavelId === eu.id);
+  if (meusAtrasos.length) {
+    itens.push(<ItemAcao key="meus-atrasos" href="/minhas-entregas" numero={meusAtrasos.length} tom="vermelho"
+      titulo={meusAtrasos.length === 1 ? 'Você tem uma entrega atrasada' : `Você tem ${meusAtrasos.length} entregas atrasadas`}
+      sub={meusAtrasos.slice(0, 3).map((x) => `${x.titulo} (${x.diasAtraso}d)`).join(' · ')} acao="Resolver →" />);
+  }
+  const doTime = atrasos(d, hoje).filter((x) => time.some((p) => p.id === x.responsavelId));
+  if (doTime.length) {
+    const nomes = [...new Set(doTime.map((x) => pessoa(d, x.responsavelId)?.nome ?? ''))];
+    itens.push(<ItemAcao key="muro-time" href="/muro" numero={nomes.length} tom="vermelho" titulo={nomes.length === 1 ? 'Pessoa do seu time com entregas atrasadas' : 'Pessoas do seu time com entregas atrasadas'}
+      sub={`${nomes.join(', ')} · ${doTime.length} ${doTime.length === 1 ? 'entrega' : 'entregas'} vencida(s) sem registro`} acao="Ver →" />);
+  }
   for (const i of urgentes) {
     const sol = pessoa(d, i.solicitanteId);
     itens.push(<ItemAcao key={i.id} href="/area/iniciativas" tom="ambar" titulo={`Aprovar: ${i.titulo}`} sub={`${sol?.nome ?? ''} · ${i.tipo === 'obr' ? 'obrigatória' : 'urgente'} · esperando há ${espera(i.enviadaEm)} ${espera(i.enviadaEm) === 1 ? 'dia' : 'dias'}`} acao="Decidir →" />);

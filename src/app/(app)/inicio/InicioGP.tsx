@@ -8,6 +8,8 @@ import { gestorDe } from '@/lib/regras/pessoas';
 import { alocacaoDe, dependenciasVM, infoProjeto, nomeArea, noRaia, pessoa } from '@/lib/visoes';
 import { Barra, ItemAcao, PillFarol, Vazio } from '@/components/ui';
 import { beneficiosParaMedir } from '@/lib/beneficios-vm';
+import { atrasos } from '@/lib/muro';
+import { pontoEsperaPor } from '@/lib/regras/pontos';
 import { Saudacao } from './Saudacao';
 
 export function InicioGP({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao; hoje: string }) {
@@ -30,6 +32,26 @@ export function InicioGP({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao; hoj
   else if (devidos.length > 1) partes.push(`${devidos.length} status da semana vencem na sexta.`);
 
   const itens: React.ReactNode[] = [];
+  const meusAtrasos = atrasos(d, hoje).filter((x) => x.responsavelId === eu.id);
+  if (meusAtrasos.length) {
+    itens.push(<ItemAcao key="meus-atrasos" href="/minhas-entregas" numero={meusAtrasos.length} tom="vermelho"
+      titulo={meusAtrasos.length === 1 ? 'Você tem uma entrega atrasada' : `Você tem ${meusAtrasos.length} entregas atrasadas`}
+      sub={meusAtrasos.slice(0, 3).map((x) => `${x.titulo} (${x.diasAtraso}d)`).join(' · ')} acao="Resolver →" />);
+  }
+  const daEquipe = atrasos(d, hoje).filter((x) => x.gpId === eu.id && x.responsavelId !== eu.id);
+  if (daEquipe.length) {
+    itens.push(<ItemAcao key="muro-equipe" href="/muro" numero={daEquipe.length} tom="vermelho" titulo="Atrasos da equipe nos seus projetos"
+      sub={daEquipe.slice(0, 3).map((x) => `${pessoa(d, x.responsavelId)?.nome ?? ''}: ${x.titulo} (${x.diasAtraso}d)`).join(' · ')} acao="Ver muro →" />);
+  }
+  for (const x of d.pedidosPrazo.filter((y) => y.status === 'pendente' && d.iniciativas.some((i) => i.id === y.iniciativaId && i.gpId === eu.id))) {
+    itens.push(<ItemAcao key={`prazo${x.id}`} href={`/projetos/${x.iniciativaId}#prazos`} titulo="Pedido de mais prazo"
+      sub={`${pessoa(d, x.solicitanteId)?.nome ?? ''}: ${x.motivo}`} acao="Decidir →" />);
+  }
+  const pontosGp = d.pontos.filter((x) => x.destino === 'gp' && pontoEsperaPor(x, eu.id, false));
+  if (pontosGp.length) {
+    itens.push(<ItemAcao key="pontos-gp" href="/pontos" numero={pontosGp.length} tom="vermelho" titulo={pontosGp.length === 1 ? 'Impedimento informado pela equipe' : 'Impedimentos informados pela equipe'}
+      sub={pontosGp.map((x) => x.titulo).join(' · ')} acao="Resolver →" />);
+  }
   for (const { i } of devidos) itens.push(<ItemAcao key={`st${i.id}`} href={`/projetos/${i.id}#status`} titulo="Publicar o status da semana" sub={`${curto(i.titulo)} · vence sexta, ${br(sexta).slice(0, 5)}`} acao="Escrever →" />);
   const atrasadas = infos.flatMap(({ i, info }) => info.atrasadas.map((t) => ({ i, t })));
   if (atrasadas.length) {

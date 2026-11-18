@@ -8,6 +8,7 @@ import { ItemAcao, Kpi, GradeKpi, Painel, Vazio } from '@/components/ui';
 import { pontoAtrasado, pontoEsperaPor } from '@/lib/regras/pontos';
 import { riscoAtivo } from '@/lib/regras/riscos';
 import { beneficiosParaMedir } from '@/lib/beneficios-vm';
+import { atrasos } from '@/lib/muro';
 import { Saudacao } from './Saudacao';
 import { PainelCiclo } from './PainelCiclo';
 import { BotaoCobrar } from './BotaoCobrar';
@@ -27,6 +28,18 @@ export function InicioPMO({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao; ho
 
   // ---- Precisa de você ----
   const itens: React.ReactNode[] = [];
+  const meusAtrasos = atrasos(d, hoje).filter((x) => x.responsavelId === sessao.pessoa.id);
+  if (meusAtrasos.length) {
+    itens.push(<ItemAcao key="meus-atrasos" href="/minhas-entregas" numero={meusAtrasos.length} tom="vermelho"
+      titulo={meusAtrasos.length === 1 ? 'Você tem uma entrega atrasada' : `Você tem ${meusAtrasos.length} entregas atrasadas`}
+      sub={meusAtrasos.slice(0, 3).map((x) => `${x.titulo} (${x.diasAtraso}d)`).join(' · ')} acao="Resolver →" />);
+  }
+  const noMuro = atrasos(d, hoje);
+  if (noMuro.length) {
+    const pessoasNoMuro = new Set(noMuro.map((x) => x.responsavelId)).size;
+    itens.push(<ItemAcao key="muro" href="/muro" numero={noMuro.length} tom="vermelho" titulo="Entregas atrasadas no portfólio (muro da vergonha)"
+      sub={`${pessoasNoMuro} ${pessoasNoMuro === 1 ? 'pessoa' : 'pessoas'} com tarefas, gates ou status vencidos sem registro`} acao="Ver muro →" />);
+  }
   const av = listaAvaliacao(d);
   const prontas = av.itens.filter((x) => !x.comunicado && !x.decisao).length;
   if (prontas) itens.push(<ItemAcao key="av" href="/avaliacao" numero={prontas} titulo={prontas === 1 ? 'Iniciativa pronta para avaliar' : 'Iniciativas prontas para avaliar'} sub={`Já aprovadas pelos gestores${av.ciclo ? ` no ciclo ${av.ciclo.ano}` : ''}`} acao="Avaliar →" />);

@@ -11,6 +11,7 @@ import { riscoAtivo } from './regras/riscos';
 import { situacaoDependencia } from './regras/dependencias';
 import { balancoCusto, balancoEscopo, balancoPrazo, type ItemBalanco } from './regras/encerramento';
 import { situacaoBeneficio } from './regras/beneficios';
+import { proximoStatusDevido } from './regras/muro';
 
 // Cálculos derivados usados por várias telas. Tudo a partir de DadosOrg (a "foto" da empresa).
 
@@ -75,23 +76,26 @@ export function infoProjeto(d: DadosOrg, ini: Iniciativa, hoje: string) {
   const reports = d.reports.filter((r) => r.iniciativaId === ini.id).sort((a, b) => b.data.localeCompare(a.data));
   const ultimo = reports[0];
   const referenciaStatus = ultimo?.data ?? (ini.playEm ? ini.playEm.toISOString().slice(0, 10) : inicio);
-  const statusAtrasado = diffDias(hoje, referenciaStatus) > 7;
+  // próximo status pela cadência combinada (semanal, quinzenal, mensal) — atrasado se o dia passou sem publicação
+  const proximoStatus = proximoStatusDevido(referenciaStatus, ini.statusCadencia, ini.statusDia, !!ultimo);
+  const statusAtrasado = proximoStatus < hoje;
   const proximoMarco = marcos.find((m) => m.status !== 'Atingido');
   return {
     fases, tarefas, marcos, riscos, base, desvio: dv, faseAtual: atual,
     progresso: progresso(tarefas),
     fimPrevisto: dataDaSemana(inicio, fimDoPlano(fases)),
-    ultimoStatus: ultimo, statusAtrasado,
+    ultimoStatus: ultimo, statusAtrasado, proximoStatus,
     proximoMarco,
     atrasadas: tarefas.filter((t) => tarefaAtrasada(t, hoje)),
   };
 }
 
-/** Quem participa do projeto: o GP, quem está alocado em alguma fase e quem é responsável por alguma tarefa. */
+/** Quem participa do projeto: o GP, quem responde por alguma fase, quem está alocado em alguma fase e quem é responsável por alguma tarefa. */
 export function participaDoProjeto(d: DadosOrg, iniId: string, pessoaId: string) {
   const ini = d.iniciativas.find((i) => i.id === iniId);
   if (!ini) return false;
   if (ini.gpId === pessoaId) return true;
+  if (d.fases.some((f) => f.iniciativaId === iniId && f.responsavelId === pessoaId)) return true;
   const faseIds = new Set(d.fases.filter((f) => f.iniciativaId === iniId).map((f) => f.id));
   return d.alocacoes.some((a) => a.pessoaId === pessoaId && faseIds.has(a.faseId)) || d.tarefas.some((t) => t.iniciativaId === iniId && t.responsavelId === pessoaId);
 }
