@@ -16,7 +16,7 @@ import { podeMedirBeneficio, situacaoBeneficio, validarMedicao } from './benefic
 import { situacaoDependencia } from './dependencias';
 import { balancoCusto, balancoEscopo, balancoPrazo, validarLicao } from './encerramento';
 import { diaDaSemana, diasDeAtraso, emNegociacao, proximoDiaSemana, proximoStatusDevido, validarPedidoPrazo, situacaoStatus, rotuloVencimentoStatus } from './muro';
-import { gestorDe, timeDireto, areasSobGestao, nomeCurto, acimaDoCedido, patrocinadorValido, acessoBloqueado, statusAoReativar, pendenciasAoDesativar, rotuloAtivo } from './pessoas';
+import { gestorDe, timeDireto, areasSobGestao, nomeCurto, acimaDoCedido, patrocinadorValido, acessoBloqueado, statusAoReativar, pendenciasAoDesativar, rotuloAtivo, podeSerGp } from './pessoas';
 import { addDias, diffDias, dataPorExtenso, haQuanto, proximaSexta } from './datas';
 
 const raia = (chave: string, ordem: number, extra: Partial<Raia> = {}): Raia => ({
@@ -566,5 +566,15 @@ describe('desativar o acesso de uma pessoa', () => {
     const r = pendenciasAoDesativar({ projetosGp: ['App'], areasResponsavel: ['TI'], tarefasAbertas: 2, aprovacoesPendentes: 1 });
     expect(r).toHaveLength(4);
     expect(r[0]).toMatch(/GP de um projeto/);
+  });
+});
+
+describe('trocar o gerente do projeto', () => {
+  it('só pessoa interna que não foi desativada', () => {
+    expect(podeSerGp({ externo: false, status: 'ativo' })).toBe(true);
+    expect(podeSerGp({ externo: false, status: 'convite' })).toBe(true);
+    expect(podeSerGp({ externo: false, status: 'inativo' })).toBe(false);
+    expect(podeSerGp({ externo: true, status: 'ativo' })).toBe(false);
+    expect(podeSerGp(undefined)).toBe(false);
   });
 });

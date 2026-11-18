@@ -10,6 +10,7 @@ import { TelaProjeto } from './TelaProjeto';
 import { SecaoPontos } from './SecaoPontos';
 import { VisaoLeitura } from './VisaoLeitura';
 import { Patrocinio } from './Patrocinio';
+import { TrocarGp } from './TrocarGp';
 import { Mudancas } from './Mudancas';
 import { Financeiro } from './Financeiro';
 import { Feedback } from './Feedback';
@@ -83,6 +84,11 @@ export default async function Projeto({ params, searchParams }: { params: Promis
           faseInicial: fase && faseIds.has(fase) ? fase : '',
         }}
       />
+      {ehPmo && (() => {
+        const gpAtual = pessoa(d, ini.gpId);
+        return <TrocarGp iniciativaId={ini.id} atual={ini.gpId ?? ''} atualNome={gpAtual?.nome ?? 'Sem GP'} inativo={gpAtual?.status === 'inativo'}
+          opcoes={d.pessoas.filter((x) => !x.externo && x.status !== 'inativo').sort((a, b) => Number(b.perfis.includes('gp')) - Number(a.perfis.includes('gp')) || a.nome.localeCompare(b.nome)).map((x) => ({ id: x.id, nome: x.nome, gp: x.perfis.includes('gp') }))} />;
+      })()}
       {ehPmo && <Patrocinio iniciativaId={ini.id} atual={ini.patrocinadorId ?? ''} texto={ini.patrocinadorTexto}
         opcoes={d.pessoas.filter((x) => !x.externo && x.status !== 'inativo' && x.perfis.includes('patrocinador')).map((x) => ({ id: x.id, nome: x.nome }))} />}
       {(() => {
