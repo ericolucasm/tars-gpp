@@ -735,6 +735,34 @@ try {
   if (await hist.getByLabel('não lida', { exact: true }).count()) throw new Error('Ainda há avisos não lidos');
   await p.context().close();
   ok('Meu TARS: novidades com contador no menu; abrir um aviso marca como lido e leva ao lugar certo; histórico e "marcar todas"');
+
+  // Meu TARS: planejar o dia e adiar com lembrete (pessoal; no "ver como" não aparece)
+  p = await como('carlos.andrade@acme.com.br');
+  await ir(p, '/inicio');
+  const cx = p.getByRole('region', { name: 'Precisa de você' });
+  const alvo = cx.getByRole('link').filter({ hasText: 'Feedback' }).first();
+  const tituloAlvo = (await alvo.innerText()).split('\n').find((l) => l.includes('Feedback')).trim();
+  await cx.getByLabel(`Planejar: ${tituloAlvo}`).selectOption('hoje');
+  await cx.getByRole('group', { name: 'Meu plano para hoje' }).getByText(tituloAlvo).waitFor();
+  const outro = cx.getByRole('group', { name: 'Para acompanhar' }).getByRole('link').first();
+  const tituloOutro = (await outro.innerText()).split('\n').map((l) => l.trim()).filter((l) => l && !/^\d+$/.test(l))[0];
+  await cx.getByLabel(`Planejar: ${tituloOutro}`).selectOption('lembrar');
+  const lemb = cx.getByRole('group', { name: `Lembrete: ${tituloOutro}` });
+  await lemb.getByLabel('Lembrar em').fill(new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10));
+  await lemb.getByRole('button', { name: 'Adiar' }).click();
+  const adiados = cx.getByRole('group', { name: 'Adiados' });
+  await adiados.locator('summary').click();
+  await adiados.getByText(/volta em/).first().waitFor();
+  await p.context().close();
+  p = await como('mariana@acme.com.br', 'pmo');
+  await ir(p, '/inicio');
+  await p.getByLabel('Admin · ver como').selectOption({ label: 'Carlos Andrade · Vendas' });
+  await p.getByRole('heading', { name: /Carlos/ }).waitFor();
+  await p.getByRole('region', { name: 'Precisa de você' }).getByRole('group', { name: 'Meu plano para hoje' }).waitFor();
+  if (await p.getByLabel(/^Planejar: /).count()) throw new Error('No ver como, o admin não deveria mexer no plano da pessoa');
+  await p.getByLabel('Admin · ver como').selectOption({ label: 'Mariana · PMO (você)' });
+  await p.context().close();
+  ok('Meu TARS: a pessoa planeja um item para hoje e adia outro com lembrete; no "ver como" o plano aparece, mas não pode ser mudado');
 } catch (e) {
   console.error('✗ FALHOU no passo', passo + 1, '\n', e.message.split('\n').slice(0, 6).join('\n'));
   process.exitCode = 1;

@@ -472,3 +472,16 @@ export const feedbacks = pgTable('feedbacks', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [uniqueIndex('feedbacks_projeto_pessoa').on(t.iniciativaId, t.pessoaId)]);
+
+// Meu TARS: como cada pessoa organiza a própria caixa (planejar para hoje, esta semana ou depois; adiar até uma data).
+// É pessoal: só a própria pessoa vê e muda. Não muda prazo oficial nenhum (o muro continua contando).
+export const planosPessoais = pgTable('planos_pessoais', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  orgId: uuid('org_id').notNull(),
+  pessoaId: uuid('pessoa_id').notNull().references(() => pessoas.id, { onDelete: 'cascade' }),
+  itemId: text('item_id').notNull(), // id do item da caixa (ex.: "tarefa-<uuid>", "pedido-<uuid>")
+  plano: text('plano'), // hoje | semana | depois | null
+  planejadoEm: date('planejado_em'), // dia em que a pessoa planejou (o "hoje" vale só nesse dia; a "semana", só nessa semana)
+  adiadoAte: date('adiado_ate'), // some da caixa até esse dia (lembrete)
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [uniqueIndex('planos_pessoa_item').on(t.pessoaId, t.itemId)]);
