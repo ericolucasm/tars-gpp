@@ -247,13 +247,30 @@ type Rodar = (fn: () => Promise<{ ok: boolean; msg?: string; erro?: string }>, m
 function LinhaTarefa({ p, t, comRemover, rodar }: { p: Props; t: Props['tarefas'][number]; comRemover: boolean; rodar: Rodar }) {
   const atrasada = !t.concluida && !!t.prazo && t.prazo < p.hoje;
   const quem = p.pessoas.find((x) => x.id === t.responsavelId);
+  const [ed, setEd] = useState<{ titulo: string; quem: string; prazo: string } | null>(null);
   const Tag = comRemover ? 'div' : 'label';
+  if (ed) {
+    const opcoes = p.pessoas.filter((x) => x.noProjeto || x.id === t.responsavelId);
+    return (
+      <div role="group" aria-label={`Editar tarefa ${t.titulo}`} style={s('display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px; padding: 10px; border-radius: 9px; border: 1px solid #D9CFFF; background: #F7F4FF')}>
+        <label style={{ ...sMiniLab, flex: '2 1 200px' }}>Tarefa<input type="text" value={ed.titulo} onChange={(e) => setEd({ ...ed, titulo: e.target.value })} style={sMini} /></label>
+        <label style={{ ...sMiniLab, flex: '1 1 150px' }}>Responsável<select value={ed.quem} onChange={(e) => setEd({ ...ed, quem: e.target.value })} style={sMini}>
+          <option value="">Sem responsável (conta para o GP)</option>
+          {(opcoes.length ? opcoes : p.pessoas).map((o) => <option key={o.id} value={o.id}>{o.nome}</option>)}
+        </select></label>
+        <label style={{ ...sMiniLab, flex: '1 1 140px' }}>Prazo<input type="date" value={ed.prazo} onChange={(e) => setEd({ ...ed, prazo: e.target.value })} style={sMini} /></label>
+        <button type="button" onClick={() => setEd(null)} style={s('height: 40px; padding: 0 12px; border-radius: 9px; border: 1px solid #E2DCD0; background: #FFFFFF; color: #26213A; font-size: 13px')}>Cancelar</button>
+        <button type="button" disabled={!ed.titulo.trim()} onClick={() => { rodar(() => A.editarTarefa(t.id, { titulo: ed.titulo, responsavelId: ed.quem, prazo: ed.prazo }), true); setEd(null); }} style={sAdd}>Salvar</button>
+      </div>
+    );
+  }
   return (
     <Tag style={comRemover ? s('display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; border: 1px solid #EFEBE3') : s('display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; background: #FAF8F4; cursor: pointer')}>
       <input type="checkbox" checked={t.concluida} aria-label={`Concluir ${t.titulo}`} onChange={() => rodar(() => A.alternarTarefa(t.id))} style={s('width: 18px; height: 18px; accent-color: #6D4AFF')} />
       <span style={{ ...s('flex: 1 1 200px; font-size: 13px; font-weight: 600'), color: t.concluida ? '#8A8296' : '#26213A', textDecoration: t.concluida ? 'line-through' : 'none' }}>{t.titulo}</span>
       <span style={s('font-size: 12px; color: #5E5770')}>{quem?.nome ?? ''}</span>
       <span style={{ fontSize: 12, fontWeight: atrasada ? 700 : 400, color: atrasada ? '#B42318' : '#5E5770' }}>{t.prazo ? (atrasada ? `Atrasada · ${br(t.prazo)}` : `Prazo ${br(t.prazo)}`) : 'Sem prazo'}</span>
+      {comRemover && <button type="button" aria-label={`Editar tarefa ${t.titulo}`} title="Editar título, responsável e prazo" onClick={() => setEd({ titulo: t.titulo, quem: t.responsavelId ?? '', prazo: t.prazo ?? '' })} style={s('width: 32px; height: 32px; border-radius: 8px; border: 0; background: transparent; color: #6E6780; font-size: 15px')}>✎</button>}
       {comRemover && <button type="button" aria-label={`Remover tarefa ${t.titulo}`} onClick={() => rodar(() => A.removerTarefa(t.id))} style={s('width: 32px; height: 32px; border-radius: 8px; border: 0; background: transparent; color: #8A8296; font-size: 16px')}>×</button>}
     </Tag>
   );

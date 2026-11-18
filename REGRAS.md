@@ -122,6 +122,7 @@ Raias padrão, na ordem: Solicitações → Backlog → Pré-projeto → Em exec
 - **[Protótipo]** Farol sugerido: desvio > 2 semanas → Crítico; desvio > 0 → Atenção; sem linha de base → Atenção; pessoa acima do cedido → Atenção; caso contrário, OK. O GP escolhe o farol (o sugerido é só referência).
 - **[Protótipo]** Status da fase pela data: Concluída (fim ≤ hoje), Em andamento, Planejada.
 - **[Protótipo]** Tarefa atrasada = não concluída com prazo vencido.
+- **[Decisão V2]** **Editar tarefa:** o GP do projeto ou o PMO corrige o título, o responsável e o prazo de uma tarefa (botão ✎ no detalhe da fase), sem apagar e criar de novo. O novo responsável é avisado; se só o prazo mudou, o responsável é avisado do novo prazo. Se houver um **pedido de mais prazo** aguardando o GP para aquela tarefa, o prazo não muda por aqui: o GP decide o pedido (é o que fica registrado no muro).
 - **[Protótipo]** Status do projeto: precisa de data e "O que avançou?". Grava o farol e o desvio do momento.
 - **[Protótipo]** Alocação por fase em passos de 10% (mínimo 10%). Ao alocar uma pessoa, entram 20%. Fornecedor externo não tem limite de cedência.
 - **[Implícita]** Alocar acima do cedido **gera um pedido de alocação** ao gestor da pessoa ("vai pedir aprovação ao gestor da área").

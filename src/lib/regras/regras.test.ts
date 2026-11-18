@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { notaFinal, custoReferencia, ordenarPorNota, podeComunicar } from './avaliacao';
 import { acoesDoCard, acaoDeConclusao, prontoParaConcluir, validarGate, podeConfirmar, type Raia } from './esteira';
-import { desvio, farolSugerido, statusDaFase, fasesDoModelo, mesesDaLinha, descreverMudanca, progresso, reordenar, ordemValida } from './projeto';
+import { desvio, farolSugerido, statusDaFase, fasesDoModelo, mesesDaLinha, descreverMudanca, progresso, reordenar, ordemValida, validarEdicaoTarefa } from './projeto';
 import { podeResolverPonto, pontoEsperaPor, pontoAtrasado } from './pontos';
 import { validarPedidoMudanca, variacaoCusto } from './mudancas';
 import { resumoFinanceiro, situacaoCusto } from './financeiro';
@@ -491,5 +491,19 @@ describe('status a publicar na Início do GP (cadência)', () => {
     expect(rotuloVencimentoStatus('2026-10-17', '2026-10-17')).toBe('vence hoje');
     expect(rotuloVencimentoStatus('2026-10-23', '2026-10-17')).toBe('vence sexta, 23/10');
     expect(rotuloVencimentoStatus('2026-10-16', '2026-10-17')).toBe('venceu sexta, 16/10 (1 dia de atraso)');
+  });
+});
+
+describe('editar tarefa', () => {
+  const base = { titulo: 'Testar', prazo: '2026-11-20', prazoAtual: '2026-11-10', pedidoPrazoPendente: false };
+  it('exige título e prazo válido', () => {
+    expect(validarEdicaoTarefa({ ...base, titulo: '  ' })).toBe('Descreva a tarefa.');
+    expect(validarEdicaoTarefa({ ...base, prazo: '20/11' })).toBe('Prazo inválido.');
+    expect(validarEdicaoTarefa(base)).toBeNull();
+    expect(validarEdicaoTarefa({ ...base, prazo: '' })).toBeNull(); // pode ficar sem prazo
+  });
+  it('com pedido de mais prazo aguardando, o prazo não muda por aqui (o resto pode)', () => {
+    expect(validarEdicaoTarefa({ ...base, pedidoPrazoPendente: true })).toMatch(/pedido de mais prazo/);
+    expect(validarEdicaoTarefa({ ...base, prazo: '2026-11-10', pedidoPrazoPendente: true })).toBeNull();
   });
 });
