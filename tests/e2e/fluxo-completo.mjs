@@ -712,8 +712,8 @@ try {
   await caixa.getByText(/Tudo que depende de você/).waitFor();
   const grupos = await caixa.getByRole('group').evaluateAll((els) => els.map((e) => e.getAttribute('aria-label')));
   const ORDEM = ['Atrasado', 'Vence hoje', 'Alguém está esperando por você', 'Nos próximos 7 dias', 'Para fazer', 'Mais adiante', 'Para acompanhar'];
-  const idx = grupos.map((g) => ORDEM.indexOf(g));
-  if (!idx.length || idx.some((x) => x < 0) || idx.some((x, k) => k && x < idx[k - 1])) throw new Error('Grupos fora da ordem de prioridade: ' + grupos.join(', '));
+  const idx = grupos.map((g) => ORDEM.indexOf(g)).filter((x) => x >= 0); // só os grupos de prioridade
+  if (!idx.length || idx.some((x, k) => k && x < idx[k - 1])) throw new Error('Grupos fora da ordem de prioridade: ' + grupos.join(', '));
   await p.context().close();
   ok('Meu TARS: a caixa única mostra o que depende da pessoa, agrupado na ordem de prioridade');
 
@@ -758,11 +758,33 @@ try {
   await ir(p, '/inicio');
   await p.getByLabel('Admin · ver como').selectOption({ label: 'Carlos Andrade · Vendas' });
   await p.getByRole('heading', { name: /Carlos/ }).waitFor();
-  await p.getByRole('region', { name: 'Precisa de você' }).getByRole('group', { name: 'Meu plano para hoje' }).waitFor();
+  await p.getByRole('region', { name: 'Precisa de você' }).getByText(/não aparecem: são só dela/).waitFor();
+  if (await p.getByRole('group', { name: 'Meu plano para hoje' }).count()) throw new Error('No ver como, o plano da pessoa não deveria aparecer');
   if (await p.getByLabel(/^Planejar: /).count()) throw new Error('No ver como, o admin não deveria mexer no plano da pessoa');
   await p.getByLabel('Admin · ver como').selectOption({ label: 'Mariana · PMO (você)' });
   await p.context().close();
-  ok('Meu TARS: a pessoa planeja um item para hoje e adia outro com lembrete; no "ver como" o plano aparece, mas não pode ser mudado');
+  ok('Meu TARS: a pessoa planeja um item para hoje e adia outro com lembrete; no "ver como" o plano não aparece (é só da pessoa)');
+
+  // Meu TARS: tarefa pessoal e anotação (só a pessoa vê)
+  p = await como('carlos.andrade@acme.com.br');
+  await ir(p, '/inicio');
+  const cx2 = p.getByRole('region', { name: 'Precisa de você' });
+  const nova = cx2.getByRole('group', { name: 'Nova tarefa pessoal' });
+  await nova.getByLabel('Tarefa pessoal', { exact: true }).fill('Preparar a reunião com a DevHouse');
+  await nova.getByLabel('Prazo da tarefa pessoal').fill(new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' }));
+  await nova.getByRole('button', { name: 'Adicionar' }).click();
+  await cx2.getByRole('group', { name: 'Vence hoje' }).getByText('Preparar a reunião com a DevHouse').waitFor();
+  await cx2.getByLabel('Planejar: Preparar a reunião com a DevHouse').selectOption('anotar');
+  const anot = cx2.getByRole('group', { name: 'Anotação: Preparar a reunião com a DevHouse' });
+  await anot.getByLabel('Anotação').fill('levar o cronograma revisado');
+  await anot.getByRole('button', { name: 'Salvar anotação' }).click();
+  await cx2.getByText(/📝 levar o cronograma revisado/).waitFor();
+  await cx2.getByLabel('Concluir Preparar a reunião com a DevHouse').click(); // a tarefa sai da lista quando o servidor confirma
+  const concl = cx2.getByRole('group', { name: 'Tarefas pessoais concluídas' });
+  await concl.locator('summary').click();
+  await concl.getByText('Preparar a reunião com a DevHouse').waitFor();
+  await p.context().close();
+  ok('Meu TARS: a pessoa cria uma tarefa pessoal (entra na prioridade pela data), anota e conclui');
 } catch (e) {
   console.error('✗ FALHOU no passo', passo + 1, '\n', e.message.split('\n').slice(0, 6).join('\n'));
   process.exitCode = 1;

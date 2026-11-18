@@ -17,7 +17,7 @@ import { situacaoDependencia } from './dependencias';
 import { balancoCusto, balancoEscopo, balancoPrazo, validarLicao } from './encerramento';
 import { diaDaSemana, diasDeAtraso, emNegociacao, proximoDiaSemana, proximoStatusDevido, validarPedidoPrazo, situacaoStatus, rotuloVencimentoStatus, venceTextoCurto } from './muro';
 import { gestorDe, timeDireto, areasSobGestao, nomeCurto, acimaDoCedido, patrocinadorValido, acessoBloqueado, statusAoReativar, pendenciasAoDesativar, rotuloAtivo, podeSerGp, motivoParaNaoExcluirArea } from './pessoas';
-import { grupoDoItem, ordenarCaixa, planoEfetivo, validarAdiamento } from './meu-tars';
+import { grupoDoItem, ordenarCaixa, planoEfetivo, validarAdiamento, validarTarefaPessoal, validarNota, tarefaPessoalVisivel } from './meu-tars';
 import { grupoNovidade, podeMarcarLida } from './novidades';
 import { addDias, diffDias, dataPorExtenso, haQuanto, proximaSexta } from './datas';
 
@@ -649,5 +649,21 @@ describe('Meu TARS: planejamento pessoal', () => {
     expect(validarAdiamento('2026-11-18', H)).toMatch(/depois de hoje/);
     expect(validarAdiamento('2026-11-19', H)).toBeNull();
     expect(validarAdiamento('2028-01-01', H)).toMatch(/um ano/);
+  });
+});
+
+describe('Meu TARS: tarefas pessoais e anotações', () => {
+  it('tarefa pessoal precisa de título; prazo opcional', () => {
+    expect(validarTarefaPessoal({ titulo: ' ', prazo: null })).toMatch(/Descreva/);
+    expect(validarTarefaPessoal({ titulo: 'Preparar a reunião', prazo: null })).toBeNull();
+    expect(validarTarefaPessoal({ titulo: 'Preparar a reunião', prazo: '20/11' })).toMatch(/inválido/);
+    expect(validarTarefaPessoal({ titulo: 'x'.repeat(201), prazo: null })).toMatch(/200/);
+  });
+  it('anotação até 500 caracteres; concluída fica visível por 7 dias', () => {
+    expect(validarNota('liguei para o Marcos')).toBeNull();
+    expect(validarNota('x'.repeat(501))).toMatch(/500/);
+    expect(tarefaPessoalVisivel(null, '2026-11-18')).toBe(true);
+    expect(tarefaPessoalVisivel('2026-11-11', '2026-11-18')).toBe(true);
+    expect(tarefaPessoalVisivel('2026-11-10', '2026-11-18')).toBe(false);
   });
 });

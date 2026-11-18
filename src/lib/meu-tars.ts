@@ -22,6 +22,7 @@ export type ItemCaixa = Prioridade & {
   id: string; titulo: string; sub: string; href: string; acao: string;
   tom?: TomCaixa; badgeTom?: TomCaixa; numero?: number; papel: Papel;
   cobrarIds?: string[]; // PMO: status atrasados, com o botão "Cobrar"
+  pessoal?: { id: string; concluida: boolean }; // tarefa pessoal (só a pessoa vê)
 };
 
 const curto = (t: string) => { const k = t.indexOf(' para '); return k > 0 ? t.slice(0, k) : t; };
@@ -279,7 +280,7 @@ function doPatrocinador(d: DadosOrg, eu: Pessoa): ItemCaixa[] {
  * A caixa única de uma pessoa: as entregas dela e o que depende dela em cada papel que ela tem
  * (gestor, GP, PMO, patrocinador), sem repetir, em ordem de prioridade.
  */
-export function caixaDe(d: DadosOrg, eu: Pessoa, admin: boolean, hoje: string) {
+export function caixaDe(d: DadosOrg, eu: Pessoa, admin: boolean, hoje: string, extras: ItemCaixa[] = []) {
   const ehPmo = eu.perfis.includes('pmo');
   const ehGestor = eu.perfis.includes('gestor') || d.delegacoes.some((x) => x.substitutoId === eu.id && x.inicio <= hoje && x.fim >= hoje);
   const ehGp = eu.perfis.includes('gp') || d.iniciativas.some((i) => i.gpId === eu.id);
@@ -291,6 +292,7 @@ export function caixaDe(d: DadosOrg, eu: Pessoa, admin: boolean, hoje: string) {
     ...(ehGp ? doGp(d, eu, hoje) : []),
     ...doPatrocinador(d, eu),
     ...doColaborador(d, eu),
+    ...extras,
   ];
   const vistos = new Set<string>();
   const unicos = todos.filter((x) => (vistos.has(x.id) ? false : (vistos.add(x.id), true)));

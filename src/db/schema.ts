@@ -483,5 +483,17 @@ export const planosPessoais = pgTable('planos_pessoais', {
   plano: text('plano'), // hoje | semana | depois | null
   planejadoEm: date('planejado_em'), // dia em que a pessoa planejou (o "hoje" vale só nesse dia; a "semana", só nessa semana)
   adiadoAte: date('adiado_ate'), // some da caixa até esse dia (lembrete)
+  nota: text('nota'), // anotação pessoal no item (ex.: "liguei para o Marcos, responde amanhã")
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [uniqueIndex('planos_pessoa_item').on(t.pessoaId, t.itemId)]);
+
+// Meu TARS: tarefas pessoais (o que não é de projeto: "preparar a reunião com o fornecedor"). Só a própria pessoa vê.
+export const tarefasPessoais = pgTable('tarefas_pessoais', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  orgId: uuid('org_id').notNull(),
+  pessoaId: uuid('pessoa_id').notNull().references(() => pessoas.id, { onDelete: 'cascade' }),
+  titulo: text('titulo').notNull(),
+  prazo: date('prazo'),
+  concluidaEm: timestamp('concluida_em', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [index('tarefas_pessoais_pessoa').on(t.pessoaId)]);
