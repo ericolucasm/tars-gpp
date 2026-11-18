@@ -842,6 +842,16 @@ try {
   if (nPer() !== '1') throw new Error('Período não foi removido');
   await p.context().close();
   ok('Linha do tempo: o "+" cria outro período da mesma fase (equipe própria, a fase vai até o fim do último) e dá para removê-lo');
+
+  // Detalhamento por fase: quem atua em cada fase e período; "Editar" abre o painel da barra lá em cima
+  p = await como('mariana@acme.com.br', 'pmo');
+  await ir(p, `/projetos/${invId3}`);
+  const tabela = p.getByRole('table', { name: 'Recursos por fase e período' });
+  await tabela.getByRole('row').filter({ hasText: fasePer }).getByText(/Bruno Reis 40%/).waitFor(); // atribuído no painel (passo da linha do tempo)
+  await tabela.getByRole('button', { name: `Editar recursos de ${fasePer}` }).click();
+  await p.getByRole('region', { name: `Painel da fase ${fasePer}` }).getByRole('group', { name: 'Alocação de Bruno Reis' }).waitFor();
+  await p.context().close();
+  ok('Detalhamento por fase: tabela de quem atua em cada fase e período; "Editar" abre o painel da barra');
 } catch (e) {
   console.error('✗ FALHOU no passo', passo + 1, '\n', e.message.split('\n').slice(0, 6).join('\n'));
   process.exitCode = 1;

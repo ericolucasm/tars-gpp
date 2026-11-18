@@ -6,7 +6,7 @@ import { addDias, br } from '@/lib/regras/datas';
 import { desvio as calcDesvio, fimDoPlano, FAROL, mesesDaLinha, reordenar, rotuloDesvioCurto, type Fase, type Farol } from '@/lib/regras/projeto';
 import * as A from '@/app/acoes/projeto';
 import { dimPrazo, farolGeral, type Dimensao } from '@/lib/regras/farol';
-import { RiscosFase, rkEstilo, type RiscoVM } from './RiscosFase';
+import { RiscosFase, type RiscoVM } from './RiscosFase';
 import { PainelFase } from './PainelFase';
 import { envelopeDosPeriodos, ordenarPeriodos, rotuloPeriodo, siglaEquipe } from '@/lib/regras/projeto';
 
@@ -181,7 +181,7 @@ export function TelaProjeto({ p }: { p: Props }) {
         <div style={sKpi}><span style={s('font-size: 12px; color: #5E5770')}>Acima do cedido</span><span style={{ ...s('font-size: 20px; font-weight: 700'), color: acimaIds.length ? '#9A5B05' : '#26213A' }}>{acimaIds.length} {acimaIds.length === 1 ? 'pessoa' : 'pessoas'}</span></div>
       </div>
 
-      <section aria-label="Linha do tempo" style={s('background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px')}>
+      <section id="linha-do-tempo" aria-label="Linha do tempo" style={s('background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px')}>
         <div style={s('display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center')}>
           <div style={s('display: flex; flex-direction: column; gap: 2px')}><h2 style={s('margin: 0; font-size: 18px; font-weight: 700')}>Linha do tempo</h2><span style={s('font-size: 12px; color: #5E5770')}>{p.base ? 'Linha de base congelada. Mudanças agora geram desvio.' : 'Gerada a partir do modelo e das datas da iniciativa. Arraste as barras e congele a linha de base.'} Clique numa barra para atribuir pessoas e configurar a fase. Use ⠿ ou as setas para reordenar.</span></div>
           <div style={s('display: flex; flex-wrap: wrap; gap: 8px')}>
@@ -267,12 +267,12 @@ export function TelaProjeto({ p }: { p: Props }) {
       </section>
 
       <section aria-label="Tarefas e pessoas por fase" style={s('background: #FFFFFF; border: 1px solid #E2DCD0; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px')}>
-        <div style={s('display: flex; flex-direction: column; gap: 2px')}><h2 style={s('margin: 0; font-size: 18px; font-weight: 700')}>Planejamento por fase</h2><span style={s('font-size: 12px; color: #5E5770')}>Escolha uma fase para cadastrar tarefas, alocar pessoas e registrar marcos e riscos. Sem fase escolhida, tudo aparece agrupado.</span></div>
+        <div style={s('display: flex; flex-direction: column; gap: 2px')}><h2 style={s('margin: 0; font-size: 18px; font-weight: 700')}>Detalhamento por fase</h2><span style={s('font-size: 12px; color: #5E5770')}>Em "Todas as fases": quem atua em cada fase e período (o que está nas barras da linha do tempo). Escolha uma fase para cadastrar tarefas e registrar marcos e riscos.</span></div>
         <div role="tablist" aria-label="Fase" style={s('display: flex; flex-wrap: wrap; gap: 6px')}>
           <button type="button" role="tab" aria-selected={!atual} onClick={() => setSel('')} style={tabEstilo(!atual)}>Todas as fases</button>
           {fases.map((f) => <button key={f.id} type="button" role="tab" aria-selected={sel === f.id} onClick={() => setSel(f.id)} style={tabEstilo(sel === f.id)}>{f.nome}</button>)}
         </div>
-        {!atual ? <Grupos p={p} fases={fases} statusFase={statusFase} datasDe={datasDe} setSel={setSel} rodar={rodar} /> : <DetalheFase key={atual.id} p={p} f={atual} status={statusFase(atual)} datas={datasDe(atual)} rodar={rodar} pend={pend} />}
+        {!atual ? <Grupos p={p} fases={fases} statusFase={statusFase} setSel={setSel} abrirPainel={(id) => { setAberta(id); setSel(p.periodos.find((x) => x.id === id)?.faseId ?? ''); document.getElementById('linha-do-tempo')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }} /> : <DetalheFase key={atual.id} p={p} f={atual} status={statusFase(atual)} datas={datasDe(atual)} rodar={rodar} pend={pend} />}
       </section>
 
       <StatusProjeto p={p} rodar={rodar} pend={pend} />
@@ -314,38 +314,54 @@ function LinhaTarefa({ p, t, comRemover, rodar }: { p: Props; t: Props['tarefas'
   );
 }
 
-function Grupos({ p, fases, statusFase, datasDe, setSel, rodar }: { p: Props; fases: FaseVM[]; statusFase: (f: Fase) => string; datasDe: (f: Fase) => string; setSel: (id: string) => void; rodar: Rodar }) {
+/** "Todas as fases": detalhamento dos recursos atribuídos em cada fase e período (o que está nas barras da linha do tempo). */
+function Grupos({ p, fases, statusFase, setSel, abrirPainel }: { p: Props; fases: FaseVM[]; statusFase: (f: Fase) => string; setSel: (id: string) => void; abrirPainel: (periodoId: string) => void }) {
+  const th = s('text-align: left; padding: 9px 12px; font-size: 12px; font-weight: 600; color: #5E5770; background: #FAF8F4; border-bottom: 1px solid #EFEBE3; white-space: nowrap');
+  const td = s('padding: 9px 12px; border-bottom: 1px solid #F3F0EA; vertical-align: top; font-size: 13px');
+  const data = (w: number) => br(addDias(p.inicio, w * 7)).slice(0, 5);
   return (
-    <div style={s('display: flex; flex-direction: column; gap: 10px')}>
-      {fases.map((f) => {
-        const ppl = p.alocs.filter((a) => a.faseId === f.id);
-        const tks = p.tarefas.filter((t) => t.faseId === f.id);
-        const ms = p.marcos.filter((m) => m.faseId === f.id);
-        const rk = p.riscos.filter((r) => r.faseId === f.id && (r.status === 'aberto' || r.status === 'ocorreu'));
-        return (
-          <div key={f.id} style={s('border: 1px solid #EFEBE3; border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 10px')}>
-            <div style={s('display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; align-items: center')}>
-              <button type="button" onClick={() => setSel(f.id)} style={s('display: flex; flex-direction: column; align-items: flex-start; border: 0; background: transparent; padding: 0; text-align: left; color: #26213A')}><span style={s('font-size: 15px; font-weight: 700')}>{f.nome}</span><span style={s('font-size: 12px; color: #5E5770')}>{datasDe(f)} · {statusFase(f)}</span></button>
-              <div style={s('display: flex; flex-wrap: wrap; gap: 6px')}>
-                {ppl.map((a) => {
-                  const pe = p.pessoas.find((x) => x.id === a.pessoaId);
-                  const over = pe && pe.cap != null && a.pct > pe.cap;
-                  return <span key={a.pessoaId} style={{ ...s('font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 10px'), background: over ? '#FEF3DC' : '#EFEAFE', color: over ? '#7A4A04' : '#3A22A8' }}>{pe?.nome.split(' ')[0]} {a.pct}%</span>;
-                })}
-                {ppl.length === 0 && <span style={s('font-size: 12px; color: #9A5B05; font-weight: 600')}>Sem pessoas alocadas</span>}
-              </div>
-            </div>
-            {tks.map((t) => <LinhaTarefa key={t.id} p={p} t={t} comRemover={false} rodar={rodar} />)}
-            {tks.length === 0 && <span style={s('font-size: 12px; color: #5E5770')}>Nenhuma tarefa cadastrada.</span>}
-            {ms.length + rk.length > 0 && (
-              <div style={s('display: flex; flex-wrap: wrap; gap: 6px')}>
-                {ms.map((m) => <span key={m.id} style={msEstilo(m.status).chip}><span style={s('width: 7px; height: 7px; transform: rotate(45deg); background: currentColor')} />Marco: {m.nome} · {br(m.data)} · {m.status}</span>)}
-                {rk.map((r) => <span key={r.id} style={{ ...rkEstilo(r.nivel), flex: undefined }}>Risco {r.nivel.toLowerCase()}: {r.nome}</span>)}
-              </div>
-            )}
-          </div>
-        );
-      })}
+    <div style={s('overflow-x: auto; border: 1px solid #EFEBE3; border-radius: 12px')}>
+      <table aria-label="Recursos por fase e período" style={s('width: 100%; border-collapse: collapse; min-width: 760px')}>
+        <thead><tr>{['Fase', 'Período', 'Quem atua (%)', 'Carga', 'Tarefas', ''].map((c, i) => <th key={i} scope="col" style={th}>{c}</th>)}</tr></thead>
+        <tbody>
+          {fases.flatMap((f) => {
+            const pers = ordenarPeriodos(p.periodos.filter((x) => x.faseId === f.id));
+            const tks = p.tarefas.filter((t) => t.faseId === f.id);
+            const feitas = tks.filter((t) => t.concluida).length;
+            const atrasadas = tks.filter((t) => !t.concluida && t.prazo && t.prazo < p.hoje).length;
+            return pers.map((per, k) => {
+              const ppl = p.alocs.filter((a) => a.periodoId === per.id);
+              const carga = ppl.reduce((soma, a) => soma + a.pct, 0) / 100;
+              const rotulo = rotuloPeriodo(k, pers.length) || 'Único';
+              return (
+                <tr key={per.id}>
+                  {k === 0 && (
+                    <th scope="row" rowSpan={pers.length} style={{ ...td, textAlign: 'left' }}>
+                      <button type="button" onClick={() => setSel(f.id)} style={s('display: flex; flex-direction: column; align-items: flex-start; border: 0; background: transparent; padding: 0; text-align: left; color: #26213A')}>
+                        <span style={s('font-size: 13px; font-weight: 700')}>{f.nome}</span><span style={s('font-size: 11px; color: #5E5770; font-weight: 400')}>{statusFase(f)}</span>
+                      </button>
+                    </th>
+                  )}
+                  <td style={td}><span style={s('font-weight: 600')}>{rotulo}</span><br /><span style={s('font-size: 12px; color: #5E5770')}>{data(per.inicioSemana)} a {data(per.inicioSemana + per.duracao)} · {per.duracao} sem.</span></td>
+                  <td style={td}>
+                    <span style={s('display: flex; flex-wrap: wrap; gap: 4px')}>
+                      {ppl.map((a) => {
+                        const pe = p.pessoas.find((x) => x.id === a.pessoaId);
+                        const over = pe && pe.cap != null && a.pct > pe.cap;
+                        return <span key={a.pessoaId} title={over ? `Acima do cedido (${pe?.cap}%): pedido ao gestor` : undefined} style={{ ...s('font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 10px'), background: over ? '#FEF3DC' : '#EFEAFE', color: over ? '#7A4A04' : '#3A22A8' }}>{pe?.nome ?? ''} {a.pct}%</span>;
+                      })}
+                      {ppl.length === 0 && <span style={s('font-size: 12px; color: #9A5B05; font-weight: 600')}>Ninguém atribuído</span>}
+                    </span>
+                  </td>
+                  <td style={{ ...td, whiteSpace: 'nowrap' }}>{carga ? `${carga.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} ${carga <= 1 ? 'pessoa' : 'pessoas'}` : '—'}</td>
+                  {k === 0 && <td rowSpan={pers.length} style={{ ...td, whiteSpace: 'nowrap' }}>{tks.length ? `${feitas} de ${tks.length}` : '—'}{atrasadas ? <><br /><span style={s('font-size: 12px; color: #B42318; font-weight: 600')}>{atrasadas} atrasada(s)</span></> : null}</td>}
+                  <td style={td}><button type="button" aria-label={`Editar recursos de ${f.nome}${pers.length > 1 ? ` (${rotulo})` : ''}`} onClick={() => abrirPainel(per.id)} style={s('border: 0; background: transparent; color: #4B2FD1; font-weight: 600; font-size: 13px; white-space: nowrap')}>Editar →</button></td>
+                </tr>
+              );
+            });
+          })}
+        </tbody>
+      </table>
     </div>
   );
 }
