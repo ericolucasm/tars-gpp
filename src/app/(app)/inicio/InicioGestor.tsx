@@ -4,7 +4,7 @@ import type { DadosOrg } from '@/lib/dados';
 import type { Sessao } from '@/lib/sessao';
 import { br, diffDias } from '@/lib/regras/datas';
 import { areasSobGestao, gestorDe, primeiroNome, timeDireto } from '@/lib/regras/pessoas';
-import { alocacaoDe, cicloAtual, noRaia, pessoa } from '@/lib/visoes';
+import { alocacaoDe, cicloAtual, financeiroDo, noRaia, pessoa } from '@/lib/visoes';
 import { ItemAcao, PillFarol, Vazio } from '@/components/ui';
 import { pontoAtrasado, pontoEsperaPor } from '@/lib/regras/pontos';
 import { beneficiosParaMedir } from '@/lib/beneficios-vm';
@@ -29,6 +29,14 @@ export function InicioGestor({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao;
   if (obrig) texto += ` Uma iniciativa obrigatória espera há ${espera(obrig.enviadaEm)} ${espera(obrig.enviadaEm) === 1 ? 'dia' : 'dias'}.`;
 
   const itens: React.ReactNode[] = [];
+  const minhasAreas = new Set(areasSobGestao(eu.id, d.areas));
+  const estourando = d.iniciativas.filter((i) => i.areaId && minhasAreas.has(i.areaId) && noRaia(d, i, 'exe', 'pau'))
+    .map((i) => ({ i, f: financeiroDo(d, i) })).filter((x) => x.f.situacao === 'crit');
+  if (estourando.length) {
+    itens.push(<ItemAcao key="custo-area" href="/relatorios?r.financeiro.situacao=crit#financeiro" numero={estourando.length} tom="vermelho"
+      titulo={estourando.length === 1 ? 'Projeto da área estourando o orçamento' : 'Projetos da área estourando o orçamento'}
+      sub={estourando.map((x) => `${x.i.titulo.split(' para ')[0]} (+${x.f.desvioPct}%)`).join(' · ')} acao="Ver custos →" />);
+  }
   const meusAtrasos = atrasos(d, hoje).filter((x) => x.responsavelId === eu.id);
   if (meusAtrasos.length) {
     itens.push(<ItemAcao key="meus-atrasos" href="/minhas-entregas" numero={meusAtrasos.length} tom="vermelho"

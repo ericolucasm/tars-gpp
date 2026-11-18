@@ -191,6 +191,7 @@ Funcionalidades que nasceram da análise da mecânica do PMO (17/11), para o aco
 - **[Decisão V2]** O PMO pode definir o orçamento aprovado direto (ex.: no play). O GP muda o orçamento só por pedido de mudança de custo.
 - **[Decisão V2]** "Consumo × concluído" compara o quanto do orçamento já foi gasto com o percentual de tarefas concluídas: gastar muito mais rápido do que se entrega é sinal de alerta.
 - **[Decisão V2]** Relatório **Financeiro dos projetos** (PMO: todos, com filtro de área e situação; GP: os dele) e aviso **Projetos estourando o orçamento** na Início do PMO.
+- **[Decisão V2]** **Custos da área** (relatório do gestor): orçado, realizado e previsto no fim dos projetos da área e subáreas, somados no topo, com o mesmo cálculo e a mesma situação do Financeiro dos projetos. Filtros: etapa (em execução e pausados, o padrão; concluídos; todos), área (se cuida de mais de uma) e situação do custo. Na Início do gestor aparece **Projetos da área estourando o orçamento**.
 
 ### Farol por dimensão
 - **[Decisão V2]** O TARS sugere um farol para cada dimensão do projeto. O farol geral sugerido é o **pior** entre elas, explicando qual puxou para baixo. O GP continua escolhendo o farol final (§7).
