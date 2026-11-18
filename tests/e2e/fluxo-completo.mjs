@@ -183,10 +183,17 @@ try {
   await p.getByPlaceholder('Descreva a entrega').fill('Levantar indicadores atuais');
   await p.getByRole('button', { name: 'Adicionar' }).first().click();
   await p.getByText('Levantar indicadores atuais').waitFor();
+  await p.getByRole('button', { name: 'Editar tarefa Levantar indicadores atuais' }).click();
+  const edt = p.getByRole('group', { name: 'Editar tarefa Levantar indicadores atuais' });
+  await edt.getByLabel('Tarefa').fill('Levantar indicadores atuais da expedição');
+  await edt.getByLabel('Prazo').fill(new Date(Date.now() + 10 * 86400000).toISOString().slice(0, 10));
+  await edt.getByRole('button', { name: 'Salvar' }).click();
+  await p.getByText('Tarefa atualizada.').first().waitFor();
+  await p.getByText('Levantar indicadores atuais da expedição').waitFor();
   await p.getByLabel('Alocar pessoa').selectOption({ label: 'Diego Santos' });
   await p.getByRole('button', { name: 'Alocar 20%' }).click();
   await p.getByText(/Acima do cedido \(10%\)/).waitFor();
-  ok('GP cadastra tarefa e alocação acima do cedido gera pedido ao gestor');
+  ok('GP cadastra tarefa, edita título e prazo, e alocação acima do cedido gera pedido ao gestor');
   await p.getByLabel('Novo risco').fill('Dados da expedição incompletos');
   await p.getByLabel('Probabilidade').last().selectOption({ label: 'Alta' });
   await p.getByLabel('Impacto').last().selectOption({ label: 'Alto' });

@@ -129,3 +129,14 @@ export function reordenar<T>(lista: T[], de: number, para: number): T[] {
 export function ordemValida(atuais: string[], nova: string[]) {
   return nova.length === atuais.length && new Set(nova).size === nova.length && nova.every((id) => atuais.includes(id));
 }
+
+/**
+ * Edição de tarefa pelo GP ou PMO: título obrigatório; com um pedido de mais prazo aguardando o GP,
+ * o prazo não muda por aqui (o GP decide o pedido, que é o que fica registrado no muro).
+ */
+export function validarEdicaoTarefa(e: { titulo: string; prazo: string; prazoAtual: string | null; pedidoPrazoPendente: boolean }): string | null {
+  if (!e.titulo.trim()) return 'Descreva a tarefa.';
+  if (e.prazo && !/^\d{4}-\d{2}-\d{2}$/.test(e.prazo)) return 'Prazo inválido.';
+  if (e.pedidoPrazoPendente && (e.prazo || null) !== e.prazoAtual) return 'Há um pedido de mais prazo para esta tarefa. Decida o pedido em Prazos e responsáveis.';
+  return null;
+}

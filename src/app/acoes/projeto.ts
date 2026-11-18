@@ -2,10 +2,10 @@
 
 import { and, eq, inArray } from 'drizzle-orm';
 import { db, schema as t } from '@/db';
-import { dataDaSemana, descreverMudanca, desvio, fasesDoModelo, ordemValida, rotuloDesvio, type Fase } from '@/lib/regras/projeto';
+import { dataDaSemana, descreverMudanca, desvio, fasesDoModelo, ordemValida, rotuloDesvio, validarEdicaoTarefa, type Fase } from '@/lib/regras/projeto';
 import { gestorDe } from '@/lib/regras/pessoas';
 import { nivelDoRisco, validarRisco } from '@/lib/regras/riscos';
-import { nomeMes } from '@/lib/regras/datas';
+import { br, nomeMes } from '@/lib/regras/datas';
 import { fasesDo, linhaBaseDo, pessoa } from '@/lib/visoes';
 import { contexto, executar, exigir, exigirPmo, notificar } from './_ctx';
 
@@ -161,6 +161,30 @@ export async function adicionarTarefa(faseId: string, titulo: string, responsave
     const { fase } = await ctxFase(faseId);
     exigir(titulo.trim(), 'Descreva a tarefa.');
     await db.insert(t.tarefas).values({ iniciativaId: fase.iniciativaId, faseId, titulo: titulo.trim(), responsavelId: responsavelId || null, prazo: prazo || null });
+  });
+}
+
+/** GP ou PMO corrige título, responsável e prazo de uma tarefa (sem precisar apagar e criar de novo). */
+export async function editarTarefa(tarefaId: string, e: { titulo: string; responsavelId: string; prazo: string }) {
+  return executar(async () => {
+    const ctx0 = await contexto();
+    const tf = ctx0.dados.tarefas.find((x) => x.id === tarefaId);
+    exigir(tf, 'Tarefa não encontrada.');
+    const { dados, eu, ini } = await ctxProjeto(tf.iniciativaId);
+    const pendente = dados.pedidosPrazo.some((x) => x.tipo === 'tarefa' && x.alvoId === tf.id && x.status === 'pendente');
+    const erro = validarEdicaoTarefa({ titulo: e.titulo, prazo: e.prazo, prazoAtual: tf.prazo, pedidoPrazoPendente: pendente });
+    exigir(!erro, erro ?? '');
+    const resp = e.responsavelId || null;
+    exigir(!resp || dados.pessoas.some((p) => p.id === resp), 'Responsável inválido.');
+    const prazo = e.prazo || null;
+    await db.update(t.tarefas).set({ titulo: e.titulo.trim(), responsavelId: resp, prazo }).where(eq(t.tarefas.id, tf.id));
+    const titulo = e.titulo.trim();
+    if (resp && resp !== tf.responsavelId && resp !== eu.id) {
+      await notificar(dados.org.id, [resp], `Você é responsável pela tarefa "${titulo}" no projeto ${ini.titulo}${prazo ? ` (prazo ${br(prazo)})` : ''}.`, '/minhas-entregas');
+    } else if (resp && resp === tf.responsavelId && prazo !== tf.prazo && resp !== eu.id) {
+      await notificar(dados.org.id, [resp], `O prazo da tarefa "${titulo}" (${ini.titulo}) mudou para ${prazo ? br(prazo) : 'sem prazo'}.`, '/minhas-entregas');
+    }
+    return { ok: true, msg: 'Tarefa atualizada.' };
   });
 }
 
