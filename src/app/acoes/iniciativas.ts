@@ -4,7 +4,7 @@ import { and, eq } from 'drizzle-orm';
 import { db, schema as t } from '@/db';
 import { aprovadorDe, chaveDaRaia, cicloAberto, raiaChave } from '@/lib/visoes';
 import { retiradaPermitida, validarRetirada } from '@/lib/regras/esteira';
-import { patrocinadorValido } from '@/lib/regras/pessoas';
+import { patrocinadorValido, podeSerGp } from '@/lib/regras/pessoas';
 import { contexto, executar, exigir, notificar } from './_ctx';
 
 export type DadosForm = {
@@ -100,5 +100,24 @@ export async function definirPatrocinador(iniciativaId: string, pessoaId: string
     await db.update(t.iniciativas).set({ patrocinadorId: novo?.id ?? null, ...(novo ? { patrocinadorTexto: null } : {}), updatedAt: new Date() }).where(and(eq(t.iniciativas.id, ini.id), eq(t.iniciativas.orgId, dados.org.id)));
     if (novo && novo.id !== ini.patrocinadorId && novo.id !== eu.id) await notificar(dados.org.id, [novo.id], `Você é o patrocinador de "${ini.titulo}".`, ini.inicioProjeto ? `/projetos/${ini.id}` : '/inicio');
     return { ok: true, msg: novo ? `Patrocinador: ${novo.nome}.` : 'Patrocinador removido.' };
+  });
+}
+
+/** PMO troca o gerente de um projeto (ex.: quem era GP saiu da empresa ou mudou de função). Os dois são avisados. */
+export async function trocarGp(iniciativaId: string, pessoaId: string) {
+  return executar(async () => {
+    const { dados, eu, ehPmo, autoria } = await contexto();
+    exigir(ehPmo, 'Apenas o PMO pode trocar o gerente do projeto.');
+    const ini = dados.iniciativas.find((i) => i.id === iniciativaId);
+    exigir(ini && ini.inicioProjeto, 'Projeto não encontrado.');
+    const novo = dados.pessoas.find((p) => p.id === pessoaId);
+    exigir(novo && podeSerGp(novo), 'Escolha uma pessoa ativa da empresa.');
+    exigir(novo.id !== ini.gpId, 'Esta pessoa já é o GP do projeto.');
+    await db.update(t.iniciativas).set({ gpId: novo.id, updatedAt: new Date() }).where(and(eq(t.iniciativas.id, ini.id), eq(t.iniciativas.orgId, dados.org.id)));
+    if (!novo.perfis.includes('gp')) await db.update(t.pessoas).set({ perfis: [...novo.perfis, 'gp'] }).where(eq(t.pessoas.id, novo.id));
+    await db.insert(t.transicoes).values({ orgId: dados.org.id, iniciativaId: ini.id, acao: 'trocar_gp', deRaiaId: ini.raiaId, paraRaiaId: ini.raiaId, motivo: `GP: ${dados.pessoas.find((p) => p.id === ini.gpId)?.nome ?? '—'} → ${novo.nome}`, ...autoria });
+    if (novo.id !== eu.id) await notificar(dados.org.id, [novo.id], `Você agora é o gerente do projeto "${ini.titulo}".`, `/projetos/${ini.id}`);
+    if (ini.gpId && ini.gpId !== eu.id) await notificar(dados.org.id, [ini.gpId], `${novo.nome} assumiu como gerente do projeto "${ini.titulo}".`, '/inicio');
+    return { ok: true, msg: `${novo.nome} agora é o GP do projeto.` };
   });
 }

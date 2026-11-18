@@ -115,3 +115,8 @@ export function pendenciasAoDesativar(c: { projetosGp: string[]; areasResponsave
   if (c.tarefasAbertas) r.push(`${c.tarefasAbertas} ${c.tarefasAbertas === 1 ? 'tarefa aberta' : 'tarefas abertas'} em projetos.`);
   return r;
 }
+
+/** Novo gerente de um projeto: pessoa interna com acesso (não desativada). */
+export function podeSerGp(p: { externo: boolean; status: string } | undefined | null): boolean {
+  return !!p && !p.externo && p.status !== 'inativo';
+}

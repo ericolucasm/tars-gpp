@@ -649,6 +649,23 @@ try {
   await p.context().close();
   ok('PMO troca o patrocinador de um projeto por uma pessoa cadastrada');
 
+  // PMO troca o GP de um projeto; o novo GP passa a gerenciar
+  p = await como('mariana@acme.com.br', 'pmo');
+  const invId2 = sql("select id from iniciativas where titulo='Inventário rotativo'");
+  await ir(p, `/projetos/${invId2}`);
+  const gpBox = p.getByRole('group', { name: 'Gerente do projeto' });
+  await gpBox.getByLabel('Escolher gerente do projeto').selectOption({ label: 'Fábio Oliveira' });
+  await gpBox.getByRole('button', { name: 'Trocar GP' }).click();
+  await gpBox.getByText('Fábio Oliveira agora é o GP do projeto.').waitFor();
+  await p.context().close();
+  p = await como('fabio.oliveira@acme.com.br');
+  await ir(p, '/inicio');
+  await p.getByRole('navigation', { name: 'Menu principal' }).getByRole('link', { name: 'Inventário rotativo' }).click();
+  await p.waitForURL(new RegExp(`/projetos/${invId2}`));
+  await p.getByRole('region', { name: 'Prazos e responsáveis' }).waitFor(); // página completa, de quem gerencia
+  await p.context().close();
+  ok('PMO troca o GP de um projeto e o novo GP passa a gerenciá-lo');
+
   // Admin desativa o acesso de quem saiu (vê as pendências), a pessoa não entra mais; depois reativa
   p = await como('mariana@acme.com.br', 'pmo');
   await ir(p, '/cadastros');
