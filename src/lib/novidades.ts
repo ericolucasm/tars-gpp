@@ -24,5 +24,12 @@ export async function naoLidas(orgId: string, pessoaId: string): Promise<number>
 /** Plano pessoal da pessoa para os itens da caixa (Meu TARS). */
 export async function planosDe(orgId: string, pessoaId: string) {
   const rows = await db.select().from(t.planosPessoais).where(and(eq(t.planosPessoais.orgId, orgId), eq(t.planosPessoais.pessoaId, pessoaId)));
-  return new Map(rows.map((r) => [r.itemId, { plano: r.plano, planejadoEm: r.planejadoEm, adiadoAte: r.adiadoAte }]));
+  return new Map<string, { plano: string | null; planejadoEm: string | null; adiadoAte: string | null; nota: string | null }>(rows.map((r) => [r.itemId, { plano: r.plano, planejadoEm: r.planejadoEm, adiadoAte: r.adiadoAte, nota: r.nota }]));
+}
+
+/** Tarefas pessoais da pessoa (abertas e as concluídas recentemente). Só ela vê. */
+export async function tarefasPessoaisDe(orgId: string, pessoaId: string) {
+  const rows = await db.select().from(t.tarefasPessoais).where(and(eq(t.tarefasPessoais.orgId, orgId), eq(t.tarefasPessoais.pessoaId, pessoaId))).orderBy(t.tarefasPessoais.createdAt);
+  const dia = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' });
+  return rows.map((r) => ({ id: r.id, titulo: r.titulo, prazo: r.prazo, concluidaEm: r.concluidaEm ? dia.format(r.concluidaEm) : null }));
 }

@@ -66,3 +66,22 @@ export function validarAdiamento(ate: string, hoje: string): string | null {
   if (ate > addDias(hoje, 365)) return 'Escolha uma data dentro de um ano.';
   return null;
 }
+
+// ---------- Tarefas pessoais e anotações (só a própria pessoa vê) ----------
+
+export function validarTarefaPessoal(t: { titulo: string; prazo: string | null }): string | null {
+  const titulo = t.titulo.trim();
+  if (titulo.length < 2) return 'Descreva a tarefa.';
+  if (titulo.length > 200) return 'Use até 200 caracteres.';
+  if (t.prazo && !/^\d{4}-\d{2}-\d{2}$/.test(t.prazo)) return 'Prazo inválido.';
+  return null;
+}
+
+export function validarNota(nota: string): string | null {
+  return nota.trim().length > 500 ? 'A anotação pode ter até 500 caracteres.' : null;
+}
+
+/** Tarefa pessoal concluída aparece por 7 dias em "Concluídas" (para desfazer) e depois some da caixa. */
+export function tarefaPessoalVisivel(concluidaEm: string | null, hoje: string) {
+  return !concluidaEm || concluidaEm >= addDias(hoje, -7);
+}
