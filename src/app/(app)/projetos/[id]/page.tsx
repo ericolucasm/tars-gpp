@@ -39,7 +39,7 @@ export default async function Projeto({ params, searchParams }: { params: Promis
   const ehPmo = temPerfil(sessao, 'pmo');
   const ehGp = ini.gpId === sessao.pessoa.id;
   const hoje = hojeISO();
-  const modo = modoDoProjeto({ ehPmo, ehGp, participa: participaDoProjeto(d, ini.id, sessao.pessoa.id), solicitante: ini.solicitanteId === sessao.pessoa.id });
+  const modo = modoDoProjeto({ ehPmo, ehGp, participa: participaDoProjeto(d, ini.id, sessao.pessoa.id), solicitante: ini.solicitanteId === sessao.pessoa.id, patrocinador: !!ini.patrocinadorId && ini.patrocinadorId === sessao.pessoa.id });
   if (!modo) redirect('/inicio');
   if (modo === 'leitura') {
     // quem participa do projeto (alocado, responsável de fase ou de tarefa) ou pediu a iniciativa vê o projeto em modo leitura

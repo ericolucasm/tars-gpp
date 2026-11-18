@@ -7,6 +7,7 @@ import { primeiroNome } from '@/lib/regras/pessoas';
 import { chaveDaRaia, cicloAberto, infoProjeto, nomeArea, noRaia, participaDoProjeto, pessoa } from '@/lib/visoes';
 import { Etapas, PillFarol, Vazio } from '@/components/ui';
 import { atrasos } from '@/lib/muro';
+import { ProjetosPatrocinados } from '@/components/ProjetosPatrocinados';
 import { Saudacao, frase } from './Saudacao';
 import { RetirarIniciativa } from './RetirarIniciativa';
 import { retiradaPermitida } from '@/lib/regras/esteira';
@@ -121,6 +122,7 @@ export function InicioColaborador({ d, sessao, hoje }: { d: DadosOrg; sessao: Se
           </div>
         ))}
       </section>
+      <ProjetosPatrocinados d={d} pessoaId={eu.id} hoje={hoje} />
     </>
   );
 }

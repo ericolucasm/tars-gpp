@@ -9,6 +9,7 @@ import { ItemAcao, PillFarol, Vazio } from '@/components/ui';
 import { pontoAtrasado, pontoEsperaPor } from '@/lib/regras/pontos';
 import { beneficiosParaMedir } from '@/lib/beneficios-vm';
 import { atrasos } from '@/lib/muro';
+import { ProjetosPatrocinados } from '@/components/ProjetosPatrocinados';
 import { Saudacao } from './Saudacao';
 
 export function InicioGestor({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao; hoje: string }) {
@@ -127,6 +128,7 @@ export function InicioGestor({ d, sessao, hoje }: { d: DadosOrg; sessao: Sessao;
           <span style={s('font-size: 13px; color: #4A4458')}>pessoas alocadas · média de {media}% do tempo</span>
         </Link>
       </div>
+      <ProjetosPatrocinados d={d} pessoaId={eu.id} hoje={hoje} />
     </>
   );
 }

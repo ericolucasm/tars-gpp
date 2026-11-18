@@ -143,10 +143,10 @@ export function validarEdicaoTarefa(e: { titulo: string; prazo: string; prazoAtu
 
 /**
  * Como a pessoa vê a página do projeto: o GP do projeto e o PMO editam; quem participa (alocado,
- * responsável de fase ou de tarefa) e quem pediu a iniciativa veem em modo leitura; os demais não acessam.
+ * responsável de fase ou de tarefa), quem pediu a iniciativa e o patrocinador veem em modo leitura; os demais não acessam.
  */
-export function modoDoProjeto(p: { ehPmo: boolean; ehGp: boolean; participa: boolean; solicitante?: boolean }): 'edicao' | 'leitura' | null {
+export function modoDoProjeto(p: { ehPmo: boolean; ehGp: boolean; participa: boolean; solicitante?: boolean; patrocinador?: boolean }): 'edicao' | 'leitura' | null {
   if (p.ehPmo || p.ehGp) return 'edicao';
-  if (p.participa || p.solicitante) return 'leitura';
+  if (p.participa || p.solicitante || p.patrocinador) return 'leitura';
   return null;
 }
