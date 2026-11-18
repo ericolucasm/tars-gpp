@@ -151,3 +151,20 @@ export function acaoDeConclusao(card: { raiaId: string; solStatus: string | null
 export function prontoParaConcluir(fases: { confirmadaEm: Date | string | null }[]) {
   return fases.length > 0 && fases.every((f) => !!f.confirmadaEm);
 }
+
+/**
+ * Quem pediu pode desistir enquanto a iniciativa ainda está com ele ou com o gestor:
+ * rascunho (exclui, nunca entrou na esteira), devolvida ou aguardando o gestor (vai para Cancelados).
+ * Depois que o gestor aprova, a decisão é do PMO.
+ */
+export function retiradaPermitida(raiaChave: string | null | undefined, solStatus: string | null): 'excluir' | 'cancelar' | null {
+  if (raiaChave !== 'sol') return null;
+  if (solStatus === 'rascunho') return 'excluir';
+  if (solStatus === 'devolvida' || solStatus === 'aguardando_gestor') return 'cancelar';
+  return null;
+}
+
+export function validarRetirada(tipo: 'excluir' | 'cancelar', comentario: string): string | null {
+  if (tipo === 'cancelar' && comentario.trim().length < 5) return 'Conte em poucas palavras por que está retirando. O gestor vai ver esse comentário.';
+  return null;
+}

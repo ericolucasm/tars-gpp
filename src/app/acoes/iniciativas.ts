@@ -2,7 +2,8 @@
 
 import { and, eq } from 'drizzle-orm';
 import { db, schema as t } from '@/db';
-import { aprovadorDe, cicloAberto, raiaChave } from '@/lib/visoes';
+import { aprovadorDe, chaveDaRaia, cicloAberto, raiaChave } from '@/lib/visoes';
+import { retiradaPermitida, validarRetirada } from '@/lib/regras/esteira';
 import { contexto, executar, exigir, notificar } from './_ctx';
 
 export type DadosForm = {
@@ -56,4 +57,30 @@ export async function salvarIniciativa(f: DadosForm, enviar: boolean) {
     if (enviar && aprovador) await notificar(dados.org.id, [aprovador], `${eu.nome} enviou "${campos.titulo}" para sua aprovação.`, '/area/iniciativas');
   });
   return { ...r, id: novoId };
+}
+
+/** Quem pediu desiste da iniciativa: rascunho é excluído; devolvida ou com o gestor vai para Cancelados com o motivo. */
+export async function retirarIniciativa(iniciativaId: string, comentario: string) {
+  return executar(async () => {
+    const { dados, eu, autoria } = await contexto();
+    const ini = dados.iniciativas.find((i) => i.id === iniciativaId);
+    exigir(ini, 'Iniciativa não encontrada.');
+    exigir(ini.solicitanteId === eu.id, 'Só quem pediu pode retirar esta iniciativa.');
+    const tipo = retiradaPermitida(chaveDaRaia(dados, ini.raiaId), ini.solStatus);
+    exigir(tipo, 'Esta iniciativa já foi aprovada pelo gestor. Para cancelar, fale com o PMO.');
+    const erro = validarRetirada(tipo, comentario);
+    exigir(!erro, erro ?? '');
+    if (tipo === 'excluir') {
+      await db.delete(t.iniciativas).where(and(eq(t.iniciativas.id, ini.id), eq(t.iniciativas.orgId, dados.org.id)));
+      return { ok: true, msg: `Rascunho “${ini.titulo}” excluído.` };
+    }
+    const can = raiaChave(dados, 'can');
+    exigir(can, 'A etapa de cancelados não está configurada.');
+    const agora = new Date();
+    const motivoSaida = `Retirada por quem pediu — ${comentario.trim()}`;
+    await db.update(t.iniciativas).set({ raiaId: can.id, solStatus: null, motivoSaida, situacao: null, canceladaEm: agora, updatedAt: agora }).where(eq(t.iniciativas.id, ini.id));
+    await db.insert(t.transicoes).values({ orgId: dados.org.id, iniciativaId: ini.id, acao: 'retirada_solicitante', deRaiaId: ini.raiaId, paraRaiaId: can.id, motivo: motivoSaida, ...autoria });
+    if (ini.solStatus === 'aguardando_gestor') await notificar(dados.org.id, [ini.aprovadorId], `${eu.nome} retirou "${ini.titulo}": ${comentario.trim()}`, '/area/iniciativas');
+    return { ok: true, msg: `“${ini.titulo}” retirada.` };
+  });
 }

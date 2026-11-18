@@ -8,6 +8,8 @@ import { chaveDaRaia, cicloAberto, infoProjeto, nomeArea, noRaia, participaDoPro
 import { Etapas, PillFarol, Vazio } from '@/components/ui';
 import { atrasos } from '@/lib/muro';
 import { Saudacao, frase } from './Saudacao';
+import { RetirarIniciativa } from './RetirarIniciativa';
+import { retiradaPermitida } from '@/lib/regras/esteira';
 
 const PASSOS = ['Enviada', 'Gestor', 'Avaliação do PMO', 'Decisão'];
 
@@ -24,6 +26,7 @@ function passo(d: DadosOrg, i: Iniciativa, hoje: string) {
   if (c === 'pre') return { at: 4, alerta: false, sub: `Aprovada${ciclo ? ` no ciclo ${ciclo.ano}` : ''} · em preparação para virar projeto` };
   if (c === 'exe' || c === 'pau') return { at: 4, alerta: false, sub: `Aprovada${ciclo ? ` no ciclo ${ciclo.ano}` : ''} · virou projeto${c === 'pau' ? ' (pausado)' : ' e está em execução'}` };
   if (c === 'con') return { at: 4, alerta: false, sub: `Aprovada${ciclo ? ` no ciclo ${ciclo.ano}` : ''} · virou projeto e foi entregue em ${br(dia(i.concluidaEm)).slice(0, 5)}` };
+  if (i.motivoSaida?.startsWith('Retirada por quem pediu')) return { at: 1, alerta: false, sub: `Você retirou esta iniciativa${i.motivoSaida.includes(' — ') ? ` · ${i.motivoSaida.split(' — ').slice(1).join(' — ')}` : ''}` };
   if (!i.aprovadaGestorEm && i.enviadaEm) return { at: 1, alerta: false, sub: `${aprov?.nome ?? 'Seu gestor'} decidiu não seguir${i.motivoSaida ? ` · motivo: ${i.motivoSaida}` : ''}` };
   return { at: 4, alerta: false, sub: `Não aprovada${i.motivoSaida ? ` · motivo: ${i.motivoSaida}` : ''}` };
 }
@@ -76,6 +79,7 @@ export function InicioColaborador({ d, sessao, hoje }: { d: DadosOrg; sessao: Se
             <div style={s('display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; align-items: center')}>
               <span style={s('display: flex; flex-direction: column; gap: 2px')}><span style={s('font-size: 15px; font-weight: 600')}>{i.titulo}</span><span style={s('font-size: 12px; color: #5E5770')}>{p.sub}</span></span>
               {i.inicioProjeto && noRaia(d, i, 'exe', 'pau', 'con') && <Link href={`/projetos/${i.id}`} style={s('height: 36px; padding: 0 14px; border-radius: 9px; border: 1px solid #DCD2FF; background: #F7F4FF; color: #4B2FD1; font-weight: 600; font-size: 13px; display: inline-flex; align-items: center')}>Acompanhar projeto →</Link>}
+              {(() => { const tipo = retiradaPermitida(chaveDaRaia(d, i.raiaId), i.solStatus); return tipo ? <RetirarIniciativa id={i.id} titulo={i.titulo} tipo={tipo} /> : null; })()}
               {p.acao && <Link href={`/iniciativas/${i.id}/editar`} style={s('height: 36px; padding: 0 14px; border-radius: 9px; background: #6D4AFF; color: #FFFFFF; font-weight: 600; font-size: 13px; display: inline-flex; align-items: center')}>{p.acao}</Link>}
             </div>
             <Etapas etapas={PASSOS.map((n, k) => ({ nome: k === p.at && p.alerta ? 'Ajuste pedido' : n }))} atual={p.at} alerta={p.alerta} />
