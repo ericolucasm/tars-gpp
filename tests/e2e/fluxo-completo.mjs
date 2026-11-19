@@ -866,6 +866,36 @@ try {
   await p.getByRole('heading', { name: 'Quadro de avisos', level: 1 }).waitFor();
   await p.context().close();
   ok('Menu lateral: Meu TARS, Minhas entregas e Quadro de avisos no topo; no PMO, Iniciativas (portfólio, ciclos, avaliação) separadas de Projetos (projetos, roadmap)');
+
+  // Filtros da tela Projetos: GP (só os dele, sem filtro de GP) e PMO (todos, com filtro de GP)
+  p = await como('marina.gomes@acme.com.br');
+  await ir(p, '/projetos');
+  let filtros = p.getByRole('group', { name: 'Filtros' });
+  if (await filtros.getByLabel('GP').count()) throw new Error('GP não deveria ver o filtro de GP');
+  await filtros.getByLabel('Situação').selectOption({ label: 'Concluídos' });
+  await p.waitForURL(/situacao=con/);
+  await p.getByRole('main').getByRole('link', { name: /Pesquisa de clima 2026/ }).waitFor();
+  await p.getByRole('main').getByRole('link', { name: /Implantação do CRM/ }).waitFor({ state: 'detached', timeout: 15000 }).catch(() => { throw new Error('Filtro de situação não escondeu projeto em execução'); });
+  await filtros.getByLabel('Buscar').fill('xyz inexistente');
+  await p.getByText('Nenhum projeto com esses filtros.').waitFor();
+  await filtros.getByRole('button', { name: 'Limpar filtros' }).click();
+  await p.waitForURL(/\/projetos$/);
+  await p.getByRole('main').getByRole('link', { name: /Implantação do CRM/ }).waitFor();
+  await p.context().close();
+  p = await como('mariana@acme.com.br', 'pmo');
+  await ir(p, '/projetos');
+  filtros = p.getByRole('group', { name: 'Filtros' });
+  await filtros.getByLabel('GP').selectOption({ label: 'Fábio Oliveira' });
+  await p.waitForURL(/gp=/);
+  await p.getByRole('main').getByRole('link', { name: /Roteirização de entregas/ }).waitFor();
+  await p.getByRole('main').getByRole('link', { name: /Implantação do CRM/ }).waitFor({ state: 'detached', timeout: 15000 }).catch(() => { throw new Error('Filtro de GP não escondeu projeto de outro GP'); });
+  await filtros.getByLabel('Ativo de').fill('2026-01-01');
+  await filtros.getByLabel('até').fill('2026-06-30');
+  await p.waitForURL(/ate=2026-06-30/);
+  await p.getByRole('main').getByRole('link', { name: /Coletores de dados no armazém/ }).waitFor(); // ativo no 1º semestre
+  await p.getByRole('main').getByRole('link', { name: /Roteirização de entregas/ }).waitFor({ state: 'detached', timeout: 15000 }).catch(() => { throw new Error('Filtro de período não escondeu projeto que começou depois'); });
+  await p.context().close();
+  ok('Projetos: filtros de situação, busca, GP (só para o PMO) e período, com "Limpar filtros"');
 } catch (e) {
   console.error('✗ FALHOU no passo', passo + 1, '\n', e.message.split('\n').slice(0, 6).join('\n'));
   process.exitCode = 1;

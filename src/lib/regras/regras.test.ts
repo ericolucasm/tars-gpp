@@ -18,6 +18,7 @@ import { balancoCusto, balancoEscopo, balancoPrazo, validarLicao } from './encer
 import { diaDaSemana, diasDeAtraso, emNegociacao, proximoDiaSemana, proximoStatusDevido, validarPedidoPrazo, situacaoStatus, rotuloVencimentoStatus, venceTextoCurto } from './muro';
 import { gestorDe, timeDireto, areasSobGestao, nomeCurto, acimaDoCedido, patrocinadorValido, acessoBloqueado, statusAoReativar, pendenciasAoDesativar, rotuloAtivo, podeSerGp, motivoParaNaoExcluirArea } from './pessoas';
 import { grupoDoItem, ordenarCaixa, planoEfetivo, validarAdiamento, validarTarefaPessoal, validarNota, tarefaPessoalVisivel } from './meu-tars';
+import { passaNoFiltro, filtroAtivo, normalizarFiltro } from './filtro-projetos';
 import { grupoNovidade, podeMarcarLida } from './novidades';
 import { addDias, diffDias, dataPorExtenso, haQuanto, proximaSexta } from './datas';
 
@@ -702,5 +703,45 @@ describe('períodos de uma fase', () => {
   it('rótulo só quando há mais de um período', () => {
     expect(rotuloPeriodo(0, 1)).toBe('');
     expect(rotuloPeriodo(1, 2)).toBe('2º período');
+  });
+});
+
+describe('Filtros da tela Projetos', () => {
+  const base = { titulo: 'Implantação do CRM', areaId: 'vendas', gpId: 'marina', situacao: 'exe' as const, farol: 'ok', inicio: '2026-06-29', fim: '2026-12-20' };
+
+  it('sem filtro, todos passam', () => {
+    expect(passaNoFiltro(base, {})).toBe(true);
+    expect(filtroAtivo({})).toBe(false);
+  });
+
+  it('busca ignora maiúsculas e acentos', () => {
+    expect(passaNoFiltro(base, { busca: 'implantacao' })).toBe(true);
+    expect(passaNoFiltro(base, { busca: 'ERP' })).toBe(false);
+  });
+
+  it('área, GP e situação por igualdade', () => {
+    expect(passaNoFiltro(base, { area: 'vendas', gp: 'marina', situacao: 'exe' })).toBe(true);
+    expect(passaNoFiltro(base, { area: 'rh' })).toBe(false);
+    expect(passaNoFiltro(base, { gp: 'carlos' })).toBe(false);
+    expect(passaNoFiltro(base, { situacao: 'con' })).toBe(false);
+  });
+
+  it('farol: sem farol conta como OK; concluído nunca entra no filtro de farol', () => {
+    expect(passaNoFiltro({ ...base, farol: null }, { farol: 'ok' })).toBe(true);
+    expect(passaNoFiltro(base, { farol: 'crit' })).toBe(false);
+    expect(passaNoFiltro({ ...base, situacao: 'con' }, { farol: 'ok' })).toBe(false);
+  });
+
+  it('período: entra quem esteve ativo em algum dia do intervalo', () => {
+    expect(passaNoFiltro(base, { de: '2026-12-01', ate: '2027-01-31' })).toBe(true); // termina dentro
+    expect(passaNoFiltro(base, { de: '2026-01-01', ate: '2026-06-29' })).toBe(true); // começa no último dia
+    expect(passaNoFiltro(base, { de: '2027-01-01' })).toBe(false); // já terminou
+    expect(passaNoFiltro(base, { ate: '2026-06-28' })).toBe(false); // ainda não começou
+  });
+
+  it('normaliza o endereço: descarta inválidos e inverte período trocado', () => {
+    expect(normalizarFiltro({ situacao: 'xpto', farol: 'crit', de: '31/12/2026', busca: '  ' })).toEqual({ busca: undefined, area: undefined, gp: undefined, situacao: undefined, farol: 'crit', de: undefined, ate: undefined });
+    const n = normalizarFiltro({ de: '2026-12-31', ate: '2026-01-01' });
+    expect([n.de, n.ate]).toEqual(['2026-01-01', '2026-12-31']);
   });
 });
